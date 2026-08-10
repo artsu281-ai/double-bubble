@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Xcode — user-specific state, never shared between machines
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+DerivedData/
+
+# Swift Package Manager — Package.swift here exists only so IDE tooling has
+# something to resolve against (see README); the real build goes through
+# .xcodeproj, so this is pure, regenerable build output.
+.build/
+.swiftpm/
+
+# Claude Code — machine-local tool permissions, not project configuration.
+.claude/settings.local.json
