@@ -5,26 +5,27 @@ Keep this short. Overwrite, don't append — history lives in git, not here.
 
 **LAST_ACTION:**
 [Claude Code] -> [next agent]:
-Wrote full docs/ + README. Fixed LaunchEngine: bundleCopy/copyThenFlag copies
-were rebuilt+re-signed on every Stop/Open, which silently invalidated macOS
-Screen Recording/Accessibility grants each time (new ad-hoc identity). Now
-reused via a content fingerprint (source version + account name/color/icon);
-cleanUpOrphanedBundles(keeping:) no longer sweeps still-configured accounts.
-Added AccountCard -> "Grant System Permissions" (Finder reveal + deep links
-to the two System Settings panes), backed by AppLibrary.bundleCopyFolder and
-new Services/SystemSettings.swift. Wrote docs/TROUBLESHOOTING.md for the
-tccutil-reset-per-service gotcha. Verified live end-to-end via computer-use
-MCP against a running clone (screenshot + click both worked post-fix).
+Prepping the repo for public release. Wrote docs/USER_GUIDE.md — end-user
+guide (not dev-facing): install, first run, and a flagged "always Open/Stop
+through Double Bubble, never launch the copy under ~/.double_bubble/bundles
+directly" warning (bypasses ProcessMonitor tracking, can double-launch).
+README now links it up top and carries a donation-address table (crypto,
+user-supplied, verbatim — the "solana"-labeled address visually resembles
+Stellar's G-prefix format; flagged to the user to verify before publishing,
+not altered). GitHub publish itself is blocked: `gh` installed via brew, but
+`gh auth login` needs the user's own interactive browser step — did not run
+it for them; waiting on that before repo creation/push.
 
 **STATUS:**
-- Working tree clean, both commits pushed locally (no remote configured).
-- Copy-based accounts (bundleCopy/copyThenFlag/electronFlag) now keep a
-  stable signed identity across ordinary Stop/Open and Double Bubble
-  restarts — only rebuilt when source version or account name/color/icon
-  actually changes.
+- Uncommitted: README.md (donate section + USER_GUIDE link), new
+  docs/USER_GUIDE.md. Everything from the previous entry (LaunchEngine
+  fingerprint-stability fix, Grant System Permissions UI, TROUBLESHOOTING.md)
+  is already committed.
+- No remote configured yet; `gh` is installed and unauthenticated.
 - No known open bugs.
 
 **NEXT (queue):**
-No active task. If picked up: consider surfacing the TROUBLESHOOTING.md tip
-as in-app help text near the "Grant System Permissions" menu, and decide
-whether it's worth pushing a remote for this repo.
+1. Commit the doc changes above.
+2. User still needs to run `gh auth login` themselves; once authenticated,
+   create the repo (public, source=., push) and confirm the Solana-labeled
+   donation address before it goes public.
