@@ -1,135 +1,142 @@
-# Архитектура
+# Architecture
 
-## Общая картина
+## The big picture
 
-Double Bubble — классическое SwiftUI-приложение с одним источником истины
-и без сетевого слоя: всё состояние живёт локально, на диске и в памяти
-процесса.
+Double Bubble is a classic SwiftUI app with a single source of truth and
+no network layer at all: every bit of state lives locally, either on disk
+or in the process's own memory.
 
 ```
 DoubleBubbleApp (Scene)
    │
-   ├── LibraryView (главное окно)
-   ├── MenuBarMenuView (иконка в строке меню)
+   ├── LibraryView (main window)
+   ├── MenuBarMenuView (menu bar icon)
    │
-   └── AppLibrary  ── единственный @StateObject, общий для обоих экранов
+   └── AppLibrary  ── the one @StateObject, shared by both screens
           │
-          ├── ManagedApp / Account   (что и с кем сохранено)
-          ├── AppInstance             (что сейчас реально запущено, в памяти)
+          ├── ManagedApp / Account   (what's saved, and for which accounts)
+          ├── AppInstance             (what's actually running right now, in memory)
           │
-          ├── LaunchEngine.shared     (как запустить/остановить копию)
-          │      └── AppKnowledgeBase (какую стратегию изоляции применить)
-          │      └── IconFactory      (брендирование Dock-иконки)
+          ├── LaunchEngine.shared     (how to launch/stop a copy)
+          │      └── AppKnowledgeBase (which isolation strategy to use)
+          │      └── IconFactory      (branding the Dock icon)
           │
-          └── ProcessMonitor.shared   (жив ли ещё процесс с данным pid)
+          └── ProcessMonitor.shared   (is the process behind this pid still alive)
 ```
 
-`AppLibrary` — это одновременно и модель данных (`@Published var apps`), и
-контроллер, дергающий `LaunchEngine`/`ProcessMonitor`. Отдельного слоя
-ViewModel нет: вьюхи ([`LibraryView.swift`](../DoubleBubble/Views/LibraryView.swift))
-работают с `AppLibrary` напрямую как с `@ObservedObject`.
+`AppLibrary` is both the data model (`@Published var apps`) and the
+controller that drives `LaunchEngine`/`ProcessMonitor`. There's no separate
+ViewModel layer: the views
+([`LibraryView.swift`](../DoubleBubble/Views/LibraryView.swift)) work with
+`AppLibrary` directly as an `@ObservedObject`.
 
-## Жизненный цикл приложения
+## App lifecycle
 
-Точка входа — [`DoubleBubbleApp.swift`](../DoubleBubble/DoubleBubbleApp.swift):
+The entry point is
+[`DoubleBubbleApp.swift`](../DoubleBubble/DoubleBubbleApp.swift):
 
-- `Window("Double Bubble", id: "main")` — единственное окно приложения,
-  показывает `LibraryView`.
-- `MenuBarExtra` — второй, независимый UI поверх того же `AppLibrary`:
-  список аккаунтов со статусом «запущен/нет» и кнопками Open/Stop прямо из
-  строки меню, без необходимости открывать окно.
-- Настроек-сцены (`Settings {}`) нет намеренно: настройки живут в поповере
-  тулбара главного окна, чтобы `⌘,` не создавал второе окно с тем же
-  функционалом.
-- `AppDelegate` перехватывает `applicationShouldTerminate` — единственный
-  способ на AppKit узнать «а можно ли вообще выходить прямо сейчас».
-  SwiftUI Scene-жизненный цикл такого хука не даёт. Если у `library` есть
-  хоть один запущенный аккаунт, показывается предупреждение: выход не
-  убивает эти процессы, они продолжат работать в фоне, а Double Bubble
-  переподключится к ним при следующем запуске.
+- `Window("Double Bubble", id: "main")` — the app's one window, showing
+  `LibraryView`.
+- `MenuBarExtra` — a second, independent UI on top of the same
+  `AppLibrary`: a list of accounts with their running status and
+  Open/Stop buttons, right from the menu bar, no need to open the window.
+- There's deliberately no Settings scene (`Settings {}`): settings live in
+  a popover off the main window's toolbar, so `⌘,` doesn't create a second
+  window duplicating the same controls.
+- `AppDelegate` intercepts `applicationShouldTerminate` — the only way in
+  AppKit to answer "is it actually okay to quit right now." SwiftUI's
+  Scene lifecycle has no hook for that. If `library` has even one running
+  account, a warning appears: quitting won't kill those processes — they
+  keep running in the background, and Double Bubble reattaches to them on
+  its next launch.
 
-## Поток данных: запуск аккаунта
+## Data flow: opening an account
 
-1. Пользователь жмёт «Open» на карточке аккаунта в
-   [`AccountCard`](../DoubleBubble/Views/LibraryView.swift) (или в
+1. The user clicks "Open" on an account's card in
+   [`AccountCard`](../DoubleBubble/Views/LibraryView.swift) (or in
    `MenuBarMenuView`).
-2. Вызывается `AppLibrary.open(account:in:)`:
-   - если для этого `account.id` уже есть живой `AppInstance` — выходим
-     сразу (идемпотентность повторного клика);
-   - если запись есть, но процесс на самом деле мёртв — она вычищается,
-     чтобы не блокировать повторный запуск;
-   - резолвится security-scoped bookmark приложения в `URL`;
+2. `AppLibrary.open(account:in:)` runs:
+   - if this `account.id` already has a live `AppInstance`, it returns
+     immediately (a repeated click is idempotent);
+   - if a record exists but the process is actually dead, it's cleaned up
+     first so it doesn't block the new launch;
+   - the app's security-scoped bookmark is resolved to a `URL`;
    - `LaunchEngine.shared.launch(appURL:appName:account:distinctIcons:)`
-     определяет стратегию изоляции и физически запускает процесс —
-     подробности в [LAUNCH_ENGINE.md](LAUNCH_ENGINE.md);
-   - результат (`AppInstance` с `pid`) кладётся в `instances[account.id]`;
-   - `lastOpenedAt` аккаунта обновляется и сохраняется;
-   - `bringForward(_:)` несколько раз с интервалом активирует процесс по
-     `pid` — обёрнутый процесс отвечает на тот же bundle ID, что и уже
-     запущенный оригинал, поэтому активация «вообще каким-нибудь окном»
-     системой может подсунуть не тот аккаунт, если не указать pid явно.
-3. `ProcessMonitor` узнаёт о смерти процесса тремя параллельными путями
-   (уведомления `NSWorkspace`, `Process.terminationHandler`, поллинг
-   `kill(pid, 0)` раз в 5с) и обновляет `@Published runningPIDs`.
-4. `AppLibrary` подписан на этот поток и через `pruneDeadInstances()`
-   убирает из `instances` записи о процессах, которых больше нет — включая
-   случай, когда пользователь закрыл вторую копию вручную через `⌘Q`.
+     picks the isolation strategy and actually launches the process —
+     details in [LAUNCH_ENGINE.md](LAUNCH_ENGINE.md);
+   - the result (an `AppInstance` with a `pid`) goes into
+     `instances[account.id]`;
+   - the account's `lastOpenedAt` is updated and saved;
+   - `bringForward(_:)` activates the process by `pid`, retrying a few
+     times over a short interval — the wrapped process answers to the same
+     bundle ID as an already-running original, so activating "whatever
+     window" the system picks can bring the wrong account forward unless
+     the pid is given explicitly.
+3. `ProcessMonitor` learns a process has died through three parallel
+   paths (`NSWorkspace` notifications, `Process.terminationHandler`, and a
+   `kill(pid, 0)` poll every 5s) and updates `@Published runningPIDs`.
+4. `AppLibrary` is subscribed to that stream and, through
+   `pruneDeadInstances()`, drops any `instances` entry whose process is
+   gone — including the case where the user closed the second copy by hand
+   with `⌘Q`.
 
-## Персистентность и восстановление состояния
+## Persistence and restoring state
 
-- Список `apps: [ManagedApp]` сохраняется в `UserDefaults` (JSON) при каждом
-  изменении (`didSet { save() }`). Подробности модели — в
+- The `apps: [ManagedApp]` list is saved to `UserDefaults` (as JSON) on
+  every change (`didSet { save() }`). Model details are in
   [DATA_MODEL.md](DATA_MODEL.md).
-- `instances: [UUID: AppInstance]` — **только в памяти**. При перезапуске
-  Double Bubble список обнуляется и восстанавливается заново через
-  `adoptRunningInstances()`, которая вызывает
-  `LaunchEngine.discoverRunningInstances()` — сканирует запущенные
-  приложения (`NSWorkspace.runningApplications`) и вывод `ps -axo pid=,args=`
-  в поисках путей вида `~/.double_bubble/{bundles,data}/<slug>-<key>`,
-  привязывая их обратно к `Account.isolationKey`.
-- При старте `AppLibrary.init()` также вызывает уборку:
-  `LaunchEngine.shared.cleanUpOrphanedBundles(keeping:)` (удаляет
-  скопированные бандлы, которые не запущены, не закреплены в Dock и не
-  принадлежат ни одному оставшемуся в библиотеке аккаунту) и
-  `cleanUpOrphanedData(keeping:)` (в Trash улетают data-папки, для которых
-  в библиотеке больше нет аккаунта). Копии для существующих аккаунтов
-  специально переживают этот сброс — иначе System Settings продолжали бы
-  показывать Screen Recording/Accessibility как выданные для копии, которой
-  уже нет на диске; подробности — в
-  [LAUNCH_ENGINE.md](LAUNCH_ENGINE.md#переиспользование-копии-между-запусками).
+- `instances: [UUID: AppInstance]` is **in-memory only**. When Double
+  Bubble itself restarts, the list is empty and gets rebuilt through
+  `adoptRunningInstances()`, which calls
+  `LaunchEngine.discoverRunningInstances()` — it scans running apps
+  (`NSWorkspace.runningApplications`) and the output of
+  `ps -axo pid=,args=` for paths shaped like
+  `~/.double_bubble/{bundles,data}/<slug>-<key>`, tying them back to an
+  `Account.isolationKey`.
+- On startup, `AppLibrary.init()` also runs cleanup:
+  `LaunchEngine.shared.cleanUpOrphanedBundles(keeping:)` (removes copied
+  bundles that aren't running, aren't pinned to the Dock, and don't belong
+  to any account still in the library) and `cleanUpOrphanedData(keeping:)`
+  (trashes data folders whose account no longer exists in the library).
+  Copies for accounts that still exist deliberately survive this sweep —
+  otherwise System Settings would keep showing Screen Recording/
+  Accessibility as granted for a copy that no longer exists on disk;
+  details in
+  [LAUNCH_ENGINE.md](LAUNCH_ENGINE.md#reusing-the-copy-between-launches).
 
-## Слой сервисов
+## The service layer
 
-`Services/` группирует независимые друг от друга утилиты, каждая отвечает
-за одну вещь:
+`Services/` groups together utilities that are independent of each other,
+each responsible for exactly one thing:
 
-| Сервис | Зона ответственности |
+| Service | What it owns |
 |---|---|
-| [`LaunchEngine`](../DoubleBubble/Services/LaunchEngine.swift) | Запуск/остановка второй копии приложения — ядро проекта, см. [LAUNCH_ENGINE.md](LAUNCH_ENGINE.md) |
-| [`AppKnowledgeBase`](../DoubleBubble/Services/AppKnowledgeBase.swift) | Реестр «bundle ID → стратегия изоляции» для известных приложений |
-| [`IconFactory`](../DoubleBubble/Services/IconFactory.swift) | Рендер брендированной `.icns` (оригинальная иконка + цветной бейдж) |
-| [`ProcessMonitor`](../DoubleBubble/Services/ProcessMonitor.swift) | Единый источник истины «жив ли pid» для всего приложения |
-| [`AccountIcon`](../DoubleBubble/Services/AccountIcon.swift) | Импорт и нормализация пользовательской картинки аккаунта (квадрат, ≤256px) |
-| [`NotificationService`](../DoubleBubble/Services/NotificationService.swift) | Системные уведомления об ошибке запуска, когда нет открытого окна для алерта |
-| [`AppTheme`](../DoubleBubble/Services/AppTheme.swift) | Темы оформления и `ThemePalette`, читаемая напрямую из вьюх через `Environment` |
-| [`AppLanguage`](../DoubleBubble/Services/AppLanguage.swift) | Переопределение `AppleLanguages`, требует релонча |
-| [`InterfaceDensity`](../DoubleBubble/Services/InterfaceDensity.swift) | Единый параметр размеров UI (Comfortable/Compact) |
-| [`LaunchAtLogin`](../DoubleBubble/Services/LaunchAtLogin.swift) | Обёртка над `SMAppService` для автозапуска при входе в систему |
-| [`DiskUsage`](../DoubleBubble/Services/DiskUsage.swift) | Асинхронный подсчёт размера папки на диске (для показа «сколько весит» аккаунт) |
+| [`LaunchEngine`](../DoubleBubble/Services/LaunchEngine.swift) | Launching/stopping a second copy of an app — the project's core, see [LAUNCH_ENGINE.md](LAUNCH_ENGINE.md) |
+| [`AppKnowledgeBase`](../DoubleBubble/Services/AppKnowledgeBase.swift) | The "bundle ID → isolation strategy" registry for known apps |
+| [`IconFactory`](../DoubleBubble/Services/IconFactory.swift) | Rendering a branded `.icns` (the original icon plus a colored badge) |
+| [`ProcessMonitor`](../DoubleBubble/Services/ProcessMonitor.swift) | The app's single source of truth for "is this pid alive" |
+| [`AccountIcon`](../DoubleBubble/Services/AccountIcon.swift) | Importing and normalizing a custom account picture (square, ≤256px) |
+| [`NotificationService`](../DoubleBubble/Services/NotificationService.swift) | System notifications for a launch failure when there's no open window to show an alert in |
+| [`AppTheme`](../DoubleBubble/Services/AppTheme.swift) | Appearance themes and the `ThemePalette` views read directly via `Environment` |
+| [`AppLanguage`](../DoubleBubble/Services/AppLanguage.swift) | Overriding `AppleLanguages`, which needs a relaunch |
+| [`InterfaceDensity`](../DoubleBubble/Services/InterfaceDensity.swift) | The one interface-wide sizing knob (Comfortable/Compact) |
+| [`LaunchAtLogin`](../DoubleBubble/Services/LaunchAtLogin.swift) | A wrapper around `SMAppService` for launch-at-login |
+| [`DiskUsage`](../DoubleBubble/Services/DiskUsage.swift) | Asynchronously computing a folder's size on disk (to show how much an account "weighs") |
 
-Все сервисы — `enum` с статическими методами или синглтон `.shared`;
-инъекции зависимостей и протоколов-абстракций в проекте нет — размер
-кодовой базы (~4400 строк) её не оправдывает.
+Every service is either an `enum` with static methods or a `.shared`
+singleton — there's no dependency injection or protocol-abstraction layer
+in the project; the codebase's size (~4,400 lines) doesn't justify one.
 
-## Потокобезопасность
+## Thread safety
 
-- `LaunchEngine` явно помечен `@unchecked Sendable`: у каждого аккаунта своя
-  директория (ключ — `Account.isolationKey`), общего мутируемого состояния
-  между параллельными запусками нет, поэтому запуск двух аккаунтов
-  одновременно безопасен.
-- `ProcessMonitor` сериализует доступ к внутреннему `[pid_t: Process]` через
-  приватную `DispatchQueue`, а все мутации `@Published runningPIDs` уводит на
-  главный поток — за одним намеренным исключением: если вызывающий уже на
-  главном потоке, мутация применяется синхронно, чтобы не потерять «гонку»
-  между регистрацией нового pid и запущенной в этом же тике проверкой на
-  мёртвые инстансы (см. комментарий у `ProcessMonitor.mutate(_:)`).
+- `LaunchEngine` is explicitly marked `@unchecked Sendable`: every account
+  has its own directory (keyed by `Account.isolationKey`), and there's no
+  shared mutable state between concurrent launches, so launching two
+  accounts at once is safe.
+- `ProcessMonitor` serializes access to its internal `[pid_t: Process]`
+  through a private `DispatchQueue`, and routes every mutation of
+  `@Published runningPIDs` onto the main thread — with one deliberate
+  exception: if the caller is already on the main thread, the mutation is
+  applied synchronously, so as not to lose a race between registering a
+  new pid and a dead-instance check running in that same tick (see the
+  comment on `ProcessMonitor.mutate(_:)`).

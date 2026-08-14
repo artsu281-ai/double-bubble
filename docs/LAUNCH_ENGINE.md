@@ -1,274 +1,284 @@
-# LaunchEngine — как запускается вторая копия
+# LaunchEngine — how a second copy gets launched
 
 [`LaunchEngine.swift`](../DoubleBubble/Services/LaunchEngine.swift) (962
-строки) — ядро Double Bubble. Всё остальное приложение — это UI и
-персистентность вокруг вопроса «как заставить второй экземпляр этого
-конкретного `.app` запуститься со своими данными».
+lines) is Double Bubble's core. Everything else in the app is UI and
+persistence wrapped around one question: "how do you get a second instance
+of this specific `.app` to start up with its own data."
 
-## Проблема
+## The problem
 
-macOS обычно не даёт запустить второй экземпляр одного приложения: клик по
-Dock-иконке активирует уже запущенный процесс вместо старта нового, а даже
-там, где второй процесс всё же стартует, оба экземпляра по умолчанию читают
-один и тот же профиль/конфиг/сессию. Единого универсального способа обойти
-это для всех приложений не существует — разные технологии (Electron,
-JetBrains Platform, обычные Cocoa-бандлы, песочница App Sandbox) требуют
-разных трюков. `LaunchEngine` инкапсулирует пять таких трюков за одним
+macOS usually won't let you launch a second instance of the same app: a
+Dock icon click activates the process that's already running instead of
+starting a new one, and even where a second process does start, both
+instances read the same profile/config/session by default. There's no
+single universal way around this for every app — different technologies
+(Electron, the JetBrains Platform, plain Cocoa bundles, App Sandbox) each
+need a different trick. `LaunchEngine` wraps five such tricks behind one
 API.
 
-## Пять стратегий (`LaunchStrategy`)
+## Five strategies (`LaunchStrategy`)
 
-| Стратегия | Как работает | Для чего |
+| Strategy | How it works | Used for |
 |---|---|---|
-| `.electronFlag(binaryPath:)` | Запускает **оригинальный** бинарник напрямую с `--user-data-dir=<путь>` | Electron/Chromium-приложения, у которых нельзя сделать копию (library validation) |
-| `.jetbrains(binaryPath:)` | Запускает оригинальный бинарник с `IDEA_PROPERTIES=<файл .properties>` в окружении | IntelliJ-платформа (IDEA, PyCharm, WebStorm, GoLand, RustRover, Rider, CLion) |
-| `.configDir(binaryPath:flag:separateValue:)` | Запускает оригинальный бинарник с произвольным флагом конфиг-директории | Приложения со своим CLI-флагом (Zed: `--config-dir=`, Telegram Desktop: `-workdir`) |
-| `.bundleCopy` | Копирует весь `.app`, патчит `CFBundleIdentifier`/`CFBundleDisplayName` в его `Info.plist`, переподписывает ad-hoc, запускает копию | «Нативные» Cocoa-приложения без флага для указания данных |
-| `.copyThenFlag(flag:separateValue:)` | Комбинация: копирует и переподписывает бандл, затем запускает **копию** с флагом данных | Приложения в песочнице, которым флаг данных не помогает, пока они в песочнице (переподпись снимает entitlement) |
+| `.electronFlag(binaryPath:)` | Launches the **original** binary directly with `--user-data-dir=<path>` | Electron/Chromium apps that can't be copied (library validation) |
+| `.jetbrains(binaryPath:)` | Launches the original binary with `IDEA_PROPERTIES=<.properties file>` in the environment | The IntelliJ platform (IDEA, PyCharm, WebStorm, GoLand, RustRover, Rider, CLion) |
+| `.configDir(binaryPath:flag:separateValue:)` | Launches the original binary with an arbitrary config-directory flag | Apps with their own CLI flag (Zed: `--config-dir=`, Telegram Desktop: `-workdir`) |
+| `.bundleCopy` | Copies the whole `.app`, patches `CFBundleIdentifier`/`CFBundleDisplayName` in its `Info.plist`, re-signs it ad hoc, launches the copy | "Native" Cocoa apps with no flag for pointing at a data directory |
+| `.copyThenFlag(flag:separateValue:)` | A combination: copies and re-signs the bundle, then launches the **copy** with a data-directory flag | Sandboxed apps where the data flag doesn't help while still sandboxed (re-signing drops the entitlement) |
 
-`displayName`, `label`, `symbolName`, `explanation` — это то же самое
-перечисление, но с текстом/иконкой для UI (бейджи в карточке приложения).
+`displayName`, `label`, `symbolName`, `explanation` are all the same enum,
+just with text/an icon for the UI (the badges on an app's card).
 
-## Как определяется стратегия
+## How the strategy is chosen
 
-`detectStrategy(for:)` — чистая функция без побочных эффектов, порядок
-проверок:
+`detectStrategy(for:)` is a pure function with no side effects; the checks
+run in this order:
 
-1. **База знаний** ([`AppKnowledgeBase`](KNOWLEDGE_BASE.md)) по
-   `CFBundleIdentifier` — самый специфичный источник, побеждает всегда.
-2. **Автоопределение Chromium-семейства** — по наличию
-   `Contents/Frameworks/<Имя> Framework.framework` рядом с `Helpers/`.
-   Проверка по layout фреймворка, а не по списку известных имён: жёстко
-   зашитые «Google Chrome Framework.framework» + «Microsoft Edge
-   Framework.framework» пропускали бы любую малоизвестную сборку на том же
-   движке.
-3. **Автоопределение JetBrains** — по наличию `Contents/jbr` (встроенный
-   JetBrains Runtime).
-4. Если ничего не подошло — фолбэк `.bundleCopy`.
+1. **The knowledge base** ([`AppKnowledgeBase`](KNOWLEDGE_BASE.md)) keyed
+   by `CFBundleIdentifier` — the most specific source, always wins.
+2. **Auto-detecting the Chromium family** — by the presence of
+   `Contents/Frameworks/<Name> Framework.framework` next to a `Helpers/`
+   directory. This checks the framework's layout rather than a list of
+   known names: hard-coding "Google Chrome Framework.framework" plus
+   "Microsoft Edge Framework.framework" would miss any lesser-known build
+   on the same engine.
+3. **Auto-detecting JetBrains** — by the presence of `Contents/jbr` (a
+   bundled JetBrains Runtime).
+4. If nothing matched — fall back to `.bundleCopy`.
 
-## Проверки перед запуском
+## Checks before launching
 
-Прежде чем реально копировать/подписывать бандл, `LaunchEngine` спрашивает
-у `codesign`:
+Before actually copying/signing a bundle, `LaunchEngine` asks `codesign`:
 
-- **`sandboxInfo(for:)`** — читает entitlements (`codesign -d
-  --entitlements :-`). Если приложение в App Sandbox **и** использует
-  `application-groups` — `SandboxInfo.blocksBundleCopy == true`: переподпись
-  ad-hoc теряет Team ID, из-за чего копия физически не может достучаться до
-  App Group своих же данных. Копировать такое приложение — гарантированно
-  сломанная вторая копия, поэтому запуск прерывается заранее с понятной
-  ошибкой (`LaunchError.sandboxedAppGroup`), вместо того чтобы дать
-  пользователю наткнуться на битую копию самому.
-- **`usesLibraryValidation(for:)`** — парсит вывод `codesign -dv` на предмет
-  `library-validation`. Такой бандл после ad-hoc переподписи вообще
-  отказывается запускаться («Не удаётся открыть приложение», без вменяемой
-  причины от системы) — это все Chromium-браузеры. Тоже блокируется заранее
-  (`LaunchError.libraryValidation`).
+- **`sandboxInfo(for:)`** — reads the entitlements (`codesign -d
+  --entitlements :-`). If the app is in App Sandbox **and** uses
+  `application-groups`, then `SandboxInfo.blocksBundleCopy == true`:
+  re-signing ad hoc drops the Team ID, so the copy can't physically reach
+  its own data in the App Group. Copying an app like this guarantees a
+  broken second copy, so the launch is stopped early with a clear error
+  (`LaunchError.sandboxedAppGroup`) instead of letting the user run into a
+  broken copy on their own.
+- **`usesLibraryValidation(for:)`** — parses `codesign -dv`'s output for
+  `library-validation`. A bundle like that flat-out refuses to launch
+  after an ad-hoc re-sign ("Can't open the application," with no sane
+  reason from the system) — this covers every Chromium browser. Also
+  blocked ahead of time (`LaunchError.libraryValidation`).
 
-Обе проверки закэшированы в `AppLibrary` (`sandboxCache`,
-`libraryValidationCache`) — `codesign` это внешний процесс, вызывать его на
-каждый рендер SwiftUI-вьюхи недопустимо.
+Both checks are cached in `AppLibrary` (`sandboxCache`,
+`libraryValidationCache`) — `codesign` is an external process; calling it
+on every SwiftUI view render is out of the question.
 
-## Пошагово: что происходит при `launch(...)`
+## Step by step: what happens in `launch(...)`
 
 ```
 launch(appURL:appName:account:distinctIcons:)
   │
-  ├─ детектит strategy
-  ├─ если distinctIcons включён и апгрейд возможен → апгрейдит стратегию
-  │    (electronFlag/configDir → copyThenFlag, см. ниже)
-  ├─ если account.usesDefaultProfile → всегда launchElectron(..., userDataDir: nil)
-  │    (своя обёртка/иконка, но без изоляции данных — см. DATA_MODEL.md)
-  └─ иначе — switch по strategy:
+  ├─ detects the strategy
+  ├─ if distinctIcons is on and an upgrade is possible → upgrades the strategy
+  │    (electronFlag/configDir → copyThenFlag, see below)
+  ├─ if account.usesDefaultProfile → always launchElectron(..., userDataDir: nil)
+  │    (its own wrapper/icon, but no data isolation — see DATA_MODEL.md)
+  └─ otherwise — switch on strategy:
        .electronFlag   → launchElectron(...)
        .jetbrains      → launchJetBrains(...)
        .configDir      → launchConfigDir(...)
-       .bundleCopy     → (после проверок sandbox/library-validation) launchViaBundleCopy(...)
-       .copyThenFlag   → (после тех же проверок) launchViaBundleCopy(..., workdir: ...)
+       .bundleCopy     → (after the sandbox/library-validation checks) launchViaBundleCopy(...)
+       .copyThenFlag   → (after the same checks) launchViaBundleCopy(..., workdir: ...)
 ```
 
-### `.electronFlag` — обёртка вокруг оригинального бинарника
+### `.electronFlag` — a wrapper around the original binary
 
-Собирается минимальный `.app`-«стаб» в
-`~/.double_bubble/bundles/<slug>-<key>/<ИмяАккаунта>.app`:
+Builds a minimal `.app` "stub" at
+`~/.double_bubble/bundles/<slug>-<key>/<AccountName>.app`:
 
 ```
 Contents/
-  Info.plist          — уникальный CFBundleIdentifier + CFBundleDisplayName
-  MacOS/launcher       — shell-скрипт: exec "<реальный бинарник>" --user-data-dir=<путь> "$@"
-  Resources/icon.icns  — брендированная иконка (IconFactory)
+  Info.plist          — a unique CFBundleIdentifier + CFBundleDisplayName
+  MacOS/launcher       — shell script: exec "<real binary>" --user-data-dir=<path> "$@"
+  Resources/icon.icns  — the branded icon (IconFactory)
 ```
 
-`exec` в скрипте — не случайность: с точки зрения ядра процесс *становится*
-реальным Chrome/VS Code в момент `exec`, а не остаётся дочерним процессом
-обёртки. Это буквально те же килобайты, а не гигабайты — оригинальный
-бандл не копируется и не трогается вовсе, поэтому обходится даже
-library-validation (никакая переподпись оригинального кода не требуется).
+The `exec` in that script isn't incidental: from the kernel's point of
+view the process *becomes* the real Chrome/VS Code the moment `exec`
+runs, rather than staying a child process of the wrapper. This is
+literally kilobytes, not gigabytes — the original bundle is never copied
+or touched at all, so it sidesteps library validation entirely too (no
+re-signing of the original code is needed).
 
-### `.jetbrains` — переменная окружения `IDEA_PROPERTIES`
+### `.jetbrains` — the `IDEA_PROPERTIES` environment variable
 
-Создаёт `~/.double_bubble/data/<slug>-<key>/{config,system,plugins,logs}` и
-файл `idea.properties`, указывающий платформе на эти папки. Оригинальный
-бинарник запускается напрямую (`Process`), с этой переменной в окружении.
-Полная изоляция: конфиг, кэши, установленные плагины, логи — всё раздельно.
+Creates `~/.double_bubble/data/<slug>-<key>/{config,system,plugins,logs}`
+and an `idea.properties` file pointing the platform at those folders. The
+original binary is launched directly (`Process`), with that variable set
+in the environment. Full isolation: config, caches, installed plugins,
+logs — all separate.
 
-### `.configDir` — произвольный CLI-флаг
+### `.configDir` — an arbitrary CLI flag
 
-Аналогично, но параметризовано: флаг (`--config-dir`, `-workdir`, ...) и
-форма аргумента — `separateValue: true` даёт два отдельных argv-элемента
-(`-workdir /path`, как ожидает Qt/Telegram Desktop), `false` — одну строку
-GNU-style (`--config-dir=/path`).
+Same idea, but parameterized: the flag (`--config-dir`, `-workdir`, ...)
+and the argument shape — `separateValue: true` gives two separate argv
+entries (`-workdir /path`, as Qt/Telegram Desktop expect), `false` gives a
+single GNU-style string (`--config-dir=/path`).
 
-### `.bundleCopy` — копия + переподпись
+### `.bundleCopy` — copy + re-sign
 
-1. Копирует весь `.app` в `~/.double_bubble/bundles/<slug>-<key>/`.
-2. `xattr -rd com.apple.quarantine` — иначе Gatekeeper снова спросит
-   подтверждение на «скачанное» приложение при первом запуске копии.
-3. Патчит `Contents/Info.plist`: `CFBundleIdentifier` получает суффикс
-   `.doublebubble.<isolationKey>`, `CFBundleDisplayName` — имя аккаунта.
-   Уникальный bundle ID — это то, что вообще позволяет двум копиям
-   сосуществовать как раздельные Dock-иконки и раздельные LaunchServices-
-   записи.
-4. Брендирует иконку через `IconFactory.brand(...)` **до** подписи —
-   изменение ресурсов бандла после подписи инвалидирует сигнатуру.
-   Ошибка брендирования не прерывает запуск — это чисто косметика.
-5. Переподписывает ad-hoc (`codesign --force --sign - --deep`), включая все
-   вложенные `Frameworks`/`PlugIns` по отдельности перед финальной подписью
-   верхнего уровня.
-6. Открывает копию через `NSWorkspace.openApplication` с
+1. Copies the whole `.app` into `~/.double_bubble/bundles/<slug>-<key>/`.
+2. `xattr -rd com.apple.quarantine` — otherwise Gatekeeper would ask for
+   confirmation again, on the copy's first launch, as if it were a fresh
+   "downloaded" app.
+3. Patches `Contents/Info.plist`: `CFBundleIdentifier` gets a
+   `.doublebubble.<isolationKey>` suffix, `CFBundleDisplayName` becomes
+   the account's name. A unique bundle ID is what actually lets two
+   copies coexist as separate Dock icons and separate LaunchServices
+   entries.
+4. Brands the icon via `IconFactory.brand(...)` **before** signing —
+   changing bundle resources after signing would invalidate the
+   signature. A branding failure never blocks the launch — it's purely
+   cosmetic.
+5. Re-signs ad hoc (`codesign --force --sign - --deep`), signing every
+   nested `Frameworks`/`PlugIns` individually before the final top-level
+   signature.
+6. Opens the copy via `NSWorkspace.openApplication` with
    `createsNewApplicationInstance = true`.
 
-### `.copyThenFlag` — копия, которой затем даётся флаг
+### `.copyThenFlag` — a copy that then gets handed a flag
 
-То же самое копирование/переподпись, но вместо `NSWorkspace.openApplication`
-копия запускается напрямую через `Process` с флагом данных, указывающим на
-свою директорию в `~/.double_bubble/data/...`. Нужен для приложений,
-которые в песочнице *принимают* флаг рабочей директории, но реально
-использовать его не могут, пока в песочнице — переподпись снимает
-sandbox-entitlement, и только тогда флаг начинает работать (иначе обе
-копии продолжали бы падать в общий системный support-каталог и вторая
-завершалась бы из-за файловой блокировки первой).
+The same copy/re-sign as above, but instead of
+`NSWorkspace.openApplication`, the copy is launched directly through
+`Process` with a data flag pointing at its own directory under
+`~/.double_bubble/data/...`. Needed for apps that, while sandboxed,
+*accept* a working-directory flag but can't actually use it — re-signing
+drops the sandbox entitlement, and only then does the flag start working
+(otherwise both copies would keep falling back to the shared system
+support directory, and the second would exit on the first one's file
+lock).
 
-## Апгрейд до различающихся иконок
+## Upgrading to distinct icons
 
-`LaunchEngine.upgradedForDistinctIcons(_:)` переписывает флаговую стратегию
-в её «копийного близнеца»:
+`LaunchEngine.upgradedForDistinctIcons(_:)` rewrites a flag-based strategy
+into its copy-based twin:
 
 ```
 .electronFlag        → .copyThenFlag(flag: "--user-data-dir", separateValue: false)
 .configDir(_, f, sv)  → .copyThenFlag(flag: f, separateValue: sv)
-.jetbrains/.bundleCopy/.copyThenFlag → без изменений
+.jetbrains/.bundleCopy/.copyThenFlag → unchanged
 ```
 
-Логика: отдельная Dock-иконка физически может жить только в отдельном
-бандле — без копии есть только оригинальный `.app`, который брендировать
-нельзя, не сломав его для всех остальных запусков. `supportsDistinctIconsUpgrade`
-и `canUpgradeForDistinctIcons(appURL:strategy:)` определяют, когда такой
-апгрейд вообще имеет смысл предлагать в UI (стратегия это поддерживает
-*и* бандл технически копируем — не library-validated).
+The logic: a separate Dock icon can physically live only in a separate
+bundle — without a copy there's only the original `.app`, which can't be
+branded without breaking it for every other launch.
+`supportsDistinctIconsUpgrade` and
+`canUpgradeForDistinctIcons(appURL:strategy:)` decide when this upgrade
+is even worth offering in the UI (the strategy supports it *and* the
+bundle is actually copyable — not library-validated).
 
-## Обнаружение уже запущенных копий (`discoverRunningInstances`)
+## Discovering already-running copies (`discoverRunningInstances`)
 
-При старте Double Bubble не помнит `pid` предыдущей сессии (`AppInstance`
-не персистится), поэтому ищет их заново по двум источникам:
+At startup, Double Bubble doesn't remember the previous session's `pid`s
+(`AppInstance` isn't persisted), so it looks for them again from two
+sources:
 
-1. **Копийные стратегии** — `NSWorkspace.shared.runningApplications`,
-   фильтр по `bundleURL`, начинающемуся с
-   `~/.double_bubble/bundles/`. `isolationKey` вычленяется прямо из пути.
-2. **Флаговые стратегии** (оригинальный бинарник, свой процесс) —
-   `ps -axo pid=,args=`, поиск подстроки `~/.double_bubble/data/` в
-   аргументах командной строки. Дочерние процессы Electron (`--type=...`
-   для renderer/gpu/utility) явно исключаются — иначе `terminate()`
-   получил бы pid хелпер-процесса, а не главного, и приложение осталось бы
-   жить.
+1. **Copy-based strategies** — `NSWorkspace.shared.runningApplications`,
+   filtered for a `bundleURL` starting with
+   `~/.double_bubble/bundles/`. The `isolationKey` is pulled straight out
+   of the path.
+2. **Flag-based strategies** (the original binary, its own process) —
+   `ps -axo pid=,args=`, looking for the substring
+   `~/.double_bubble/data/` in the command-line arguments. Electron child
+   processes (`--type=...` for renderer/gpu/utility) are explicitly
+   excluded — otherwise `terminate()` would get a helper process's pid
+   instead of the main one, and the app would keep running.
 
-Оба пути возвращают словарь `isolationKey → RunningInstance(pid, url,
-launchedAt)`, который `AppLibrary.adoptRunningInstances()` сопоставляет
-обратно с сохранёнными `Account` по их `isolationKey`.
+Both paths return a dictionary of `isolationKey → RunningInstance(pid,
+url, launchedAt)`, which `AppLibrary.adoptRunningInstances()` matches back
+to saved `Account`s by their `isolationKey`.
 
-## Остановка (`terminate(instance:)`)
+## Stopping (`terminate(instance:)`)
 
-- Снимает регистрацию из `ProcessMonitor`.
-- `NSRunningApplication(processIdentifier:)?.terminate()`, либо
-  `kill(pid, SIGTERM)`, если система не знает про такой `NSRunningApplication`
-  (характерно для процессов, запущенных напрямую через `Process`, а не
-  через `NSWorkspace`).
-- Для `electronFlag` — обёртка (килобайты, пересобирается тривиально)
-  удаляется с диска спустя 3 секунды.
-- Для `bundleCopy`/`copyThenFlag` копия **намеренно не удаляется**. Раньше
-  удалялась точно так же, как обёртка — но копия каждый раз пересобиралась и
-  переподписывалась ad-hoc заново, из-за чего macOS считала её новым
-  приложением: любое разрешение Screen Recording/Accessibility, выданное
-  этой копии в System Settings, переставало действовать после первого же
-  Stop → Open, хотя галочка в настройках оставалась включённой. Теперь копия
-  остаётся на диске между запусками, а `launchViaBundleCopy` переиспользует
-  её как есть, если ничего, что влияет на её содержимое, не изменилось —
-  см. [ниже](#переиспользование-копии-между-запусками). Уборка мусора для
-  копий, чей аккаунт реально удалён из библиотеки, по-прежнему происходит,
-  но через `cleanUpOrphanedBundles(keeping:)` при следующем старте Double
-  Bubble, а не немедленно после Stop.
-- Для `jetbrains`/`configDir` ничего не удаляется — там нет отдельного
-  «бандла-копии», всё это и есть данные аккаунта.
+- Deregisters from `ProcessMonitor`.
+- `NSRunningApplication(processIdentifier:)?.terminate()`, or
+  `kill(pid, SIGTERM)` if the system doesn't know about an
+  `NSRunningApplication` like that (typical of processes launched
+  directly through `Process` rather than `NSWorkspace`).
+- For `electronFlag` — the wrapper (kilobytes, trivial to rebuild) is
+  removed from disk after 3 seconds.
+- For `bundleCopy`/`copyThenFlag` the copy is **deliberately not
+  deleted**. It used to be removed exactly like the wrapper — but the
+  copy was rebuilt and re-signed ad hoc from scratch every time, which
+  made macOS treat it as a new app: any Screen Recording/Accessibility
+  permission granted to that copy in System Settings stopped applying
+  after the very next Stop → Open, even though the checkbox in Settings
+  stayed on. The copy now stays on disk between launches, and
+  `launchViaBundleCopy` reuses it as-is if nothing that affects its
+  contents has changed — see
+  [below](#reusing-the-copy-between-launches). Garbage collection for
+  copies whose account has actually been removed from the library still
+  happens, but through `cleanUpOrphanedBundles(keeping:)` on Double
+  Bubble's next startup, not immediately after Stop.
+- For `jetbrains`/`configDir`, nothing is deleted — there's no separate
+  "bundle copy" there; it's all just the account's data.
 
-## Переиспользование копии между запусками
+## Reusing the copy between launches
 
-`launchViaBundleCopy` перед тем, как удалить и пересобрать `accountDir`,
-проверяет **отпечаток** (`copyFingerprint(appURL:account:)`) — строку из
-версии исходного приложения (`LaunchEngine.bundleVersion(at:)`), имени
-аккаунта, его цвета и SHA-256 его картинки (если есть). Отпечаток пишется в
-скрытый файл `.doublebubble-fingerprint` рядом с копией **только после**
-успешного завершения копирования, патча `Info.plist`, брендирования иконки
-и переподписи — то есть само его наличие с совпадающим содержимым уже
-гарантирует, что копия целиком собрана и подписана корректно.
+Before deleting and rebuilding `accountDir`, `launchViaBundleCopy` checks
+a **fingerprint** (`copyFingerprint(appURL:account:)`) — a string built
+from the source app's version (`LaunchEngine.bundleVersion(at:)`), the
+account's name, its color, and the SHA-256 of its picture (if it has
+one). The fingerprint is written to a hidden `.doublebubble-fingerprint`
+file next to the copy **only after** copying, patching `Info.plist`,
+branding the icon, and re-signing have all succeeded — so its mere
+presence, with matching contents, already guarantees the copy was fully
+built and signed correctly.
 
-Если файл существует и совпадает с текущим отпечатком — копия
-переиспользуется как есть, без единого вызова `codesign`: та же подпись, тот
-же bundle ID, та же identity, на которую могли быть выданы системные
-разрешения. Пересборка запускается только когда реально изменилось то, что
-в копию попадает: обновилась версия исходного приложения, либо у аккаунта
-поменялись имя/цвет/картинка (что патчится в `Info.plist`/иконку копии).
-Поля вроде `lastOpenedAt` в отпечаток намеренно не входят — иначе пересборка
-происходила бы на каждый запуск, что как раз и было проблемой.
+If the file exists and matches the current fingerprint, the copy is
+reused as-is, with no `codesign` call at all: the same signature, the
+same bundle ID, the same identity that system permissions may already
+have been granted to. A rebuild only kicks in when something that
+actually ends up in the copy has changed: the source app's version
+updated, or the account's name/color/picture changed (which gets patched
+into the copy's `Info.plist`/icon). Fields like `lastOpenedAt` are
+deliberately excluded from the fingerprint — otherwise a rebuild would
+happen on every single launch, which was exactly the problem this fixes.
 
-## Файловая структура на диске
+## File layout on disk
 
 ```
 ~/.double_bubble/
 ├── bundles/
 │   └── <slug>-<isolationKey>/
-│       └── <Имя>.app            # копия или .app-обёртка, пересоздаётся при каждом запуске
+│       └── <Name>.app            # the copy or .app wrapper, rebuilt as needed
 └── data/
-    └── <slug>-<isolationKey>/   # config/system/plugins/logs (JetBrains) или user-data-dir
+    └── <slug>-<isolationKey>/   # config/system/plugins/logs (JetBrains), or a user-data-dir
 ```
 
-`slug` — `LaunchEngine.slug(for:)`, безопасное для файловой системы имя
-приложения (небезопасные символы → `_`). `isolationKey` — первые 8 hex
-символов UUID аккаунта в нижнем регистре
-(см. [DATA_MODEL.md](DATA_MODEL.md#account)).
+`slug` is `LaunchEngine.slug(for:)`, a filesystem-safe form of the app's
+name (unsafe characters → `_`). `isolationKey` is the account's UUID,
+first 8 hex characters, lowercased (see
+[DATA_MODEL.md](DATA_MODEL.md#account)).
 
-Уборка мусора (см. [ARCHITECTURE.md](ARCHITECTURE.md)) при каждом старте
-приложения:
+Garbage collection (see [ARCHITECTURE.md](ARCHITECTURE.md)) runs on every
+app startup:
 
-- `cleanUpOrphanedBundles(keeping:)` — удаляет папки в `bundles/`, которые
-  не запущены сейчас, не закреплены в Dock (закреплённая, но не запущенная
-  копия всё равно «используется» — удаление превратило бы её тайл в Dock в
-  знак вопроса) **и** чей `isolationKey` не принадлежит ни одному аккаунту,
-  всё ещё сохранённому в библиотеке. Последнее условие — то, что раньше
-  отсутствовало: без него копия для существующего, просто сейчас не
-  запущенного аккаунта сносилась бы при каждом перезапуске Double Bubble,
-  и все выданные ей системные разрешения приходилось бы получать заново.
-- `cleanUpOrphanedData(keeping:)` — трэшит папки в `data/`, чей
-  `isolationKey` не встречается ни у одного сохранённого аккаунта. Строго
-  проверяет форму имени (`<slug>-<8 hex>`), чтобы ничего постороннего,
-  случайно положенного пользователем в этот каталог руками, не было
-  затронуто.
+- `cleanUpOrphanedBundles(keeping:)` — removes folders under `bundles/`
+  that aren't currently running, aren't pinned to the Dock (a pinned but
+  not-running copy still counts as "in use" — deleting it would turn its
+  Dock tile into a question mark), **and** whose `isolationKey` doesn't
+  belong to any account still saved in the library. That last condition
+  used to be missing: without it, the copy for an account that still
+  exists — just isn't running right now — would get swept away on every
+  Double Bubble restart, and every system permission it had been granted
+  would need to be re-granted from scratch.
+- `cleanUpOrphanedData(keeping:)` — trashes folders under `data/` whose
+  `isolationKey` doesn't match any saved account. It strictly checks the
+  name's shape (`<slug>-<8 hex>`), so nothing a user happened to drop into
+  that folder by hand is ever touched.
 
-## Ошибки (`LaunchError`)
+## Errors (`LaunchError`)
 
-| Case | Когда | Сообщение пользователю |
+| Case | When | Message shown to the user |
 |---|---|---|
-| `.noAppSelected` | у `ManagedApp` не разрешился `URL` | приложение не выбрано |
-| `.plistReadFailed` | `Info.plist` копии не читается | не удалось прочитать `Info.plist` |
-| `.launchFailed` | `Process`/`NSWorkspace` вернули ошибку или процесс не поднялся | «системные и жёстко изолированные приложения могут не работать» |
-| `.sandboxedAppGroup` | `sandboxInfo(for:).blocksBundleCopy` | подробное объяснение про App Group + entitlement, см. код |
-| `.libraryValidation` | `usesLibraryValidation(for:)` | объяснение + подсказка добавить приложение в базу знаний с флаговой стратегией, если оно его поддерживает |
+| `.noAppSelected` | a `ManagedApp`'s `URL` failed to resolve | no app is selected |
+| `.plistReadFailed` | the copy's `Info.plist` can't be read | couldn't read `Info.plist` |
+| `.launchFailed` | `Process`/`NSWorkspace` returned an error, or the process never came up | "system apps and heavily sandboxed apps may not work" |
+| `.sandboxedAppGroup` | `sandboxInfo(for:).blocksBundleCopy` | a detailed explanation about App Groups + entitlements, see the code |
+| `.libraryValidation` | `usesLibraryValidation(for:)` | an explanation, plus a hint to add the app to the knowledge base with a flag-based strategy if it supports one |

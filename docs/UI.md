@@ -1,160 +1,164 @@
-# Интерфейс
+# Interface
 
-## Экраны
+## Screens
 
-### Главное окно — `LibraryView`
+### The main window — `LibraryView`
 
-[`LibraryView.swift`](../DoubleBubble/Views/LibraryView.swift) (1200+
-строк) — единственное окно приложения, `NavigationSplitView`:
+[`LibraryView.swift`](../DoubleBubble/Views/LibraryView.swift) (1,200+
+lines) is the app's one window, a `NavigationSplitView`:
 
-- **Сайдбар** — список `ManagedApp`, с поиском (`.searchable`) и
-  закреплёнными (`isPinned`) приложениями всегда сверху; порядок остальных
-  стабилен и соответствует порядку добавления (стабильная сортировка по
-  `(закреплён?, исходный индекс)`).
-- **Деталь** (`AppDetailView`) — карточки аккаунтов выбранного приложения:
-  статус (запущен/остановлен), кнопка Open/Stop, версия (с предупреждением,
-  если запущенная копия отстала от версии на диске — `outdatedVersion`),
-  блокировка запуска с объяснением причины (`library.blocker(for:)`), кнопка
-  предложенной альтернативы (`onUseAlternative`, см.
-  [KNOWLEDGE_BASE.md](KNOWLEDGE_BASE.md)).
-- **`AccountCard`** — карточка одного аккаунта: аватар (инициал на цветном
-  фоне либо своя картинка), имя, статус. В контекстном меню для аккаунтов с
-  собственной подписанной копией (`AppLibrary.bundleCopyFolder(for:account:)`
-  не `nil`) есть пункт **Grant System Permissions** — быстрый доступ к копии
-  в Finder и прямые ссылки на панели Screen Recording/Accessibility в System
-  Settings (`SystemSettingsPane`, см.
+- **Sidebar** — the list of `ManagedApp`s, with search (`.searchable`)
+  and pinned (`isPinned`) apps always on top; the rest keep a stable order
+  matching the order they were added in (a stable sort by
+  `(pinned?, original index)`).
+- **Detail** (`AppDetailView`) — cards for the selected app's accounts:
+  status (running/stopped), an Open/Stop button, version (with a warning
+  if a running copy has fallen behind the version on disk —
+  `outdatedVersion`), a launch blocker with an explanation
+  (`library.blocker(for:)`), and a button for a suggested alternative
+  (`onUseAlternative`, see [KNOWLEDGE_BASE.md](KNOWLEDGE_BASE.md)).
+- **`AccountCard`** — a single account's card: an avatar (an initial on a
+  colored background, or a custom picture), a name, a status. Its context
+  menu, for accounts with their own signed copy
+  (`AppLibrary.bundleCopyFolder(for:account:)` not `nil`), has a **Grant
+  System Permissions** item — quick access to the copy in Finder, plus
+  direct links to the Screen Recording/Accessibility panes in System
+  Settings (`SystemSettingsPane`, see
   [TROUBLESHOOTING.md](TROUBLESHOOTING.md)).
-- **`AddAccountCard`** — плейсхолдер-карточка для добавления нового
-  аккаунта к приложению.
-- **`SidebarAddButton`** — точка входа для добавления нового приложения в
-  библиотеку (выбор `.app` через `NSOpenPanel`, стоящий за
+- **`AddAccountCard`** — a placeholder card for adding a new account to an
+  app.
+- **`SidebarAddButton`** — the entry point for adding a new app to the
+  library (picking a `.app` via `NSOpenPanel`, behind
   `AppLibrary.addApp(at:)`).
-- **`SettingsToolbarButton`** — поповер настроек в правом верхнем углу
-  тулбара (см. ниже, почему не отдельное окно `⌘,`).
+- **`SettingsToolbarButton`** — the settings popover in the toolbar's
+  top-right corner (see below for why it isn't a separate `⌘,` window).
 
-Действия редактирования аккаунта (`EditingAccount`, роутинг через
-`.sheet(item:)`) и удаления приложения (`removingApp`, через `.alert`)
-управляются локальным `@State` этого экрана.
+Editing an account (`EditingAccount`, routed through `.sheet(item:)`) and
+removing an app (`removingApp`, through `.alert`) are both driven by this
+screen's local `@State`.
 
 ### `AccountEditorView`
 
 [`AccountEditorView.swift`](../DoubleBubble/Views/AccountEditorView.swift)
-— модальная форма редактирования одного аккаунта: имя, цвет из
-`Account.presetColors` (с исключением уже занятых другими аккаунтами того
-же приложения цветов), своя картинка через
+is the modal form for editing a single account: name, a color from
+`Account.presetColors` (excluding colors already used by other accounts
+of the same app), and a custom picture via
 [`AccountIcon.pickFromDisk()`](../DoubleBubble/Services/AccountIcon.swift).
 
-### Настройки — `SettingsView`
+### Settings — `SettingsView`
 
 [`AboutSettingsView.swift`](../DoubleBubble/Views/AboutSettingsView.swift)
-— **не отдельное окно**, а поповер, встроенный в тулбар главного окна.
-Причина явно зафиксирована в коде: SwiftUI-сцена `Settings {}` заняла бы
-`⌘,` и создала второе окно с частично тем же функционалом, дублируя
-контролы в двух местах вместо одного. Четыре секции внутри одной
-прокручиваемой `Form`, тот же принцип, что в системных Настройках macOS —
-редко трогаемое отделено от повседневного:
+is **not a separate window** — it's a popover embedded in the main
+window's toolbar. The reason is spelled out in the code: a SwiftUI
+`Settings {}` scene would claim `⌘,` and create a second window with
+partly the same functionality, duplicating controls in two places instead
+of one. Four sections inside one scrolling `Form`, the same principle
+macOS's own System Settings uses — what's rarely touched is kept separate
+from what's used every day:
 
-1. **Interface** (`InterfaceSettingsTab`) — тема оформления
-   ([`AppTheme`](#темы-оформления)) и плотность интерфейса
-   ([`InterfaceDensity`](#плотность-интерфейса-interfacedensity)).
-2. **General** (`GeneralSettingsTab`) — повседневные переключатели:
-   автозапуск при входе в систему ([`LaunchAtLogin`](../DoubleBubble/Services/LaunchAtLogin.swift)),
-   уведомления об ошибке запуска.
-3. **Language** (`LanguageSettingsSection`) — переключение RU/EN/System, см.
-   [ниже](#локализация).
-4. **Advanced** (`AdvancedSettingsTab`) — «опасные» операции, требующие
-   доступа к `library` напрямую (сброс/очистка данных на уровне всей
-   библиотеки).
-5. **About** (`AboutSection`) — версия, копирайт, логотип издателя
-   (`PublisherLogo` из `Assets.xcassets`).
+1. **Interface** (`InterfaceSettingsTab`) — the appearance theme
+   ([`AppTheme`](#appearance-themes)) and interface density
+   ([`InterfaceDensity`](#interface-density-interfacedensity)).
+2. **General** (`GeneralSettingsTab`) — everyday toggles: launch at login
+   ([`LaunchAtLogin`](../DoubleBubble/Services/LaunchAtLogin.swift)),
+   notifications on launch failure.
+3. **Language** (`LanguageSettingsSection`) — switching between EN/RU/
+   System, see [below](#localization).
+4. **Advanced** (`AdvancedSettingsTab`) — "dangerous" operations that need
+   direct access to `library` (resetting/clearing data at the whole-
+   library level).
+5. **About** (`AboutSection`) — version, copyright, publisher logo
+   (`PublisherLogo` from `Assets.xcassets`).
 
 ### Menu Bar Extra
 
-Определён прямо в
+Defined right in
 [`DoubleBubbleApp.swift`](../DoubleBubble/DoubleBubbleApp.swift)
-(`MenuBarMenuView`) — список приложений и их аккаунтов со статусом и
-кнопкой Open/Stop, доступный без открытия главного окна; пункт «Open Double
-Bubble…» пересоздаёт закрытое главное окно через `openWindow(id: "main")`
-(обычный обход `NSApp.windows`, применявшийся раньше, не находил уже
-закрытое окно — оно просто отсутствовало в списке).
+(`MenuBarMenuView`) — a list of apps and their accounts with status and an
+Open/Stop button, reachable without opening the main window; the "Open
+Double Bubble…" item recreates a closed main window via
+`openWindow(id: "main")` (the plain `NSApp.windows` walk used before this
+couldn't find a window that had already been closed — it just wasn't in
+the list anymore).
 
 ### `BubbleMark`
 
 [`Components/BubbleMark.swift`](../DoubleBubble/Views/Components/BubbleMark.swift)
-— фирменный анимированный знак: два «метабола», рисуемые через `Canvas` с
-`.alphaThreshold` + `.blur`-фильтром, из-за чего при сближении они сливаются
-в единую массу с плавной «шейкой» посередине, а при расхождении шейка
-утончается и сама рвётся. Используется точечно — в пустых состояниях и на
-онбординге, — а не как замена системных SF Symbols: обычные функциональные
-иконки (корзина, папка, плюс) везде остаются стандартными символами,
-которые люди уже узнают именно в этой роли.
+is the animated mark: two "metaballs" drawn through a `Canvas` with an
+`.alphaThreshold` + `.blur` filter, which is what makes them merge into a
+single mass with a smooth "neck" between them as they come together, and
+what makes that neck thin out and snap on its own as they part. Used
+sparingly — in empty states and onboarding — rather than as a replacement
+for system SF Symbols: ordinary functional icons (trash, folder, plus)
+stay standard symbols everywhere, which is what people already recognize
+them for.
 
-Уважает `accessibilityReduceMotion` (останавливается на кадре «полностью
-разделены», если у пользователя включено «Уменьшить движение» в Системных
-настройках).
+Respects `accessibilityReduceMotion` (holds on the "fully split" frame if
+the user has "Reduce Motion" turned on in System Settings).
 
-## Темы оформления
+## Appearance themes
 
-[`AppTheme.swift`](../DoubleBubble/Services/AppTheme.swift) — 4 варианта:
+[`AppTheme.swift`](../DoubleBubble/Services/AppTheme.swift) — 4 options:
 
-- **Terracotta** («Default» в UI) — фирменная тема: тёплая кремовая/глиняная
-  палитра, специально выбранная контрастной по отношению к
-  холодному сине-фиолетовому цвету логотипа Double Bubble, чтобы бренд и
-  продукт читались как разные, но согласованные вещи. Есть отдельная
-  тёмная версия (`terracottaDark`) — не инверсия в серый, а более тёмный шаг
-  того же глиняного тона: чистый серый рядом с глиняным акцентом выглядел
-  бы как две несвязанные палитры.
-- **System / Light / Dark** — используют системные `NSColor`
-  (`.windowBackgroundColor`, `.controlBackgroundColor`) и не переопределяют
-  акцентный цвет — уважают то, что пользователь выбрал глобально в Системных
-  настройках.
+- **Terracotta** ("Default" in the UI) — the house theme: a warm cream/
+  clay palette, deliberately chosen to contrast with the cool blue-violet
+  of Double Bubble's own logo, so the brand and the product read as
+  distinct but related things. It has its own dark variant
+  (`terracottaDark`) — not an inversion to gray, but a darker step of the
+  same clay hue: plain gray next to a clay accent would read as two
+  unrelated palettes.
+- **System / Light / Dark** — use the system's own `NSColor`s
+  (`.windowBackgroundColor`, `.controlBackgroundColor`) and don't override
+  the accent color — they respect whatever the user picked globally in
+  System Settings.
 
-Механизм применения (`ThemedModifier` / `.themed()`) — палитра прокидывается
-через `Environment(\.themePalette)`, а не рисуется одним `.background(...)`
-поверх окна: `NavigationSplitView`, боковая панель и карточки сами рисуют
-непрозрачные системные цвета друг поверх друга, так что просто закрашенный
-фон окна ими бы полностью перекрывался. `preferredColorScheme` и палитра
-всегда выставляются из одного и того же вычисленного значения `effective`,
-чтобы поверхности и текст никогда не «спорили» друг с другом (тёмный текст
-на тёмном фоне — конкретный баг, который так был исправлен).
+How it's applied (`ThemedModifier` / `.themed()`): the palette is threaded
+through `Environment(\.themePalette)` rather than painted as one
+`.background(...)` behind the window — `NavigationSplitView`, the sidebar,
+and the cards all paint their own opaque system colors on top of each
+other, so a plain window background would be completely covered up by
+them. `preferredColorScheme` and the palette are always derived from the
+same computed `effective` value, so surfaces and text never "disagree"
+with each other (dark text on a dark background was a real bug, fixed
+this way).
 
-`success`/`danger` тоже свои для каждой темы, а не стоковые `Color.red`/
-`.green` — те рассчитаны на чистый белый/чёрный фон и на тёплом кремовом
-фоне выглядели неоново-инородными.
+`success`/`danger` are also their own per theme, rather than the stock
+`Color.red`/`.green` — those are tuned for pure white/black and looked
+like neon stickers dropped on the theme's warm cream background.
 
-## Плотность интерфейса (`InterfaceDensity`)
+## Interface density (`InterfaceDensity`)
 
 [`InterfaceDensity.swift`](../DoubleBubble/Services/InterfaceDensity.swift)
-— единственная точка, откуда вычисляются размеры (аватар, шрифт имени,
-паддинги карточки, размер иконок в сайдбаре): `.comfortable` (по умолчанию,
-крупнее, с воздухом) и `.compact` (плотнее, для тех, кто держит много
-приложений и хочет видеть больше за раз без прокрутки).
+is the single place sizes are computed from (avatar, name font, card
+padding, sidebar icon size): `.comfortable` (the default — bigger, with
+more room to breathe) and `.compact` (tighter, for people managing a lot
+of apps who'd rather see more at once without scrolling).
 
-## Локализация
+## Localization
 
-[`AppLanguage.swift`](../DoubleBubble/Services/AppLanguage.swift) — RU/EN +
-System, строки — в
-[`Localizable.xcstrings`](../DoubleBubble/Localizable.xcstrings)
-(String Catalog, современный формат Xcode). macOS резолвит язык приложения
-при старте из `AppleLanguages`, поэтому смена языка не может подхватиться
-на лету — переключатель честно об этом предупреждает и предлагает
-`AppLanguage.relaunch()` (открывает новую копию приложения и завершает
-текущую).
+[`AppLanguage.swift`](../DoubleBubble/Services/AppLanguage.swift) — EN/RU
++ System; strings live in
+[`Localizable.xcstrings`](../DoubleBubble/Localizable.xcstrings) (a String
+Catalog, Xcode's modern format). macOS resolves the app's language at
+launch from `AppleLanguages`, so a language change can't take effect on
+the fly — the picker is upfront about that and offers
+`AppLanguage.relaunch()` (opens a fresh copy of the app and quits the
+current one).
 
-`AppLanguage.launchedWith` фиксирует язык, с которым процесс реально
-стартовал — сравнение с ним нужно, чтобы предупреждение о релонче
-показывалось только тогда, когда смена языка реально что-то изменит
-(переключение туда-обратно в рамках одной сессии не должно тревожить
-пользователя лишний раз).
+`AppLanguage.launchedWith` records the language the process actually
+started with — comparing against it is what keeps the relaunch warning
+from showing unless switching the language would genuinely change
+something (toggling back and forth within one session shouldn't nag the
+user for no reason).
 
-## Иконки и брендирование
+## Icons and branding
 
-Отдельно от тем оформления самого приложения — брендирование Dock-иконок
-запущенных копий описано в
-[LAUNCH_ENGINE.md](LAUNCH_ENGINE.md#bundlecopy--копия--переподпись) и
-реализовано в
-[`IconFactory.swift`](../DoubleBubble/Services/IconFactory.swift): цветной
-кружок-бейдж с инициалом или своей картинкой поверх нижнего правого угла
-оригинальной иконки приложения, вписанный по замерянным фактическим
-границам художественной части иконки (а не по номинальному квадрату
-холста — у разных приложений разные отступы/margin внутри `.icns`).
+Separate from the app's own appearance themes — branding the Dock icons
+of running copies is covered in
+[LAUNCH_ENGINE.md](LAUNCH_ENGINE.md#bundlecopy--copy--re-sign) and
+implemented in
+[`IconFactory.swift`](../DoubleBubble/Services/IconFactory.swift): a
+colored circular badge with an initial or a custom picture, placed over
+the bottom-right corner of the app's original icon, fitted to the
+artwork's actual measured bounds (not the nominal square canvas — different
+apps leave different margins inside their `.icns`).

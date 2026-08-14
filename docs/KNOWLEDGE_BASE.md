@@ -1,15 +1,16 @@
-# AppKnowledgeBase — база знаний о приложениях
+# AppKnowledgeBase — the app knowledge base
 
 [`AppKnowledgeBase.swift`](../DoubleBubble/Services/AppKnowledgeBase.swift)
-— статический реестр `[(bundleID-префикс, IsolationDescriptor)]`,
-описывающий, каким способом лучше всего изолировать данные для конкретных,
-заранее известных приложений. Это первый и самый приоритетный источник для
-`LaunchEngine.detectStrategy(for:)` — специфичное знание побеждает любую
-автоэвристику (см. [LAUNCH_ENGINE.md](LAUNCH_ENGINE.md#как-определяется-стратегия)).
+is a static registry of `[(bundleID prefix, IsolationDescriptor)]`
+entries, describing the best way to isolate data for specific, already-
+known apps. It's the first and highest-priority source for
+`LaunchEngine.detectStrategy(for:)` — specific knowledge always beats the
+generic heuristics (see
+[LAUNCH_ENGINE.md](LAUNCH_ENGINE.md#how-the-strategy-is-chosen)).
 
-Составлено (согласно комментарию в исходнике) по публичной документации,
-документации Electron/JetBrains и общеизвестным практикам сообщества — без
-копирования кода из сторонних проектов.
+Compiled (per the comment in the source) from public documentation, the
+Electron/JetBrains docs, and general community knowledge — no code copied
+from any third-party project.
 
 ## `IsolationDescriptor`
 
@@ -23,98 +24,108 @@ struct IsolationDescriptor {
         case copyThenFlag(flag: String, separateValue: Bool)
     }
     let kind: Kind
-    let description: String     // человекочитаемое описание для UI
-    let persistsData: Bool      // сохраняются ли данные между сессиями
+    let description: String     // human-readable description for the UI
+    let persistsData: Bool      // whether data survives between sessions
     var requiresOriginalBundle: Bool = false
 }
 ```
 
-`requiresOriginalBundle` — отдельный, самый жёсткий флаг: приложение
-обязано запускаться только из исходного бандла, копия для него в принципе
-недопустима (типичный случай — Chromium-браузеры с library validation,
-у которых launcher ре-исполняется через сам бандл и теряет переданный
-argv). Это ограничение, с которым обязана считаться Dock-иконка с
-собственным брендом: без копии просто негде разместить брендированную
-иконку, и рабочий второй профиль важнее красивого тайла.
+`requiresOriginalBundle` is a separate, strictest flag: the app must run
+only from the original bundle — a copy is not acceptable for it at all
+(the typical case is Chromium browsers with library validation, whose
+launcher re-executes through the bundle itself and drops the argv it was
+given). This is a constraint a branded Dock icon simply has to yield to:
+without a copy there's nowhere to put a branded icon, and a working second
+profile matters more than a nice-looking tile.
 
-## Текущий реестр (кратко)
+## Current registry (abridged)
 
-| Приложение | Bundle ID (префикс) | Стратегия | Примечание |
+| App | Bundle ID (prefix) | Strategy | Note |
 |---|---|---|---|
-| Claude Desktop | `com.anthropic.claudefordesktop` | `copyThenFlag(--user-data-dir)` | Keychain access group завязана на Team ID — простого `--user-data-dir` недостаточно, нужна ещё и переподпись |
-| ChatGPT Desktop | `com.openai.chat` | `electronUserDataDir` | |
+| Claude Desktop | `com.anthropic.claudefordesktop` | `copyThenFlag(--user-data-dir)` | Its Keychain access group is tied to the Team ID — a plain `--user-data-dir` isn't enough, re-signing is needed too |
 | Cursor | `com.todesktop.230313mzl4w4u92` | `electronUserDataDir` | |
 | Windsurf | `com.exafunction.windsurf` | `electronUserDataDir` | |
 | VS Code | `com.microsoft.VSCode` / `com.microsoft.vscode` | `electronUserDataDir` | |
 | Zed | `dev.zed.zed` | `configDir(--config-dir, false)` | |
 | IntelliJ / PyCharm / WebStorm / GoLand / RustRover / Rider / CLion | `com.jetbrains.*` | `jetbrainsVMOptions` | |
-| Slack | `com.tinyspeck.slackmacgap` | `electronUserDataDir` | у Slack есть и штатный переключатель воркспейсов — см. ниже |
+| Slack | `com.tinyspeck.slackmacgap` | `electronUserDataDir` | Slack also has its own built-in workspace switcher — see below |
 | Discord | `com.discord` / `com.hnc.Discord` | `electronUserDataDir` | |
-| Telegram для macOS (нативный) | `ru.keepcoder.Telegram` | `bundleCopy` | Sandboxed + App Group ⇒ копия не изолируется (см. [LAUNCH_ENGINE.md](LAUNCH_ENGINE.md)); есть встроенный мультиаккаунт и рабочая альтернатива |
-| Telegram Desktop (App Store) | `org.telegram.desktop` | `copyThenFlag(-workdir, true)` | Sandboxed, но без App Group — переподпись безопасна |
-| Telegram Desktop (сайт) | `com.tdesktop.Telegram` | `configDir(-workdir, true)` | Не sandboxed — копия вообще не нужна |
-| Chrome / Edge / Brave / Vivaldi / Opera / Yandex Browser | `com.google.Chrome` и т. д. | `electronUserDataDir`, `requiresOriginalBundle: true` | Library validation — копия невозможна в принципе |
+| Telegram for macOS (native) | `ru.keepcoder.Telegram` | `bundleCopy` | Sandboxed + App Group ⇒ a copy can't be isolated (see [LAUNCH_ENGINE.md](LAUNCH_ENGINE.md)); has a built-in multi-account switcher and a working alternative build |
+| Telegram Desktop (App Store) | `org.telegram.desktop` | `copyThenFlag(-workdir, true)` | Sandboxed, but no App Group — re-signing is safe |
+| Telegram Desktop (direct download) | `com.tdesktop.Telegram` | `configDir(-workdir, true)` | Not sandboxed — no copy needed at all |
+| Chrome / Edge / Brave / Vivaldi / Opera / Yandex Browser | `com.google.Chrome` etc. | `electronUserDataDir`, `requiresOriginalBundle: true` | Library validation — a copy is impossible in principle |
 | Arc | `company.thebrowser.Browser` | `electronUserDataDir` | |
 | Figma | `com.figma.desktop` | `electronUserDataDir` | |
 | Linear | `com.linear` | `electronUserDataDir` | |
 | Notion | `notion.id` | `electronUserDataDir` | |
 | Spotify | `com.spotify.client` | `bundleCopy` | |
 
-Полный и всегда актуальный список — сам файл
-[`AppKnowledgeBase.swift`](../DoubleBubble/Services/AppKnowledgeBase.swift),
-таблица выше может отставать от кода.
+> **Note on ChatGPT/Codex:** an earlier version of this table listed
+> `com.openai.chat` as an Electron app that works via
+> `electronUserDataDir`. On inspection, the currently-shipping build
+> (bundle id `com.openai.codex`) is neither Electron nor unsandboxed
+> anymore — it's a native app, sandboxed, with a non-empty App Group,
+> putting it in the same blocked category as WhatsApp (see
+> [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for what that means in
+> practice). The stale registry entry hasn't been removed from the code
+> yet; treat it as unreliable until it's revisited.
 
-## Подсказки вместо изоляции
+The full, always up-to-date list is the
+[`AppKnowledgeBase.swift`](../DoubleBubble/Services/AppKnowledgeBase.swift)
+file itself — the table above can lag behind the code.
 
-Для двух категорий заблокированных случаев `AppKnowledgeBase` отвечает не
-стратегией, а готовой человекочитаемой подсказкой:
+## Hints instead of isolation
 
-- **`builtInMultiAccountHint(forBundleID:)`** — приложение уже само умеет
-  несколько аккаунтов (Telegram для macOS: «Settings → имя → Add
-  Account»; Slack: переключатель воркспейсов в сайдбаре). Когда Double
-  Bubble не может изолировать такое приложение, указать на встроенную
-  функцию полезнее, чем объяснять проблему с подписью кода.
-- **`alternative(forBundleID:)`** — существует другая сборка того же
-  продукта, которую Double Bubble изолировать *может*. Мотивирующий
-  пример — Telegram: нативный клиент заблокирован App Group, а Telegram
-  Desktop хранит всё в обычной папке. `AppLibrary.installedAlternative(for:)`
-  проверяет, установлена ли такая сборка на диске и ещё не добавлена в
-  библиотеку, и если да — предлагает добавить её одним кликом вместо
-  объяснения проблемы с подписью.
+For two categories of blocked apps, `AppKnowledgeBase` answers not with a
+strategy but with a ready-made, human-readable hint:
 
-## Как добавить новое приложение
+- **`builtInMultiAccountHint(forBundleID:)`** — the app already handles
+  multiple accounts on its own (Telegram for macOS: "Settings → your name
+  → Add Account"; Slack: the workspace switcher in its sidebar). When
+  Double Bubble can't isolate an app like this, pointing at its built-in
+  feature is more useful than explaining a code-signing problem.
+- **`alternative(forBundleID:)`** — a different build of the same product
+  exists that Double Bubble *can* isolate. The motivating example is
+  Telegram: the native client is blocked by its App Group, while Telegram
+  Desktop keeps everything in a plain folder.
+  `AppLibrary.installedAlternative(for:)` checks whether a build like
+  that is installed on disk and not already in the library, and if so,
+  offers to add it in one click instead of explaining the signing
+  problem.
 
-1. Узнать `CFBundleIdentifier` приложения:
+## How to add a new app
+
+1. Find the app's `CFBundleIdentifier`:
    ```bash
-   defaults read "/Applications/Имя.app/Contents/Info.plist" CFBundleIdentifier
+   defaults read "/Applications/Name.app/Contents/Info.plist" CFBundleIdentifier
    ```
-2. Определить механизм изоляции данных:
-   - Electron/Chromium с library validation → `electronUserDataDir`
-     (+ `requiresOriginalBundle: true`, если приложение отказывается
-     запускаться из копии — проверить: `codesign -dv /Applications/Имя.app
-     2>&1 | grep library-validation`).
-   - JetBrains Platform → `jetbrainsVMOptions`.
-   - Есть собственный CLI-флаг конфиг-директории → `configDir(flag:,
-     separateValue:)`. `separateValue: true`, если флаг ожидает значение
-     отдельным аргументом (`-workdir /path`), `false` — для `--flag=value`.
-   - Ничего из вышеперечисленного, обычный Cocoa-бандл → `bundleCopy`
-     (это и есть безопасный дефолт при отсутствии записи в базе).
-   - Sandboxed-приложение, принимающее CLI-флаг, но требующее снятия
-     sandbox-entitlement, чтобы флаг реально сработал → `copyThenFlag`.
-3. Проверить sandbox/App Group **до** добавления записи с `bundleCopy`/
-   `copyThenFlag`:
+2. Work out the data-isolation mechanism:
+   - Electron/Chromium with library validation → `electronUserDataDir`
+     (+ `requiresOriginalBundle: true` if the app refuses to launch from a
+     copy — check with: `codesign -dv /Applications/Name.app 2>&1 | grep
+     library-validation`).
+   - The JetBrains Platform → `jetbrainsVMOptions`.
+   - Has its own CLI flag for a config directory → `configDir(flag:,
+     separateValue:)`. `separateValue: true` if the flag expects its value
+     as a separate argument (`-workdir /path`), `false` for
+     `--flag=value`.
+   - None of the above, a plain Cocoa bundle → `bundleCopy` (this is the
+     safe default when there's no registry entry at all).
+   - A sandboxed app that accepts a CLI flag but needs the sandbox
+     entitlement dropped for the flag to actually work → `copyThenFlag`.
+3. Check for sandboxing/App Group **before** adding a `bundleCopy`/
+   `copyThenFlag` entry:
    ```bash
-   codesign -d --entitlements :- /Applications/Имя.app
+   codesign -d --entitlements :- /Applications/Name.app
    ```
-   Если есть `com.apple.security.app-sandbox = true` **и**
-   `com.apple.security.application-groups` непустой — копирование в
-   принципе не сработает; такое приложение либо не добавлять в реестр
-   вовсе (сработает fallback-блокировка в `LaunchEngine` с понятной
-   ошибкой), либо поискать альтернативную сборку и добавить через
-   `alternative(forBundleID:)`.
-4. Добавить запись в `AppKnowledgeBase.registry`, соблюдая порядок «от
-   более специфичного префикса к менее специфичному» (поиск —
-   `hasPrefix`, первое совпадение побеждает).
-5. Проверить реальным запуском: добавить приложение в Double Bubble,
-   открыть два аккаунта, убедиться, что оба поднимаются одновременно и не
-   делят сессию/логин.
+   If both `com.apple.security.app-sandbox = true` **and**
+   `com.apple.security.application-groups` is non-empty, copying won't
+   work at all; either don't add the app to the registry (the fallback
+   block in `LaunchEngine` will kick in with a clear error), or look for
+   an alternative build and add it via `alternative(forBundleID:)`.
+4. Add the entry to `AppKnowledgeBase.registry`, keeping the ordering
+   "most specific prefix to least specific" (lookup is `hasPrefix`, first
+   match wins).
+5. Verify with a real launch: add the app to Double Bubble, open two
+   accounts, and confirm both come up at the same time without sharing a
+   session/login.

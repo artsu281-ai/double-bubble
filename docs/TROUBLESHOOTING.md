@@ -1,99 +1,102 @@
-# Screen Recording / Accessibility для управляемых копий
+# Screen Recording / Accessibility for managed copies
 
-Некоторые приложения (Claude Desktop, браузеры со встроенным screen-share,
-инструменты автоматизации) на macOS требуют разрешения **Screen Recording**
-и/или **Accessibility**, чтобы захватывать экран или управлять
-мышью/клавиатурой. Если такое приложение запущено через Double Bubble как
-изолированная копия — с этими разрешениями связана пара нюансов, которых
-нет у обычного, не клонированного приложения.
+Some apps (Claude Desktop, browsers with built-in screen sharing,
+automation tools) need macOS's **Screen Recording** and/or
+**Accessibility** permission to capture the screen or control the mouse/
+keyboard. When an app like that runs through Double Bubble as an isolated
+copy, there are a couple of wrinkles around those permissions that a
+regular, non-cloned app doesn't have.
 
-## Почему это вообще отдельная история
+## Why this is its own story at all
 
-macOS выдаёт Screen Recording/Accessibility не «приложению» как понятию, а
-**конкретной подписанной копии** — паре (bundle ID, code signature). Copy-based
-стратегии Double Bubble (`bundleCopy`, `copyThenFlag`, а также лёгкая обёртка
-у `electronFlag` — все три описаны в
-[LAUNCH_ENGINE.md](LAUNCH_ENGINE.md)) переподписывают копию ad-hoc с
-изменённым `CFBundleIdentifier`. Для системы это **другое** приложение,
-никак не связанное ни с оригиналом, ни с копиями других аккаунтов — у
-каждой копии разрешения выдаются отдельно.
+macOS grants Screen Recording/Accessibility not to "the app" as a concept,
+but to **one specific signed copy** — a (bundle ID, code signature) pair.
+Double Bubble's copy-based strategies (`bundleCopy`, `copyThenFlag`, and
+the lightweight wrapper `electronFlag` uses too — all three covered in
+[LAUNCH_ENGINE.md](LAUNCH_ENGINE.md)) re-sign the copy ad hoc with a
+changed `CFBundleIdentifier`. As far as the system is concerned that's a
+**different** app, unrelated to the original or to other accounts' copies
+— each copy gets its permissions granted separately.
 
-Начиная с версии, где `launchViaBundleCopy` переиспользует уже собранную
-копию, если исходное приложение не обновилось (см.
-[LAUNCH_ENGINE.md#переиспользование-копии-между-запусками](LAUNCH_ENGINE.md#переиспользование-копии-между-запусками)),
-identity копии стабильна между обычными Stop/Open — разрешение, выданное
-один раз, больше не слетает само по себе. Слетает оно только если:
+Since the version where `launchViaBundleCopy` reuses an already-built
+copy when the source app hasn't updated (see
+[LAUNCH_ENGINE.md#reusing-the-copy-between-launches](LAUNCH_ENGINE.md#reusing-the-copy-between-launches)),
+a copy's identity stays stable across ordinary Stop/Opens — a permission
+granted once no longer disappears on its own. It only disappears if:
 
-- переименовать аккаунт, сменить его цвет или картинку (это патчится в
-  `Info.plist`/иконку копии → новая подпись);
-- обновится исходное приложение;
-- вручную удалить папку копии.
+- you rename the account, or change its color or picture (that gets
+  patched into `Info.plist`/the copy's icon → a new signature);
+- the source app updates;
+- the copy's folder is deleted by hand.
 
-## Как выдать разрешение (UI)
+## How to grant the permission (UI)
 
-В карточке аккаунта (правый клик) есть пункт **Grant System Permissions**:
+The account card's context menu (right-click) has a **Grant System
+Permissions** item:
 
-- **Show App Copy in Finder** — открывает `~/.double_bubble/bundles/<slug>-<key>/`
-  в Finder, не нужно вспоминать путь и лезть в Terminal.
-- **Open Screen Recording Settings…** / **Open Accessibility Settings…** —
-  открывает нужную панель System Settings напрямую (deep link через
-  `x-apple.systempreferences:...`, реализовано в
+- **Show App Copy in Finder** — opens
+  `~/.double_bubble/bundles/<slug>-<key>/` in Finder, no need to remember
+  the path or reach for Terminal.
+- **Open Screen Recording Settings…** / **Open Accessibility Settings…**
+  — opens the right System Settings pane directly (a deep link via
+  `x-apple.systempreferences:...`, implemented in
   [`SystemSettings.swift`](../DoubleBubble/Services/SystemSettings.swift)).
 
-Пункт появляется только для аккаунтов, у которых вообще есть отдельная
-подписанная копия (`AppLibrary.bundleCopyFolder(for:account:)` — `nil` для
-`jetbrains`/`configDir`, которые запускают оригинальный бинарник напрямую и
-никакой отдельной identity не создают).
+The item only shows up for accounts that actually have their own signed
+copy (`AppLibrary.bundleCopyFolder(for:account:)` is `nil` for
+`jetbrains`/`configDir`, which launch the original binary directly and
+create no separate identity at all).
 
-Дальше — обычный путь: в открывшейся панели найти запись (обычно называется
-как сама копия — по имени аккаунта или исходного приложения), включить
-галочку, и **полностью перезапустить аккаунт** (Stop → Open в Double Bubble).
-Без релонча процесс продолжает жить со старым, непривилегированным
-состоянием — простого «включить галочку» недостаточно.
+From there it's the usual path: find the entry in the pane that opens
+(usually named after the copy itself — the account's name or the source
+app's), turn it on, and **fully restart the account** (Stop → Open in
+Double Bubble). Without a relaunch, the process keeps running in its old,
+unprivileged state — just flipping the switch isn't enough.
 
-## Если галочка стоит, а приложение всё равно говорит «нет доступа»
+## The switch is on, but the app still says it has no access
 
-Такое бывает, если разрешение выдавалось на **другую** сборку копии (до
-пересборки — например, до обновления исходного приложения, до
-переименования аккаунта, или до отладки, в ходе которой копию пересобирали
-вручную). Тогда в System Settings может висеть «залипшая» запись, которая
-формально включена, но не относится к текущей подписи — приложение сверяет
-identity в момент запроса и честно говорит, что доступа нет.
+This happens when the permission was granted to a **different** build of
+the copy — before a rebuild, say, triggered by the source app updating,
+the account being renamed, or manual rebuilding while debugging. System
+Settings can end up with a "stuck" entry that's formally turned on but
+doesn't correspond to the current signature — the app checks its identity
+at the moment it asks, and honestly reports no access.
 
-Обычный сброс галочки (выключить/включить) это не чинит. Нужно полностью
-стереть запись из базы TCC для конкретного bundle ID и позволить macOS
-спросить заново:
+Toggling the switch off and on doesn't fix this. You need to fully wipe
+the entry from the TCC database for that specific bundle ID and let macOS
+ask again:
 
 ```bash
 tccutil reset ScreenCapture <bundle-id>
 tccutil reset Accessibility <bundle-id>
 ```
 
-где `<bundle-id>` — это `<исходный-bundle-id>.doublebubble.<isolationKey>`
-(например, `com.anthropic.claudefordesktop.doublebubble.be5ad662`). Узнать
-его можно так:
+where `<bundle-id>` is `<source-bundle-id>.doublebubble.<isolationKey>`
+(for example, `com.anthropic.claudefordesktop.doublebubble.be5ad662`).
+Find it with:
 
 ```bash
-codesign -dv "~/.double_bubble/bundles/<slug>-<key>/<Имя>.app" 2>&1 | grep Identifier
+codesign -dv "~/.double_bubble/bundles/<slug>-<key>/<Name>.app" 2>&1 | grep Identifier
 ```
 
-**Важно: сбрасывайте сервисы по одному, если один из них уже работает.**
-`tccutil reset` без указания сервиса, либо повторный сброс уже рабочего
-сервиса «за компанию» с проблемным — стирает **оба** сразу. Разрешения,
-которые уже были в порядке, придётся выдавать заново без необходимости —
-именно так в ходе отладки этой самой функциональности один рабочий грант
-случайно снесло чисткой другого.
+**Important: reset services one at a time if one of them already works.**
+Running `tccutil reset` with no service named, or resetting an already-
+working service "along with" the broken one, wipes **both** at once.
+Permissions that were already fine then need to be granted all over again
+for no reason — that's exactly how, while building this feature, one
+working grant got wiped out by cleaning up the other.
 
-После `tccutil reset` — обязательно полный перезапуск аккаунта (Stop →
-Open), затем заново пройти системный диалог/баннер разрешения, который
-должен появиться при следующей попытке приложения запросить доступ.
+After `tccutil reset`, a full account restart (Stop → Open) is required,
+followed by going through whatever system dialog/banner appears the next
+time the app tries to request access.
 
-## Если разрешение вообще не появляется в списке
+## The permission never shows up in the list at all
 
-Если после `tccutil reset` и релонча System Settings всё равно не предлагает
-ничего включить (ни диалога, ни новой строки в списке) — приложение внутри
-копии, возможно, ещё не успело реально запросить доступ у системы. Многие
-реализации Screen Recording/Accessibility запрашивают разрешение лениво, в
-момент первой попытки использовать соответствующую функцию, а не при
-старте процесса — попробуйте явно вызвать внутри копии то действие,
-которому нужен доступ, и только потом проверять System Settings.
+If, after `tccutil reset` and a relaunch, System Settings still doesn't
+offer anything to turn on (no dialog, no new row in the list), the app
+inside the copy may not have actually asked the system for access yet.
+Many Screen Recording/Accessibility implementations request the
+permission lazily — the first time the corresponding feature is actually
+used, not when the process starts — so try explicitly triggering whatever
+action inside the copy needs that access, and only then check System
+Settings.

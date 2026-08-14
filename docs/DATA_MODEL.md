@@ -1,31 +1,32 @@
-# Модель данных
+# Data model
 
-## Обзор сущностей
+## Entity overview
 
 ```
 ManagedApp  1 ── * Account
                      │
-                     │ (в памяти, по account.id)
+                     │ (in memory, keyed by account.id)
                      ▼
-                 AppInstance   ── ссылается на LaunchStrategy
+                 AppInstance   ── references a LaunchStrategy
 ```
 
-- **`ManagedApp`** — управляемое приложение (например, «Slack»): ссылка на
-  реальный `.app` на диске + список аккаунтов.
-- **`Account`** — один логин этого приложения («Personal», «Work», ...):
-  имя, цвет, картинка, признак «использовать штатный профиль приложения».
-- **`AppInstance`** — факт того, что для конкретного `Account` сейчас
-  запущен процесс: `pid`, куда он смотрит на диске, когда стартовал, с какой
-  стратегией. Существует только в памяти `AppLibrary.instances`.
-- **`Profile`** — модель предыдущей (двухслотовой) версии приложения,
-  оставлена только ради миграции старых данных.
+- **`ManagedApp`** — a managed application (e.g. "Slack"): a reference to
+  the real `.app` on disk, plus a list of accounts.
+- **`Account`** — one login for that app ("Personal", "Work", ...): name,
+  color, picture, and a flag for "use the app's own regular profile."
+- **`AppInstance`** — the fact that a process is currently running for a
+  specific `Account`: its `pid`, where it points on disk, when it started,
+  and which strategy launched it. Exists only in
+  `AppLibrary.instances`, in memory.
+- **`Profile`** — the previous (two-slot) version's model, kept around
+  purely to migrate old data.
 
-Все модели определены в [`Models/`](../DoubleBubble/Models):
-[`ManagedApp.swift`](../DoubleBubble/Models/ManagedApp.swift) (содержит и
-`Account`, и `ManagedApp`),
+All models live under [`Models/`](../DoubleBubble/Models):
+[`ManagedApp.swift`](../DoubleBubble/Models/ManagedApp.swift) (holds both
+`Account` and `ManagedApp`),
 [`AppInstance.swift`](../DoubleBubble/Models/AppInstance.swift),
-[`Profile.swift`](../DoubleBubble/Models/Profile.swift).
-Слой чтения/записи и вся бизнес-логика — в
+[`Profile.swift`](../DoubleBubble/Models/Profile.swift). The read/write
+layer and all the business logic live in
 [`AppLibrary.swift`](../DoubleBubble/Models/AppLibrary.swift).
 
 ## `Account`
@@ -36,35 +37,35 @@ struct Account: Identifiable, Codable, Equatable, Hashable {
     var name: String
     var colorHex: String
     var lastOpenedAt: Date?
-    var iconData: Data?       // опционально: своя картинка вместо инициала
-    var defaultProfile: Bool? // опционально: использовать штатный профиль приложения
+    var iconData: Data?       // optional: a custom picture instead of the initial
+    var defaultProfile: Bool? // optional: use the app's own regular profile
 }
 ```
 
-Ключевые моменты:
+Key points:
 
-- **`isolationKey`** — первые 8 символов `id.uuidString` в нижнем регистре.
-  Это стабильный, файлово-безопасный ключ, по которому именуются директории
-  копий/данных этого аккаунта на диске (`<slug>-<isolationKey>`). До этого
-  директории именовались по слоту («A»/«B»), что приводило к коллизиям между
-  разными приложениями и потере данных при остановке одного из двух
-  слотов — подробнее см. комментарий в коде.
-- **`usesDefaultProfile`** — когда `true`, аккаунт запускает приложение на
-  его *обычном* профиле, без какой-либо изоляции, но всё равно через
-  собственную обёртку — со своим именем и Dock-иконкой. Это специально для
-  Chromium-браузеров: у них не может быть отдельной идентичности бандла
-  (см. [LAUNCH_ENGINE.md](LAUNCH_ENGINE.md)), поэтому общий профиль браузера
-  тоже становится «одним из аккаунтов», а не единственным входом через
-  обычную иконку приложения.
-- **`iconData` / `defaultProfile`** — намеренно `Optional`, даже без
-  содержательного смысла в `nil`-значении: `Codable`-декодер, встретив
-  отсутствующий non-optional ключ в старом сохранённом JSON, провалит decode
-  **всего** списка приложений. Опциональность — это обратная совместимость
-  с библиотеками, сохранёнными до появления этих полей.
-- **`presetColors`** — 6 фиксированных цветов, специально приглушённых
-  относительно стоковой iOS-палитры, чтобы одинаково хорошо читаться на
-  светлом и тёмном фоне и не «сиять» на тёплом кремовом фоне темы
-  Terracotta (см. [UI.md](UI.md)).
+- **`isolationKey`** — the first 8 characters of `id.uuidString`,
+  lowercased. This is a stable, filesystem-safe key used to name this
+  account's copy/data directories on disk (`<slug>-<isolationKey>`).
+  Directories used to be named by slot ("A"/"B"), which collided between
+  different apps and lost data when one of the two slots was stopped —
+  see the comment in the code for the full story.
+- **`usesDefaultProfile`** — when `true`, the account runs the app on its
+  *normal* profile, with no isolation at all, but still through its own
+  wrapper — with its own name and Dock icon. This exists specifically for
+  Chromium browsers: they can't have a separate bundle identity (see
+  [LAUNCH_ENGINE.md](LAUNCH_ENGINE.md)), so the browser's shared profile
+  becomes "one of the accounts" too, instead of the only way in through
+  the app's ordinary icon.
+- **`iconData` / `defaultProfile`** — deliberately `Optional`, even though
+  `nil` carries no real meaning: the `Codable` decoder, hitting a missing
+  non-optional key in an older saved JSON blob, would fail to decode the
+  **entire** app list. The optionality is backward compatibility with
+  libraries saved before these fields existed.
+- **`presetColors`** — 6 fixed colors, deliberately muted relative to the
+  stock iOS palette, so they read equally well on light and dark
+  backgrounds and don't "glow" against the Terracotta theme's warm cream
+  background (see [UI.md](UI.md)).
 
 ## `ManagedApp`
 
@@ -72,26 +73,27 @@ struct Account: Identifiable, Codable, Equatable, Hashable {
 struct ManagedApp: Identifiable, Codable, Equatable {
     var id: UUID
     var name: String
-    var targetAppBookmark: Data?  // security-scoped bookmark на .app
+    var targetAppBookmark: Data?  // security-scoped bookmark for the .app
     var accounts: [Account]
-    var distinctIcons: Bool?      // опционально: разные Dock-иконки
-    var pinned: Bool?             // опционально: закреплён вверху сайдбара
+    var distinctIcons: Bool?      // optional: distinct Dock icons
+    var pinned: Bool?             // optional: pinned to the top of the sidebar
 }
 ```
 
-- `targetAppBookmark` — security-scoped bookmark, а не голый путь: так
-  доступ к `.app` переживает его перемещение в пределах системы и не требует
-  повторного выбора файла пользователем. Резолвится через
-  `resolvedURL` (лениво, каждый раз — syscall) или, предпочтительно,
-  через `AppLibrary.url(for:)`, которая кэширует результат в памяти —
-  прямое чтение из `body` вьюхи иначе означало бы syscall на каждый рендер.
-- `wantsDistinctIcons` — включает апгрейд стратегии запуска, чтобы у копии
-  была своя, брендированная Dock-иконка (актуально для стратегий, которые
-  по умолчанию делят иконку с оригиналом — Electron/configDir). Новые
-  приложения получают его включённым по умолчанию: отличать аккаунты в
-  Dock — это весь смысл приложения, поэтому платить лишним диском и чуть
-  более медленным первым запуском стоит по умолчанию, а не как настройка,
-  спрятанная в Advanced.
+- `targetAppBookmark` — a security-scoped bookmark rather than a plain
+  path: that way access to the `.app` survives it being moved around the
+  system, without asking the user to pick the file again. Resolved via
+  `resolvedURL` (lazily, a syscall every time) or, preferably, through
+  `AppLibrary.url(for:)`, which caches the result in memory — reading it
+  straight from a view's `body` would otherwise mean a syscall on every
+  render.
+- `wantsDistinctIcons` — turns on a launch-strategy upgrade so the copy
+  gets its own branded Dock icon (relevant for strategies that share an
+  icon with the original by default — Electron/configDir). New apps get
+  this on by default: telling accounts apart in the Dock is the whole
+  point of the app, so it's worth paying the extra disk space and a
+  slightly slower first launch by default, rather than as a setting
+  buried in Advanced.
 
 ## `AppInstance`
 
@@ -100,85 +102,84 @@ struct AppInstance: Identifiable {
     let id: UUID
     let accountId: UUID
     let pid: pid_t
-    let bundleCopyURL: URL     // копия .app либо изолированная data-директория
+    let bundleCopyURL: URL     // the copied .app, or the isolated data directory
     let launchedAt: Date
     let strategy: LaunchStrategy
     var launchedVersion: String?
 }
 ```
 
-Не персистится — живёт только в оперативной памяти `AppLibrary.instances`
-на время сессии. После перезапуска Double Bubble восстанавливается заново
-через `LaunchEngine.discoverRunningInstances()` (см.
-[ARCHITECTURE.md](ARCHITECTURE.md#персистентность-и-восстановление-состояния)).
+Not persisted — it lives only in `AppLibrary.instances`, in memory, for
+the lifetime of the session. After Double Bubble restarts it's rebuilt
+through `LaunchEngine.discoverRunningInstances()` (see
+[ARCHITECTURE.md](ARCHITECTURE.md#persistence-and-restoring-state)).
 
-`launchedVersion` фиксирует версию исходного приложения на момент запуска
-именно этой копии — при `bundleCopy`/`copyThenFlag` копия пересобирается из
-оригинала при каждом запуске, поэтому уже бегущий процесс может отстать от
-версии на диске после обновления приложения пользователем. UI использует
-это, чтобы аккуратно показать «эта сессия работает на устаревшей сборке»,
-не поднимая ложную тревогу для инстансов, «усыновлённых» после рестарта
-Double Bubble (там версия неизвестна — `nil`).
+`launchedVersion` records the source app's version at the moment this
+specific copy launched — with `bundleCopy`/`copyThenFlag`, the copy is
+rebuilt from the original on every launch, so an already-running process
+can fall behind the version on disk once the user updates the app. The UI
+uses this to gently flag "this session is running an outdated build,"
+without raising a false alarm for instances "adopted" after Double Bubble
+itself restarts (there, the version is unknown — `nil`).
 
-## `AppLibrary` — что делает
+## What `AppLibrary` does
 
-`AppLibrary` — единственный `ObservableObject` приложения. Основные группы
-методов:
+`AppLibrary` is the app's one `ObservableObject`. Its methods fall into a
+few groups:
 
-- **CRUD над приложениями и аккаунтами**: `addApp(at:)`, `addAccount(to:)`,
+- **CRUD over apps and accounts**: `addApp(at:)`, `addAccount(to:)`,
   `removeAccount(_:from:)`, `removeApp(_:)`, `updateAccount(_:in:)`,
   `togglePinned(_:)`, `clearData(for:in:)`.
-- **Производные, кэшируемые свойства**: `url(for:)`, `icon(for:)`,
-  `strategy(for:)`, `blocker(for:)`, `canOpen(_:)` — кэши существуют потому,
-  что резолвинг bookmark, `NSWorkspace.icon(forFile:)` и `codesign -dv`
-  — это всё синхронные системные вызовы, вызываемые прямо из `body` вьюх,
-  где недопустима задержка на каждый рендер.
-- **Запуск/остановка**: `open(account:in:)` (async, `@MainActor`),
+- **Derived, cached properties**: `url(for:)`, `icon(for:)`,
+  `strategy(for:)`, `blocker(for:)`, `canOpen(_:)` — these are cached
+  because resolving a bookmark, `NSWorkspace.icon(forFile:)`, and
+  `codesign -dv` are all synchronous system calls, called straight from a
+  view's `body`, where a delay on every render isn't acceptable.
+- **Launch/stop**: `open(account:in:)` (async, `@MainActor`),
   `stop(account:)`.
-- **Обнаружение «альтернатив»**: `installedAlternative(for:)` /
-  `alternativeNote(for:)` — если приложение заблокировано (например,
-  песочница + App Group), проверяет, установлена ли на диске рабочая
-  альтернативная сборка того же продукта (см.
-  [KNOWLEDGE_BASE.md](KNOWLEDGE_BASE.md)).
-- **Версии**: `currentVersion(for:)` (версия на диске сейчас) и
-  `outdatedVersion(for:in:)` (версия, на которой всё ещё работает уже
-  запущенный аккаунт).
+- **Finding "alternatives"**: `installedAlternative(for:)` /
+  `alternativeNote(for:)` — when an app is blocked (sandboxed + App Group,
+  say), checks whether a working alternative build of the same product is
+  installed on disk (see [KNOWLEDGE_BASE.md](KNOWLEDGE_BASE.md)).
+- **Versions**: `currentVersion(for:)` (the version on disk right now) and
+  `outdatedVersion(for:in:)` (the version an already-running account is
+  still on).
 
-## Удаление данных: Trash, а не `rm`
+## Deleting data: Trash, not `rm`
 
-И `removeAccount`, и `removeApp`, и `clearData` физически стирают
-изолированную папку аккаунта на диске — но **всегда через
-`FileManager.trashItem`**, никогда не безвозвратным удалением. Причина
-явно объяснена в коде: такая папка может быть конфигом JetBrains-плагинов с
-активированной лицензией или профилем браузера с многомесячной историей
-сессий — случайный клик или клик и передумать «в процессе» не должны быть
-безвозвратными. Удаление из Trash — это отдельный, осознанный шаг
-пользователя.
+`removeAccount`, `removeApp`, and `clearData` all physically erase an
+account's isolated folder on disk — but **always through
+`FileManager.trashItem`**, never an unrecoverable delete. The reasoning is
+spelled out in the code: that folder could be a JetBrains plugin config
+with an activated license, or a browser profile with months of session
+history — a stray click, or clicking through and then changing your mind
+mid-way, shouldn't be irreversible. Emptying the Trash is a separate,
+deliberate step the user takes on their own.
 
-Если процесс перед удалением ещё работал, стирание данных откладывается на
-3 секунды (`deleteDataFolder(atPath:wasRunning:)`) — только что остановленный
-процесс может ещё удерживать открытыми свои же файлы, и немедленное `trash`
-может тихо провалиться (`try?` глотает ошибку), оставив папку никем не
-referenced на диске.
+If the process was still running right before deletion, erasing the data
+is delayed by 3 seconds (`deleteDataFolder(atPath:wasRunning:)`) — a
+process that just stopped can still be holding its own files open, and an
+immediate `trash` can silently fail (`try?` swallows the error), leaving
+the folder orphaned on disk, referenced by nothing.
 
-## Миграция со старой (двухслотовой) версии
+## Migrating from the old (two-slot) version
 
-Раньше у приложения было ровно два слота — `Profile A` и `Profile B` — под
-ключом `com.doublebubble.profiles`. `AppLibrary.migrateFromLegacyProfiles`
-запускается один раз, при первом старте, если под новым ключом
-(`com.doublebubble.library`) ничего не найдено:
+The app used to have exactly two slots — `Profile A` and `Profile B` —
+under the key `com.doublebubble.profiles`.
+`AppLibrary.migrateFromLegacyProfiles` runs once, on first launch, if
+nothing is found under the new key (`com.doublebubble.library`):
 
-- если оба слота указывали на одно и то же приложение — они становятся
-  двумя аккаунтами одного `ManagedApp` (то, чем они по факту и были);
-- если на разные — каждый становится отдельным `ManagedApp` с одним
-  аккаунтом, и ему сразу добавляется второй (`"Second Account"`, цвет
-  `#FF9F0A`) — потому что концептуально каждое управляемое приложение
-  задумано как минимум двухаккаунтным.
+- if both slots pointed at the same app, they become two accounts of one
+  `ManagedApp` (which is what they actually were);
+- if they pointed at different apps, each becomes its own `ManagedApp`
+  with one account, and immediately gets a second one added
+  (`"Second Account"`, color `#FF9F0A`) — because conceptually every
+  managed app is meant to hold at least two accounts.
 
-## Персистентность
+## Persistence
 
-`AppLibrary.apps` целиком кодируется в JSON и пишется в `UserDefaults` при
-любом изменении (`didSet { save() }`). Никакой базы данных или файла на
-диске для метаданных библиотеки не используется — весь объём (список
-приложений × список аккаунтов × иконки ≤256px) укладывается в разумный
-размер для `UserDefaults`.
+`AppLibrary.apps` is encoded to JSON in its entirety and written to
+`UserDefaults` on every change (`didSet { save() }`). There's no database
+or on-disk file for the library's metadata — the whole volume (app list ×
+account list × icons ≤256px) comfortably fits within a reasonable size for
+`UserDefaults`.

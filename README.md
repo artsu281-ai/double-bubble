@@ -1,180 +1,181 @@
 # Double Bubble
 
 **Run two or more Claude Desktop / Claude Code accounts side by side on one
-Mac — no VMs, no logging out.** Каждый аккаунт — свой Dock-значок, свои
-данные, свой Claude Code внутри, работает параллельно с остальными. Сделано
-для разработчиков, кому одного лимита Claude Code не хватает: пока один
-аккаунт упирается в rate limit, второй продолжает работать.
+Mac — no VMs, no logging out.** Each account gets its own Dock icon, its own
+data, its own Claude Code running inside it, working in parallel with the
+rest. Built for developers who run into Claude Code's rate limit: while one
+account is throttled, the other keeps going.
 
-Double Bubble — не аддон и не хак поверх Claude Desktop, а нативное
-macOS-приложение (SwiftUI + AppKit) общего назначения: тот же механизм
-запускает несколько изолированных копий **любого** macOS-приложения —
-Slack, Telegram, Chrome, JetBrains IDE и так далее, каждую в своём
-Dock-значке, со своим именем, цветом и (по возможности) собственной
-иконкой. Claude Desktop/Claude Code — просто самый мотивирующий пример:
-именно на нём эта самая беседа и работает прямо сейчас, внутри одного из
-клонированных аккаунтов.
+Double Bubble isn't an add-on or a hack bolted onto Claude Desktop — it's a
+general-purpose, native macOS app (SwiftUI + AppKit). The same mechanism
+runs multiple isolated copies of **any** macOS app — Slack, Telegram,
+Chrome, JetBrains IDEs, and more — each in its own Dock icon, with its own
+name, color, and (where possible) its own icon. Claude Desktop/Claude Code
+is just the most motivating example: this very conversation is running on
+it right now, inside one of the cloned accounts.
 
-Идея названа в честь того, как выглядит одна клетка, делящаяся на две —
-именно это движение показывает фирменный знак приложения
+The name comes from what a single cell looks like as it splits into two —
+that's the motion the app's mark traces
 ([`BubbleMark`](DoubleBubble/Views/Components/BubbleMark.swift)).
 
-**→ Просто хотите пользоваться приложением?** Начните с
-[docs/USER_GUIDE.md](docs/USER_GUIDE.md) — там установка, первый запуск и
-разбор частых вопросов простым языком, без деталей реализации.
+**→ Just want to use the app?** Start with
+[docs/USER_GUIDE.md](docs/USER_GUIDE.md) — installation, first run, and
+common questions in plain language, no implementation details.
 
-## Возможности
+## Features
 
-- Запуск двух и более аккаунтов одного приложения параллельно, без
-  переключения профиля внутри самого приложения.
-- Автоматическое определение способа изоляции данных под конкретное
-  приложение (Electron, JetBrains, «нативные» бандлы и т. д.) — см.
+- Run two or more accounts of the same app at once, without switching
+  profiles inside the app itself.
+- Automatic detection of how to isolate a given app's data (Electron,
+  JetBrains, "native" bundles, and so on) — see
   [docs/LAUNCH_ENGINE.md](docs/LAUNCH_ENGINE.md).
-- Встроенная база знаний о десятках популярных приложений (браузеры,
-  мессенджеры, IDE, дизайн-инструменты) с готовыми стратегиями изоляции —
-  см. [docs/KNOWLEDGE_BASE.md](docs/KNOWLEDGE_BASE.md).
-- Опциональные различающиеся иконки в Dock (цветной бейдж с инициалом или
-  своей картинкой) для аккаунтов, которые физически невозможно отличить
-  друг от друга иначе.
-- Отслеживание запущенных копий в реальном времени, переподключение к ним
-  после перезапуска Double Bubble, предупреждение при попытке выйти из
-  приложения при живых процессах.
-- Menu Bar Extra для быстрого запуска/остановки аккаунтов без открытия
-  главного окна.
-- Локализация RU/EN, тема оформления (Terracotta/Light/Dark/System),
-  два уровня плотности интерфейса.
+- A built-in knowledge base covering dozens of popular apps (browsers,
+  messengers, IDEs, design tools) with ready-made isolation strategies —
+  see [docs/KNOWLEDGE_BASE.md](docs/KNOWLEDGE_BASE.md).
+- Optional distinct Dock icons (a colored badge with an initial or a
+  picture of your choice) for accounts that are otherwise impossible to
+  tell apart.
+- Real-time tracking of running copies, reattaching to them after Double
+  Bubble itself restarts, and a warning before quitting while accounts are
+  still running.
+- A Menu Bar Extra for opening/stopping accounts without opening the main
+  window.
+- English/Russian localization, an appearance theme (Terracotta/Light/
+  Dark/System), and two levels of interface density.
 
-## Требования
+## Requirements
 
-- macOS 14.0+ (Sonoma) — как для сборки, так и для запуска.
+- macOS 14.0+ (Sonoma) — to build and to run.
 - Xcode 16.0+, Swift 5.10.
-- Опционально: [XcodeGen](https://github.com/yonaskolb/XcodeGen), если нужно
-  перегенерировать `DoubleBubble.xcodeproj` из [`project.yml`](project.yml).
+- Optional: [XcodeGen](https://github.com/yonaskolb/XcodeGen), if you need
+  to regenerate `DoubleBubble.xcodeproj` from [`project.yml`](project.yml).
 
-## Сборка и запуск
+## Building and running
 
-Основной способ — через Xcode:
+The main path is through Xcode:
 
 ```bash
 open "DoubleBubble.xcodeproj"
 ```
 
-Дальше — обычный ⌘R. Проект собирается как приложение (`.app`), подпись —
-`Automatic` с `CODE_SIGN_IDENTITY = "-"` (ad-hoc), команда разработки не
-задана, так что сборка работает без Apple Developer аккаунта.
+Then the usual ⌘R. The project builds as an app (`.app`); signing is
+`Automatic` with `CODE_SIGN_IDENTITY = "-"` (ad hoc) and no development
+team set, so it builds without an Apple Developer account.
 
-Если менялся [`project.yml`](project.yml) (цели, настройки, Info.plist) —
-`.xcodeproj` нужно перегенерировать:
+If [`project.yml`](project.yml) changes (targets, settings, Info.plist),
+regenerate the `.xcodeproj`:
 
 ```bash
 xcodegen generate
 ```
 
-`Package.swift` в корне существует только для того, чтобы Swift-инструментам
-в IDE (автодополнение, `swift build` для проверки компиляции) было на что
-опереться — реальная сборка приложения всегда идёт через `.xcodeproj`,
-не через SwiftPM.
+`Package.swift` at the root exists purely so IDE-side Swift tooling
+(autocomplete, `swift build` as a compile check) has something to resolve
+against — the real app build always goes through `.xcodeproj`, never
+SwiftPM.
 
 ```bash
 swift build
 ```
 
-## Структура проекта
+## Project layout
 
 ```
 DoubleBubble/
-├── DoubleBubbleApp.swift        # Точка входа, Scene, MenuBarExtra, AppDelegate
+├── DoubleBubbleApp.swift        # Entry point, Scene, MenuBarExtra, AppDelegate
 ├── Models/
-│   ├── ManagedApp.swift         # ManagedApp, Account — основная модель данных
-│   ├── AppInstance.swift        # Запись о запущенном процессе
-│   ├── AppLibrary.swift         # ObservableObject: вся бизнес-логика библиотеки
-│   └── Profile.swift            # Легаси-модель (для миграции со старой версии)
+│   ├── ManagedApp.swift         # ManagedApp, Account — the core data model
+│   ├── AppInstance.swift        # Record of a running process
+│   ├── AppLibrary.swift         # ObservableObject: all of the library's business logic
+│   └── Profile.swift            # Legacy model (for migrating from the old version)
 ├── Services/
-│   ├── LaunchEngine.swift       # Ядро: как именно запускается вторая копия
-│   ├── AppKnowledgeBase.swift   # База знаний о приложениях
-│   ├── IconFactory.swift        # Генерация брендированных .icns
-│   ├── ProcessMonitor.swift     # Отслеживание живых процессов
-│   ├── AccountIcon.swift        # Загрузка/нормализация своей картинки аккаунта
-│   ├── NotificationService.swift# Уведомления об ошибке запуска
-│   ├── AppTheme.swift           # Темы оформления и палитра
-│   ├── AppLanguage.swift        # Переключение языка интерфейса
-│   ├── InterfaceDensity.swift   # Comfortable / Compact режимы плотности
-│   ├── LaunchAtLogin.swift      # Обёртка над SMAppService
-│   └── DiskUsage.swift          # Подсчёт размера папки на диске
+│   ├── LaunchEngine.swift       # Core: how a second copy is actually launched
+│   ├── AppKnowledgeBase.swift   # Knowledge base of known apps
+│   ├── IconFactory.swift        # Generates branded .icns files
+│   ├── ProcessMonitor.swift     # Tracks running processes
+│   ├── AccountIcon.swift        # Loads/normalizes a custom account picture
+│   ├── NotificationService.swift# Notifications for launch failures
+│   ├── AppTheme.swift           # Appearance themes and palette
+│   ├── AppLanguage.swift        # Interface-language switching
+│   ├── InterfaceDensity.swift   # Comfortable / Compact density modes
+│   ├── LaunchAtLogin.swift      # Wrapper around SMAppService
+│   └── DiskUsage.swift          # Computes a folder's size on disk
 ├── Views/
-│   ├── LibraryView.swift        # Главный экран: сайдбар + деталка + карточки
-│   ├── AccountEditorView.swift  # Редактор имени/цвета/иконки аккаунта
-│   ├── AboutSettingsView.swift  # Окно настроек (Язык/Интерфейс/Общие/О программе)
-│   └── Components/BubbleMark.swift # Анимированный фирменный знак
-├── Assets.xcassets/             # Иконка приложения, логотип издателя
-├── Localizable.xcstrings        # RU/EN строки
+│   ├── LibraryView.swift        # Main screen: sidebar + detail + cards
+│   ├── AccountEditorView.swift  # Editor for an account's name/color/icon
+│   ├── AboutSettingsView.swift  # Settings window (Language/Interface/General/About)
+│   └── Components/BubbleMark.swift # The animated mark
+├── Assets.xcassets/             # App icon, publisher logo
+├── Localizable.xcstrings        # EN/RU strings
 ├── Info.plist / DoubleBubble.entitlements
 Scripts/
-├── make_app_icon.py             # Генерация AppIcon.icns из исходника
-_Archive/                        # Черновики более ранних версий UI (не используются в сборке)
+├── make_app_icon.py             # Generates AppIcon.icns from source art
+_Archive/                        # Earlier UI drafts (not part of the build)
 ```
 
-## Документация
+## Documentation
 
-- [docs/USER_GUIDE.md](docs/USER_GUIDE.md) — руководство пользователя:
-  установка, первый запуск, частые вопросы. Начните отсюда, если просто
-  хотите пользоваться приложением.
+- [docs/USER_GUIDE.md](docs/USER_GUIDE.md) — the user guide: installation,
+  first run, common questions. Start here if you just want to use the app.
 
-Подробное описание архитектуры и подсистем — в каталоге [`docs/`](docs/):
+A detailed look at the architecture and subsystems lives in
+[`docs/`](docs/):
 
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — как всё связано между собой,
-  жизненный цикл приложения, поток данных.
-- [docs/DATA_MODEL.md](docs/DATA_MODEL.md) — модели данных, персистентность,
-  миграция со старой версии.
-- [docs/LAUNCH_ENGINE.md](docs/LAUNCH_ENGINE.md) — как запускается вторая
-  копия приложения: стратегии изоляции, песочница, подпись, файловая
-  структура `~/.double_bubble`.
-- [docs/KNOWLEDGE_BASE.md](docs/KNOWLEDGE_BASE.md) — база знаний о конкретных
-  приложениях и как добавить в неё новое.
-- [docs/UI.md](docs/UI.md) — экраны, темы оформления, локализация,
-  плотность интерфейса.
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — how everything fits
+  together, the app's lifecycle, the data flow.
+- [docs/DATA_MODEL.md](docs/DATA_MODEL.md) — data models, persistence,
+  migration from the old version.
+- [docs/LAUNCH_ENGINE.md](docs/LAUNCH_ENGINE.md) — how a second copy of an
+  app is launched: isolation strategies, sandboxing, code signing, the
+  `~/.double_bubble` file layout.
+- [docs/KNOWLEDGE_BASE.md](docs/KNOWLEDGE_BASE.md) — the knowledge base of
+  specific apps, and how to add a new one.
+- [docs/UI.md](docs/UI.md) — screens, appearance themes, localization,
+  interface density.
 - [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) — Screen
-  Recording/Accessibility для изолированных копий: почему разрешения
-  привязаны к конкретной копии, как их выдавать и как чинить «залипшие»
-  записи в System Settings.
+  Recording/Accessibility for isolated copies: why the permission is tied
+  to one specific copy, how to grant it, and how to fix a "stuck" entry in
+  System Settings.
 
-## Где живут данные аккаунтов
+## Where account data lives
 
-Double Bubble ничего не пишет внутрь `~/Library` целевого приложения.
-Все изолированные копии и данные аккаунтов лежат в:
+Double Bubble never writes inside the target app's own `~/Library`. Every
+isolated copy and every account's data lives under:
 
 ```
 ~/.double_bubble/
-├── bundles/   # копии .app-бандлов (bundleCopy) и .app-обёртки (electronFlag)
-└── data/      # изолированные data/config-директории (electronFlag, jetbrains, configDir, copyThenFlag)
+├── bundles/   # copied .app bundles (bundleCopy) and .app wrappers (electronFlag)
+└── data/      # isolated data/config directories (electronFlag, jetbrains, configDir, copyThenFlag)
 ```
 
-Настройки самого Double Bubble (список приложений и аккаунтов, тема, язык,
-плотность) хранятся в `UserDefaults` под ключом `com.doublebubble.library`
-(подробнее — [docs/DATA_MODEL.md](docs/DATA_MODEL.md)).
+Double Bubble's own settings (the list of apps and accounts, theme,
+language, density) live in `UserDefaults` under the key
+`com.doublebubble.library` (details in
+[docs/DATA_MODEL.md](docs/DATA_MODEL.md)).
 
-## Поддержать проект
+## Support the project
 
-Если Double Bubble оказался полезен и хочется поддержать разработку —
-принимаются донаты в крипте:
+If Double Bubble has been useful and you'd like to support development,
+crypto donations are welcome:
 
-| Сеть | Адрес |
+| Network | Address |
 |---|---|
 | USDT (TRC20) | `TJhS247LSsQqCW7174WR5rbbSFxRDbTpih` |
 | TON | `UQBvWb4ezuNazeLxVq8jd51FWokmmCRlkWyfg0WeQVe2_9UK` |
 | Solana | `GCXiFb73Zw6QzkxvtqPjkUhditMYLRRS6SdrPug8GcZf` |
 | Ethereum | `0x799FA0D3ec0aA876D5ADeBB4c7FFDC64431c42f7` |
 
-Перед переводом сверьте адрес и сеть в своём кошельке — перевод не в ту
-сеть невозвратен.
+Double-check the address and network in your own wallet before sending —
+a transfer on the wrong network can't be reversed.
 
-## Известные ограничения
+## Known limitations
 
-- Приложения с library validation в подписи (все Chromium-браузеры) нельзя
-  запустить из пересобранной копии — macOS отказывается её открывать.
-  Для них используется прямой флаг `--user-data-dir` на оригинальном
-  бинарнике, поэтому у второй копии не может быть отдельной Dock-иконки.
-- Приложения в песочнице с общими App Groups (например, нативный Telegram
-  для macOS) в принципе не могут быть скопированы и переподписаны — копия
-  потеряет доступ к своим же данным. Для таких Double Bubble заранее
-  показывает предупреждение и, если есть, предлагает альтернативную сборку.
+- Apps signed with library validation (every Chromium-based browser)
+  can't be launched from a rebuilt copy — macOS refuses to open it. They
+  use a direct `--user-data-dir` flag on the original binary instead, so
+  the second copy can't have its own Dock icon.
+- Sandboxed apps that keep their data in a shared App Group (for example,
+  the native Telegram client for macOS) can't be copied and re-signed at
+  all — the copy would lose access to its own data. For these, Double
+  Bubble warns up front and, where one exists, suggests a working
+  alternative build.

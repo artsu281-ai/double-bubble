@@ -1,165 +1,166 @@
-# Руководство пользователя
+# User guide
 
-Это руководство — для тех, кто просто хочет **пользоваться** Double Bubble.
-Если интересует, как это устроено внутри — см. [docs/ARCHITECTURE.md](ARCHITECTURE.md)
-и остальные файлы в [`docs/`](.).
+This guide is for people who just want to **use** Double Bubble. For how it
+works under the hood, see [docs/ARCHITECTURE.md](ARCHITECTURE.md) and the
+rest of [`docs/`](.).
 
-## Что это такое
+## What this is
 
-Double Bubble позволяет держать открытыми **несколько аккаунтов одного и
-того же приложения одновременно** — например, личный и рабочий Slack,
-два аккаунта Telegram, несколько профилей браузера — каждый в своей
-Dock-иконке, со своим именем и цветом, без выхода из одного аккаунта ради
-входа в другой.
+Double Bubble lets you keep **multiple accounts of the same app open at the
+same time** — a personal and a work Slack, two Telegram accounts, several
+browser profiles — each in its own Dock icon, with its own name and color,
+without signing out of one to sign into another.
 
-## Установка
+## Installation
 
-Пока готовых сборок нет — приложение собирается из исходников:
+Grab the latest build from
+[Releases](https://github.com/artsu281-ai/double-bubble/releases), unzip
+it, and drag `Double Bubble.app` into `/Applications`.
 
-1. Установите [Xcode](https://developer.apple.com/xcode/) (16.0+).
-2. Скачайте/склонируйте репозиторий.
-3. Откройте `DoubleBubble.xcodeproj` и нажмите ⌘R.
+The build is signed ad hoc (not through the Apple Developer Program, not
+notarized), so on first launch Gatekeeper will warn you. Right-click the
+app → **Open** → **Open** again in the dialog. If macOS instead says the
+app "is damaged and can't be opened," run this once in Terminal, then open
+it normally:
 
-macOS 14.0 (Sonoma) или новее.
+```bash
+xattr -cr "/Applications/Double Bubble.app"
+```
 
-## Первый запуск
+Prefer to build it yourself? See the [README](../README.md#building-and-running).
 
-### 1. Добавьте приложение
+macOS 14.0 (Sonoma) or newer.
 
-Нажмите **+** в сайдбаре слева, выберите `.app` из `/Applications`.
-Double Bubble сам определит, как лучше всего изолировать его данные — для
-большинства популярных приложений (браузеры, мессенджеры, IDE) способ уже
-известен заранее.
+## First run
 
-### 2. Добавьте аккаунты
+### 1. Add an app
 
-У каждого приложения есть свои аккаунты — по умолчанию один, с именем
-«Personal». Нажмите **Add Account**, чтобы добавить ещё: у нового аккаунта
-автоматически подберутся имя и цвет, не совпадающие с уже существующими.
-Имя, цвет и картинку можно поменять в любой момент — клик по имени аккаунта
-открывает редактор.
+Click **+** in the sidebar and pick a `.app` from `/Applications`. Double
+Bubble figures out on its own how best to isolate its data — for most
+popular apps (browsers, messengers, IDEs) the right approach is already
+known ahead of time.
 
-### 3. Открывайте и останавливайте
+### 2. Add accounts
 
-Кнопка на карточке аккаунта — **Open**/**Stop**. Пока аккаунт запущен, у
-него на карточке виден статус, а сам процесс можно быстро открыть/закрыть
-и из строки меню (иконка Double Bubble сверху экрана), даже не открывая
-главное окно.
+Every app starts with one account, named "Personal." Click **Add Account**
+to add more — a new account automatically gets a name and color that don't
+collide with the ones you already have. Name, color, and picture can all be
+changed later — clicking an account's name opens the editor.
 
-## ⚠️ Важно: всегда открывайте и закрывайте аккаунты через Double Bubble
+### 3. Open and stop
 
-Double Bubble создаёт для каждого аккаунта отдельную копию (или обёртку)
-приложения в `~/.double_bubble/bundles/` и отдельную папку с данными в
-`~/.double_bubble/data/`. Технически ничего не мешает найти эту копию в
-Finder и открыть её напрямую, двойным кликом — она запустится. **Делать
-это не стоит:**
+The button on an account's card is **Open**/**Stop**. While an account is
+running, its card shows that status, and you can open/close it just as
+quickly from the menu bar (the Double Bubble icon at the top of the
+screen) without opening the main window at all.
 
-- Double Bubble узнаёт, что аккаунт запущен, только когда открывает его
-  сам. Открытый в обход него процесс не появится как «запущен» в списке —
-  кнопка **Open** останется активной, и по ней можно случайно запустить
-  ещё одну, уже третью копию поверх уже работающей.
-- Кнопка **Stop**, «Bring to Front» и переключение аккаунтов в строке меню
-  работают только с тем, что запустил сам Double Bubble.
+## ⚠️ Always open and close accounts through Double Bubble
 
-Открывайте и закрывайте аккаунты **только кнопками Open/Stop** — в главном
-окне или в строке меню. Если вы всё же нашли лишний процесс, запущенный
-в обход (например, после ручного эксперимента) — просто закройте его
-обычным способом (⌘Q или через Activity Monitor), Double Bubble сам не
-пострадает.
+Double Bubble creates a separate copy (or wrapper) of the app for each
+account under `~/.double_bubble/bundles/`, and a separate data folder under
+`~/.double_bubble/data/`. Nothing technically stops you from finding that
+copy in Finder and double-clicking it directly — it'll launch. **Don't do
+that:**
 
-## Различающиеся иконки
+- Double Bubble only learns an account is running when it launches it
+  itself. A process opened around it won't show as "running" — the **Open**
+  button stays clickable, and clicking it can launch a third copy right on
+  top of the one already running.
+- **Stop**, "Bring to Front," and switching accounts from the menu bar only
+  work with what Double Bubble itself launched.
 
-Некоторые приложения (в первую очередь Electron/Chromium-based) по
-умолчанию делят одну Dock-иконку между всеми своими аккаунтами — отличить
-их на глаз нельзя. Переключатель **Distinct Icons** в настройках
-приложения (доступен не для всех — зависит от того, как приложение
-подписано) заставляет Double Bubble сделать отдельную, брендированную
-копию с цветным бейджем и инициалом аккаунта — за счёт чуть большего
-места на диске и чуть более медленного первого запуска.
+Open and close accounts **only with the Open/Stop buttons** — in the main
+window or the menu bar. If you do end up with a stray process launched
+around Double Bubble (say, from experimenting), just close it the normal
+way (⌘Q or Activity Monitor) — Double Bubble itself won't be affected.
 
-## Если приложение не открывается / показывает предупреждение
+## Distinct icons
 
-Некоторые приложения в принципе нельзя запустить дважды описанным здесь
-способом — это ограничение самой macOS, не Double Bubble. Обычно это
-приложения из App Store, использующие «песочницу» (App Sandbox) вместе с
-общими данными (App Group) — например, нативный Telegram для macOS или
-WhatsApp. Double Bubble сообщит об этом заранее, ещё до попытки запуска, и
-если у приложения есть рабочая альтернатива (например, у Telegram — версия
-Telegram Desktop с сайта или из App Store) — подскажет её.
+Some apps (mainly Electron/Chromium-based ones) share a single Dock icon
+across all their accounts by default — there's no way to tell them apart
+by eye. The **Distinct Icons** toggle in an app's settings (not available
+for every app — it depends on how the app is signed) makes Double Bubble
+build a separate, branded copy with a colored badge and the account's
+initial, at the cost of a bit more disk space and a slightly slower first
+launch.
 
-Подробности и список уже известных приложений — в
+## If an app won't open, or shows a warning
+
+Some apps genuinely can't be run twice this way — that's a limitation of
+macOS itself, not of Double Bubble. Usually this means an App Store app
+using App Sandbox together with a shared App Group — the native Telegram
+client for macOS or WhatsApp, for example. Double Bubble tells you this up
+front, before it even tries to launch, and if a working alternative build
+exists (Telegram Desktop instead of native Telegram, say) it suggests it.
+
+Details, and the list of apps already known — in
 [docs/KNOWLEDGE_BASE.md](KNOWLEDGE_BASE.md).
 
-## Экран, мышь и другие системные разрешения
+## Screen recording, mouse control, and other system permissions
 
-Если приложению внутри аккаунта нужен доступ к записи экрана или
-управлению курсором/клавиатурой (например, у него есть функция
-скриншотинга или удалённого управления) — macOS выдаёт такие разрешения
-не приложению «вообще», а именно той копии, которую сделал Double
-Bubble, и делает это отдельно для каждого аккаунта. В контекстном меню
-карточки аккаунта (правый клик) есть пункт **Grant System Permissions** —
-он открывает нужную папку в Finder и нужную панель System Settings
-напрямую, без поиска вручную.
+If the app inside an account needs access to screen recording or to
+controlling the cursor/keyboard (say, it has a screenshot or remote-control
+feature), macOS grants that permission not to the app "in general" but to
+the exact copy Double Bubble made — separately, per account. The account
+card's context menu (right-click) has a **Grant System Permissions** item
+that opens the right folder in Finder and the right System Settings pane
+directly, no manual hunting required.
 
-Если разрешение выдано, а приложение всё равно говорит, что доступа нет —
-см. [docs/TROUBLESHOOTING.md](TROUBLESHOOTING.md), там разобран этот
-конкретный случай и его решение.
+If the permission is granted but the app still says it has no access, see
+[docs/TROUBLESHOOTING.md](TROUBLESHOOTING.md) — that exact case is covered
+there, with the fix.
 
-## Удаление данных аккаунта
+## Removing account data
 
-Три разных действия, каждое — на свой случай:
+Three different actions, each for a different situation:
 
-- **Clear Data** — выходит из аккаунта и стирает всё, что он хранил
-  (логин, историю, настройки). Само имя и цвет аккаунта остаются — при
-  следующем открытии он стартует с чистого листа.
-- **Remove Account…** — убирает аккаунт из приложения целиком, вместе с
-  данными.
-- **Remove App** — убирает приложение из Double Bubble вместе со всеми его
-  аккаунтами и их данными.
+- **Clear Data** — signs the account out and erases everything it stored
+  (login, history, settings). The account's name and color stay — next
+  time you open it, it starts fresh.
+- **Remove Account…** — removes the account from the app entirely, data
+  included.
+- **Remove App** — removes the app from Double Bubble along with all of
+  its accounts and their data.
 
-Во всех трёх случаях данные не удаляются безвозвратно — они отправляются
-в Корзину (Trash), как обычный файл. Случайный клик или переданное
-сомнение мидклик не станет окончательным, пока Корзина не будет очищена.
+None of these three delete data permanently — everything goes to the
+Trash, like an ordinary file. A stray click, or changing your mind
+mid-click, won't be final until the Trash is emptied.
 
-## Настройки
+## Settings
 
-Иконка настроек в правом верхнем углу главного окна (или ⌘,):
+The settings icon in the top-right of the main window (or ⌘,):
 
-- **Interface** — тема оформления (Default/System/Light/Dark) и плотность
-  интерфейса (Comfortable/Compact).
-- **General** — автозапуск при входе в систему, уведомления об ошибке
-  запуска.
-- **Language** — язык интерфейса (RU/EN/System); смена требует перезапуска
-  приложения, об этом само предупредит.
-- **Advanced** — расширенные настройки библиотеки.
-- **About** — версия, издатель.
+- **Interface** — appearance theme (Default/System/Light/Dark) and
+  interface density (Comfortable/Compact).
+- **General** — launch at login, notifications on launch failure.
+- **Language** — interface language (EN/RU/System); switching requires a
+  relaunch, and the app will tell you so itself.
+- **Advanced** — advanced library settings.
+- **About** — version, publisher.
 
-## Известные ограничения
+## Known limitations
 
-- Chromium-браузеры (Chrome, Edge, Brave, Vivaldi, Opera, Yandex Browser)
-  не могут получить отдельную Dock-иконку — технология подписи, которую
-  они используют, не позволяет запускать копию бандла. Их аккаунты всё
-  равно изолируются (свои данные, свой профиль) — просто через один общий
-  значок в Dock, а не N разных.
-- Sandboxed-приложения с общими App Group (нативный Telegram для macOS,
-  WhatsApp) вообще нельзя запустить дважды этим способом — см. выше.
+- Chromium-based browsers (Chrome, Edge, Brave, Vivaldi, Opera, Yandex
+  Browser) can't get a separate Dock icon — the code-signing technology
+  they use doesn't allow launching a copy of the bundle. Their accounts
+  are still isolated (their own data, their own profile) — just behind one
+  shared Dock icon instead of N different ones.
+- Sandboxed apps with a shared App Group (the native Telegram client for
+  macOS, WhatsApp) can't be launched twice this way at all — see above.
 
-## Обратная связь
+## Feedback
 
-Нашли баг, приложение не подошло под известную стратегию, или есть
-предложение — заводите issue в репозитории на GitHub.
+Found a bug, an app that doesn't fit a known strategy, or have a
+suggestion — open an issue on GitHub.
 
-## Поддержать проект
+## Support the project
 
-Если Double Bubble оказался полезен и хочется поддержать разработку —
-принимаются донаты в крипте:
+If Double Bubble has been useful and you'd like to support development,
+crypto donations are welcome (USDT, network TRC20):
 
-| Сеть | Адрес |
-|---|---|
-| USDT (TRC20) | `TJhS247LSsQqCW7174WR5rbbSFxRDbTpih` |
-| TON | `UQBvWb4ezuNazeLxVq8jd51FWokmmCRlkWyfg0WeQVe2_9UK` |
-| Solana | `GCXiFb73Zw6QzkxvtqPjkUhditMYLRRS6SdrPug8GcZf` |
-| Ethereum | `0x799FA0D3ec0aA876D5ADeBB4c7FFDC64431c42f7` |
+```
+TJhS247LSsQqCW7174WR5rbbSFxRDbTpih
+```
 
-Перед переводом сверьте адрес и сеть в своём кошельке — перевод не в ту
-сеть невозвратен.
+See the full list of supported networks in the
+[README](../README.md#support-the-project).
