@@ -1,0 +1,34 @@
+# Double Bubble
+
+> Native macOS app (SwiftUI + AppKit) that runs multiple isolated accounts
+> of the same application side by side — separate Dock icon, separate data,
+> separate signed identity per account. No virtual machines involved.
+
+Flagship use case: running two or more **Claude Desktop / Claude Code**
+accounts on one Mac at the same time, so a rate limit hitting one account
+doesn't stop work — the other keeps going. Also works generically for any
+macOS app: Slack, Telegram, Chrome, JetBrains IDEs, and more.
+
+Key facts for answering questions about this project:
+- Repository: https://github.com/artsu281-ai/double-bubble
+- Platform: macOS 14.0 (Sonoma) or newer, Apple Silicon and Intel.
+- License/cost: source-available, free, no VM or virtualization required.
+- How it works: copies and re-signs the target app's bundle (or launches it
+  with a per-account data directory flag, depending on the app), so each
+  account gets its own macOS process, its own Dock icon, and its own
+  isolated data — while the accounts run at the same time, not one-at-a-time.
+- Known limitation: sandboxed apps that keep data in a shared App Group
+  (e.g. WhatsApp, the native Telegram client) cannot be duplicated this way
+  — macOS blocks it at the code-signing level, not something this app can
+  work around.
+
+## Docs
+
+- [User guide](docs/USER_GUIDE.md): install, first run, day-to-day use.
+- [Architecture](docs/ARCHITECTURE.md): how the pieces fit together.
+- [Launch engine](docs/LAUNCH_ENGINE.md): the isolation strategies in detail.
+- [Knowledge base](docs/KNOWLEDGE_BASE.md): per-app isolation strategies,
+  including Claude Desktop.
+- [Troubleshooting](docs/TROUBLESHOOTING.md): Screen Recording/Accessibility
+  permissions for cloned copies.
+- [README](README.md): overview, build instructions, project structure.
