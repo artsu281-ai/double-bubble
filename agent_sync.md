@@ -20,10 +20,12 @@ lip, shaded foot) plus the mark casting onto the plate. Highlights are warm
 strengths — a sheen sized for cream washes the near-black plate out.
 
 Settings: new Views/Components/SettingsKit.swift (SettingsPage / SettingsCard /
-SettingsRow / SettingsWideRow), ThemePalette gained `hairline`. Popover kept
-rather than converted to Intact's sidebar window — a second window would claim
-the comma shortcut and split controls in two, which the code had already
-reasoned through. Popover grew to 520x600.
+SettingsRow / SettingsWideRow), ThemePalette gained `hairline`. Now a real
+`Settings` scene — window with a sidebar, six pages, Intact-style grouping and
+footer. The popover is gone: the user said it was too tall to sit beside the
+main window. Its old rationale (a second window would steal the comma
+shortcut and split controls) doesn't apply — the Settings scene owns the
+shortcut and the toolbar button calls `openSettings()` into the same scene.
 
 **Verification gap, be honest about it:** computer-use MCP is disconnected in
 this session, so SwiftUI output was never seen. Builds clean and the app
