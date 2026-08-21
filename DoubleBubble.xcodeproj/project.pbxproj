@@ -9,12 +9,12 @@
 /* Begin PBXBuildFile section */
 		21659535C85B29C923F36757 /* BubbleMark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285FC1CD4519962DC37CA97 /* BubbleMark.swift */; };
 		23C027AFF76008B4CB93956A /* AboutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4A57756B638FCCB51EA8B4 /* AboutSettingsView.swift */; };
+		25AF001A002374A3E9196B2C /* AppIcon-light-flat.icns in Resources */ = {isa = PBXBuildFile; fileRef = 667FBFF9B004034B8D6A61A6 /* AppIcon-light-flat.icns */; };
 		281F2636683A5AFE93AEB0FB /* DockIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F49F899158334B7B28A597 /* DockIcon.swift */; };
 		2F70244E5649C45A6BC507FC /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F864AE3E398BF1EE75B4C8AD /* NotificationService.swift */; };
 		2FF01334012B0072C075A87C /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 802F10C0860C8F855F6AB822 /* UpdateChecker.swift */; };
 		317A235DB0362B2D7F568272 /* ManagedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEFB751656938F8CED5DB241 /* ManagedApp.swift */; };
 		42F3161B6C5042F0AD603B0E /* AccountIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62048241210426CB09FE058E /* AccountIcon.swift */; };
-		5F6D577F28F1668455DCA28D /* AppIcon-dark.icns in Resources */ = {isa = PBXBuildFile; fileRef = 031D0718BF815ED80FF1F48C /* AppIcon-dark.icns */; };
 		66D6C78D13D10946351F4655 /* AppInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435C22C64AB594B21D0A2A93 /* AppInstance.swift */; };
 		6FD561026427BBACED195D26 /* AppLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C276686BE1DBB00973054F9C /* AppLibrary.swift */; };
 		738219D2E2116767398363FE /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67DE699110C48CF400F70840 /* AppTheme.swift */; };
@@ -26,22 +26,25 @@
 		A55DA93D17FD848EC3CB92B2 /* LaunchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E42A65B0B1B35CBCD3ED7DD /* LaunchEngine.swift */; };
 		A5DCE8272C0A80EEB9612AB4 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226081B1751F1BE7B0B6A0F6 /* LibraryView.swift */; };
 		A894F640D335CAA73A8C1C13 /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = E07DDF06750E61FC3E24D580 /* Profile.swift */; };
+		BB0A27FF579C0F7DC1D4EE62 /* AppIcon-dark-glass.icns in Resources */ = {isa = PBXBuildFile; fileRef = 1B6D4E744BB5456539CFFA27 /* AppIcon-dark-glass.icns */; };
 		BCB986322D3B3EF415FCFBFB /* AppLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9731963773FAEB883ED95FD3 /* AppLanguage.swift */; };
+		BE4386CE5B11E4BEA5ED0998 /* AppIcon-dark-flat.icns in Resources */ = {isa = PBXBuildFile; fileRef = 79EF28519CEA5BD2A5782060 /* AppIcon-dark-flat.icns */; };
 		C21B74E57483C1D48AFFD495 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 52B4928A9D65D07D55BF519F /* Localizable.xcstrings */; };
 		C9E871AB68ABE8F12EF51D05 /* DiskUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19F4584FAF26AFA4989FD658 /* DiskUsage.swift */; };
 		CF1F21D15E47FFC5475AB8DE /* SystemSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80ED456F7B0D1A0D3DE1622 /* SystemSettings.swift */; };
 		E4967471ACBE044BFC95128D /* IconFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D070B713D58C6220FBA3EF39 /* IconFactory.swift */; };
 		E77B0697B5AB30A47DB13222 /* DoubleBubbleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C279861E33425F382DDF615 /* DoubleBubbleApp.swift */; };
 		E95A9791D3C54B12D59C04A2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B25327752194A2A8D93A7AA2 /* Assets.xcassets */; };
+		EA3664E94F19620BF5CD1674 /* AppIcon-light-glass.icns in Resources */ = {isa = PBXBuildFile; fileRef = F6C5F8F629B253FBB7659180 /* AppIcon-light-glass.icns */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		031D0718BF815ED80FF1F48C /* AppIcon-dark.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "AppIcon-dark.icns"; sourceTree = "<group>"; };
 		05B72FEEF52A9737A5285378 /* AccountEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditorView.swift; sourceTree = "<group>"; };
 		05F49F899158334B7B28A597 /* DockIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIcon.swift; sourceTree = "<group>"; };
 		0F262A1E8ED7F1EB1ECEEEA7 /* AppKnowledgeBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppKnowledgeBase.swift; sourceTree = "<group>"; };
 		19A34A759C778A4B977E4F11 /* ProcessMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessMonitor.swift; sourceTree = "<group>"; };
 		19F4584FAF26AFA4989FD658 /* DiskUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskUsage.swift; sourceTree = "<group>"; };
+		1B6D4E744BB5456539CFFA27 /* AppIcon-dark-glass.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "AppIcon-dark-glass.icns"; sourceTree = "<group>"; };
 		226081B1751F1BE7B0B6A0F6 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		2285FC1CD4519962DC37CA97 /* BubbleMark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BubbleMark.swift; sourceTree = "<group>"; };
 		2C279861E33425F382DDF615 /* DoubleBubbleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoubleBubbleApp.swift; sourceTree = "<group>"; };
@@ -50,8 +53,10 @@
 		5E42A65B0B1B35CBCD3ED7DD /* LaunchEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchEngine.swift; sourceTree = "<group>"; };
 		62048241210426CB09FE058E /* AccountIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountIcon.swift; sourceTree = "<group>"; };
 		66096C39D03543C29F7CDC9F /* DoubleBubble.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoubleBubble.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		667FBFF9B004034B8D6A61A6 /* AppIcon-light-flat.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "AppIcon-light-flat.icns"; sourceTree = "<group>"; };
 		67DE699110C48CF400F70840 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		69D23A9E62E97BEFEA81DC00 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		79EF28519CEA5BD2A5782060 /* AppIcon-dark-flat.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "AppIcon-dark-flat.icns"; sourceTree = "<group>"; };
 		802F10C0860C8F855F6AB822 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		9731963773FAEB883ED95FD3 /* AppLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguage.swift; sourceTree = "<group>"; };
 		AEFB751656938F8CED5DB241 /* ManagedApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedApp.swift; sourceTree = "<group>"; };
@@ -64,6 +69,7 @@
 		E07DDF06750E61FC3E24D580 /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
 		E77D12C233ACE9F160D1FD4D /* InterfaceDensity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterfaceDensity.swift; sourceTree = "<group>"; };
 		E82870DCE97B6A662D06A642 /* DoubleBubble.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DoubleBubble.entitlements; sourceTree = "<group>"; };
+		F6C5F8F629B253FBB7659180 /* AppIcon-light-glass.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "AppIcon-light-glass.icns"; sourceTree = "<group>"; };
 		F864AE3E398BF1EE75B4C8AD /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -108,7 +114,10 @@
 		443BE6FE6F278CB299F56167 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				031D0718BF815ED80FF1F48C /* AppIcon-dark.icns */,
+				79EF28519CEA5BD2A5782060 /* AppIcon-dark-flat.icns */,
+				1B6D4E744BB5456539CFFA27 /* AppIcon-dark-glass.icns */,
+				667FBFF9B004034B8D6A61A6 /* AppIcon-light-flat.icns */,
+				F6C5F8F629B253FBB7659180 /* AppIcon-light-glass.icns */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -220,7 +229,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5F6D577F28F1668455DCA28D /* AppIcon-dark.icns in Resources */,
+				BE4386CE5B11E4BEA5ED0998 /* AppIcon-dark-flat.icns in Resources */,
+				BB0A27FF579C0F7DC1D4EE62 /* AppIcon-dark-glass.icns in Resources */,
+				25AF001A002374A3E9196B2C /* AppIcon-light-flat.icns in Resources */,
+				EA3664E94F19620BF5CD1674 /* AppIcon-light-glass.icns in Resources */,
 				E95A9791D3C54B12D59C04A2 /* Assets.xcassets in Resources */,
 				C21B74E57483C1D48AFFD495 /* Localizable.xcstrings in Resources */,
 			);
