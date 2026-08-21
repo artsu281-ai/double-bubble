@@ -37,9 +37,11 @@ stripping re-checked (`keychain-access-groups` present before resign, gone
 after). Injection case checked separately: name is resolved literally.
 
 **STATUS:**
-- origin = github.com/artsu281-ai/double-bubble (public), v1.0.0 released.
-- **The released v1.0.0 binary still has this bug** — the fix is committed
-  but not cut into a release. Anyone downloading v1.0.0 hits it.
+- Shipped: pushed to main and released as **v1.0.1** (universal, ad-hoc
+  signed, Latest) — github.com/artsu281-ai/double-bubble/releases/tag/v1.0.1.
+  Version lives in `project.yml` (`info.properties` + `settings.base`), which
+  *generates* `DoubleBubble/Info.plist` — editing the plist directly is
+  pointless, `xcodegen generate` overwrites it.
 - First Open of each existing account rebuilds its copy (fingerprint
   changed), which resets its ad-hoc signature — Screen Recording /
   Accessibility grants for those copies need granting once more. Unavoidable:
@@ -54,6 +56,7 @@ after). Injection case checked separately: name is resolved literally.
   scope per the user.
 
 **NEXT (queue):**
-User has not been asked yet whether to cut v1.0.1 — do not publish a release
-without asking. If picked up: the `.electronFlag` wrapper-deletion bug above
-is the natural follow-up.
+No active task. The user has not yet confirmed the fix by clicking a pinned
+Dock tile on their own machine — verification so far is a scratch copy of
+Claude.app, not their live accounts. If picked up: the `.electronFlag`
+wrapper-deletion bug above is the natural follow-up.
