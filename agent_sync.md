@@ -27,6 +27,16 @@ main window. Its old rationale (a second window would steal the comma
 shortcut and split controls) doesn't apply — the Settings scene owns the
 shortcut and the toolbar button calls `openSettings()` into the same scene.
 
+Typography.swift now holds the app's only type scale: ten named roles, each
+built from a macOS text style rather than a point size, so it still answers to
+the system text-size setting. Before it there were 17 literal sizes beside 8
+semantic styles and the same role appeared at three different sizes. Three
+literals survive deliberately (two SF Symbol glyph sizes, one initial sized to
+its swatch); density's nameFont keeps its own two sizes because changing size
+is what that setting is for. Careful: applying the scale by search-and-replace
+put several explanations on the row-title step — anything mapped in bulk here
+has to be re-read against its surroundings.
+
 **Verification gap, be honest about it:** computer-use MCP is disconnected in
 this session, so SwiftUI output was never seen. Builds clean and the app
 launches and stays up with no crash reports, but no screen was inspected. The
