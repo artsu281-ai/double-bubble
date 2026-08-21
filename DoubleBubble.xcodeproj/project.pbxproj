@@ -9,10 +9,12 @@
 /* Begin PBXBuildFile section */
 		21659535C85B29C923F36757 /* BubbleMark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285FC1CD4519962DC37CA97 /* BubbleMark.swift */; };
 		23C027AFF76008B4CB93956A /* AboutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4A57756B638FCCB51EA8B4 /* AboutSettingsView.swift */; };
+		281F2636683A5AFE93AEB0FB /* DockIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F49F899158334B7B28A597 /* DockIcon.swift */; };
 		2F70244E5649C45A6BC507FC /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F864AE3E398BF1EE75B4C8AD /* NotificationService.swift */; };
 		2FF01334012B0072C075A87C /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 802F10C0860C8F855F6AB822 /* UpdateChecker.swift */; };
 		317A235DB0362B2D7F568272 /* ManagedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEFB751656938F8CED5DB241 /* ManagedApp.swift */; };
 		42F3161B6C5042F0AD603B0E /* AccountIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62048241210426CB09FE058E /* AccountIcon.swift */; };
+		5F6D577F28F1668455DCA28D /* AppIcon-dark.icns in Resources */ = {isa = PBXBuildFile; fileRef = 031D0718BF815ED80FF1F48C /* AppIcon-dark.icns */; };
 		66D6C78D13D10946351F4655 /* AppInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435C22C64AB594B21D0A2A93 /* AppInstance.swift */; };
 		6FD561026427BBACED195D26 /* AppLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C276686BE1DBB00973054F9C /* AppLibrary.swift */; };
 		738219D2E2116767398363FE /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67DE699110C48CF400F70840 /* AppTheme.swift */; };
@@ -34,7 +36,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		031D0718BF815ED80FF1F48C /* AppIcon-dark.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "AppIcon-dark.icns"; sourceTree = "<group>"; };
 		05B72FEEF52A9737A5285378 /* AccountEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditorView.swift; sourceTree = "<group>"; };
+		05F49F899158334B7B28A597 /* DockIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIcon.swift; sourceTree = "<group>"; };
 		0F262A1E8ED7F1EB1ECEEEA7 /* AppKnowledgeBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppKnowledgeBase.swift; sourceTree = "<group>"; };
 		19A34A759C778A4B977E4F11 /* ProcessMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessMonitor.swift; sourceTree = "<group>"; };
 		19F4584FAF26AFA4989FD658 /* DiskUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskUsage.swift; sourceTree = "<group>"; };
@@ -88,6 +92,7 @@
 				9731963773FAEB883ED95FD3 /* AppLanguage.swift */,
 				67DE699110C48CF400F70840 /* AppTheme.swift */,
 				19F4584FAF26AFA4989FD658 /* DiskUsage.swift */,
+				05F49F899158334B7B28A597 /* DockIcon.swift */,
 				D070B713D58C6220FBA3EF39 /* IconFactory.swift */,
 				E77D12C233ACE9F160D1FD4D /* InterfaceDensity.swift */,
 				D16A492456FA5FD2FC7C5F75 /* LaunchAtLogin.swift */,
@@ -98,6 +103,14 @@
 				802F10C0860C8F855F6AB822 /* UpdateChecker.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		443BE6FE6F278CB299F56167 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				031D0718BF815ED80FF1F48C /* AppIcon-dark.icns */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		46795705A936F8AAF19F244B = {
@@ -128,6 +141,7 @@
 				69D23A9E62E97BEFEA81DC00 /* Info.plist */,
 				52B4928A9D65D07D55BF519F /* Localizable.xcstrings */,
 				C1EF8E2A99B38CF67822FAF5 /* Models */,
+				443BE6FE6F278CB299F56167 /* Resources */,
 				3C6641F5386D866BC16F9651 /* Services */,
 				72A650DECD6789F506AFD7D5 /* Views */,
 			);
@@ -206,6 +220,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5F6D577F28F1668455DCA28D /* AppIcon-dark.icns in Resources */,
 				E95A9791D3C54B12D59C04A2 /* Assets.xcassets in Resources */,
 				C21B74E57483C1D48AFFD495 /* Localizable.xcstrings in Resources */,
 			);
@@ -228,6 +243,7 @@
 				738219D2E2116767398363FE /* AppTheme.swift in Sources */,
 				21659535C85B29C923F36757 /* BubbleMark.swift in Sources */,
 				C9E871AB68ABE8F12EF51D05 /* DiskUsage.swift in Sources */,
+				281F2636683A5AFE93AEB0FB /* DockIcon.swift in Sources */,
 				E77B0697B5AB30A47DB13222 /* DoubleBubbleApp.swift in Sources */,
 				E4967471ACBE044BFC95128D /* IconFactory.swift in Sources */,
 				A4A2176AC1795CC5EDE95C17 /* InterfaceDensity.swift in Sources */,

@@ -44,6 +44,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NotificationService.requestAuthorizationIfNeeded()
+        DockIcon.start()
         Task { await UpdateChecker.shared.checkIfDue() }
     }
 

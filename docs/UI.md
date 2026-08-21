@@ -153,6 +153,28 @@ user for no reason).
 
 ## Icons and branding
 
+Double Bubble's own app icon has two themes, both drawn by
+[`Scripts/make_app_icon.py`](../Scripts/make_app_icon.py) from one set of
+geometry so they cannot drift apart. The dark mark is not the light one with
+an inverted plate: it keeps the *relationships* that make the mark legible —
+the two discs stay 43 points of luma apart, which is what stops them reading
+as a single blob at 16pt, and the weaker disc keeps roughly the same contrast
+against its plate that the lighter disc has on cream. The plate is a warm
+near-black; neutral grey under terracotta reads as a different brand.
+
+The dark version is applied at runtime by
+[`DockIcon.swift`](../DoubleBubble/Services/DockIcon.swift), not by the asset
+catalogue. A `.appiconset` has no slot for a dark macOS app icon — adding
+`appearances: luminosity/dark` entries builds without error, which makes it
+look like it worked, but `actool` reports the images as "unassigned children"
+and drops them, and `assetutil` on the built `Assets.car` shows every AppIcon
+entry with no appearance at all. The format that does carry one, Icon
+Composer's `.icon`, is layered: it hands shape, shadow and material to macOS,
+which would restyle the light mark rather than only add a dark one. Assigning
+`NSApp.applicationIconImage` keeps the drawing exactly as designed and works
+on every macOS the app supports; the trade is that it only applies while the
+app is running, since nothing but the bundle can speak for it when it isn't.
+
 Separate from the app's own appearance themes — branding the Dock icons
 of running copies is covered in
 [LAUNCH_ENGINE.md](LAUNCH_ENGINE.md#bundlecopy--copy--re-sign) and

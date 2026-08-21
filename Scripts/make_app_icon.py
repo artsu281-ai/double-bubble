@@ -186,13 +186,21 @@ def main():
     with open(os.path.join(out, "Contents.json"), "w") as fh:
         fh.write(contents_json())
 
-    # The dark mark, kept as design source: ready to hand to Icon Composer, and
-    # usable anywhere the light one would look wrong on a dark page.
+    # The dark mark as loose PNGs, kept as design source: what Icon Composer
+    # would want as layers, and usable on any dark page.
     dark_dir = os.path.join(root, "Scripts", "AppIcon-dark")
     write_iconset(dark_dir, DARK)
 
-    # Master .icns per theme, handy for previews and store artwork.
-    for theme, name in ((LIGHT, "AppIcon.icns"), (DARK, "AppIcon-dark.icns")):
+    # The dark .icns ships inside the app: DockIcon swaps to it at runtime.
+    # .icns rather than an imageset because it carries the whole size ladder,
+    # each size rendered from the geometry rather than downsampled from 1024 —
+    # which is the difference that keeps the keyline crisp in the Dock.
+    icns_targets = (
+        (LIGHT, os.path.join(root, "Scripts", "AppIcon.icns")),
+        (DARK, os.path.join(root, "DoubleBubble/Resources/AppIcon-dark.icns")),
+    )
+    for theme, path in icns_targets:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         with tempfile.TemporaryDirectory() as tmp:
             iconset = os.path.join(tmp, "AppIcon.iconset")
             os.makedirs(iconset)
@@ -200,15 +208,12 @@ def main():
                 render(points * scale, theme).save(
                     os.path.join(iconset, filename(points, scale))
                 )
-            subprocess.run(
-                ["iconutil", "-c", "icns", "-o",
-                 os.path.join(root, "Scripts", name), iconset],
-                check=True,
-            )
+            subprocess.run(["iconutil", "-c", "icns", "-o", path, iconset], check=True)
 
     print(f"wrote {len(SIZES)} light sizes to {out}")
     print(f"wrote {len(SIZES)} dark sizes to {dark_dir}")
-    print("also wrote Contents.json, Scripts/AppIcon.icns, Scripts/AppIcon-dark.icns")
+    print("also wrote Contents.json, Scripts/AppIcon.icns,")
+    print("             DoubleBubble/Resources/AppIcon-dark.icns")
 
 
 if __name__ == "__main__":
