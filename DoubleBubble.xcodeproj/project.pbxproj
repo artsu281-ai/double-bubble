@@ -15,6 +15,7 @@
 		2FF01334012B0072C075A87C /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 802F10C0860C8F855F6AB822 /* UpdateChecker.swift */; };
 		317A235DB0362B2D7F568272 /* ManagedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEFB751656938F8CED5DB241 /* ManagedApp.swift */; };
 		42F3161B6C5042F0AD603B0E /* AccountIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62048241210426CB09FE058E /* AccountIcon.swift */; };
+		451E81E3EAD900BDAC87D07F /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7DB5F01715D59A9C9DD90C6 /* Typography.swift */; };
 		66D6C78D13D10946351F4655 /* AppInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435C22C64AB594B21D0A2A93 /* AppInstance.swift */; };
 		6FD561026427BBACED195D26 /* AppLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C276686BE1DBB00973054F9C /* AppLibrary.swift */; };
 		738219D2E2116767398363FE /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67DE699110C48CF400F70840 /* AppTheme.swift */; };
@@ -65,6 +66,7 @@
 		B25327752194A2A8D93A7AA2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B80ED456F7B0D1A0D3DE1622 /* SystemSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemSettings.swift; sourceTree = "<group>"; };
 		C276686BE1DBB00973054F9C /* AppLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLibrary.swift; sourceTree = "<group>"; };
+		C7DB5F01715D59A9C9DD90C6 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		D070B713D58C6220FBA3EF39 /* IconFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconFactory.swift; sourceTree = "<group>"; };
 		D16A492456FA5FD2FC7C5F75 /* LaunchAtLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLogin.swift; sourceTree = "<group>"; };
 		DF4A57756B638FCCB51EA8B4 /* AboutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSettingsView.swift; sourceTree = "<group>"; };
@@ -81,6 +83,7 @@
 			children = (
 				2285FC1CD4519962DC37CA97 /* BubbleMark.swift */,
 				9BF38F3B190734360CE0A7B7 /* SettingsKit.swift */,
+				C7DB5F01715D59A9C9DD90C6 /* Typography.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -271,6 +274,7 @@
 				A894F640D335CAA73A8C1C13 /* Profile.swift in Sources */,
 				79ACFF2693C67070DBCF966A /* SettingsKit.swift in Sources */,
 				CF1F21D15E47FFC5475AB8DE /* SystemSettings.swift in Sources */,
+				451E81E3EAD900BDAC87D07F /* Typography.swift in Sources */,
 				2FF01334012B0072C075A87C /* UpdateChecker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -76,7 +76,7 @@ struct SettingsView: View {
     @ViewBuilder
     private func group(_ label: String, _ items: [SettingsSection], top: CGFloat) -> some View {
         Text(label.uppercased())
-            .font(.system(size: 11, weight: .semibold))
+            .font(.sectionLabel)
             .kerning(0.8)
             .foregroundStyle(.tertiary)
             .padding(.horizontal, 12)
@@ -100,11 +100,11 @@ struct SettingsView: View {
                 Text(library.totalRunningCount == 0
                      ? String(localized: "Nothing running")
                      : String(localized: "\(library.totalRunningCount) running"))
-                    .font(.system(size: 11))
+                    .font(.meta)
                     .foregroundStyle(.secondary)
             }
             Text("Double Bubble \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
-                .font(.system(size: 11))
+                .font(.meta)
                 .foregroundStyle(.tertiary)
         }
         .padding(.horizontal, 10)
@@ -142,11 +142,13 @@ private struct SettingsSidebarRow: View {
         Button(action: action) {
             HStack(spacing: 10) {
                 Image(systemName: item.icon)
-                    .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
+                    .font(.listItem)
+                    .fontWeight(isSelected ? .semibold : .regular)
                     .foregroundStyle(isSelected ? palette.accentColor : Color.secondary)
                     .frame(width: 19)
                 Text(item.title)
-                    .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
+                    .font(.listItem)
+                    .fontWeight(isSelected ? .semibold : .regular)
                     .foregroundStyle(isSelected ? Color.primary : Color.secondary)
                 Spacer(minLength: 0)
             }
@@ -284,9 +286,10 @@ private struct DockIconChoice: View {
                 .frame(width: 46, height: 46)
 
                 Text(option.label)
-                    .font(.system(size: 11.5, weight: isSelected ? .semibold : .regular))
+                    .font(.meta)
+                    .fontWeight(isSelected ? .semibold : .regular)
                 Text(option.detail)
-                    .font(.system(size: 10))
+                    .font(.meta)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
@@ -475,7 +478,7 @@ private struct AboutSection: View {
     @ViewBuilder private var updateStatus: some View {
         if let release = updates.available {
             Link(String(localized: "Version \(release.version) available"), destination: release.url)
-                .font(.footnote)
+                .font(.meta)
         } else {
             Button(String(localized: "Check Now")) { Task { await updates.check() } }
                 .controlSize(.small)

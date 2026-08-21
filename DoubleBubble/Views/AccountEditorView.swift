@@ -25,7 +25,7 @@ struct AccountEditorView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Edit Account")
-                .font(.headline)
+                .font(.cardTitle)
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
                 .padding(.bottom, 14)
@@ -70,7 +70,7 @@ struct AccountEditorView: View {
 
                 if colorIsTaken {
                     Label("Another account already uses this color.", systemImage: "exclamationmark.triangle.fill")
-                        .font(.caption)
+                        .font(.meta)
                         .foregroundStyle(.orange)
                 }
 
@@ -80,7 +80,7 @@ struct AccountEditorView: View {
                     Text(usesDefaultProfile
                          ? "Opens the app signed in as it already is, but with this name and icon — so you can start it from here instead of its Dock icon. Nothing is kept separately, and removing this account never touches that data."
                          : "Turn this on for the account you were already signed into before Double Bubble. Everything then launches from one place, each with its own icon.")
-                        .font(.caption)
+                        .font(.meta)
                         .foregroundStyle(.secondary)
                 }
             }

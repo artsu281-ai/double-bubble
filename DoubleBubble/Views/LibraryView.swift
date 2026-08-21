@@ -162,7 +162,7 @@ struct LibraryView: View {
                 .frame(width: density.sidebarIconSize, height: density.sidebarIconSize)
 
             Text(app.name)
-                .font(density == .comfortable ? .system(size: 13.5) : .subheadline)
+                .font(.listItem)
                 .lineLimit(1)
 
             if running > 0 {
@@ -182,7 +182,7 @@ struct LibraryView: View {
                     library.togglePinned(app.id)
                 } label: {
                     Image(systemName: app.isPinned ? "pin.fill" : "pin")
-                        .font(.system(size: 11))
+                        .font(.meta)
                         .foregroundStyle(app.isPinned ? palette.accentColor : .secondary)
                         .frame(width: 20, height: 18)
                         .contentShape(Rectangle())
@@ -194,7 +194,7 @@ struct LibraryView: View {
                     removingApp = app
                 } label: {
                     Image(systemName: "trash")
-                        .font(.system(size: 11))
+                        .font(.meta)
                         .foregroundStyle(.secondary)
                         .frame(width: 20, height: 18)
                         .contentShape(Rectangle())
@@ -224,7 +224,7 @@ struct LibraryView: View {
     // stacked above it would just repeat the same instruction twice.
     private var emptySidebar: some View {
         Text("No Apps Yet")
-            .font(.subheadline)
+            .font(.listItem)
             .foregroundStyle(.secondary)
     }
 
@@ -235,11 +235,11 @@ struct LibraryView: View {
 
             VStack(spacing: 6) {
                 Text(library.apps.isEmpty ? "No Apps Yet" : "No App Selected")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.emptyTitle)
                 Text(library.apps.isEmpty
                      ? "Add an app to run a second, fully separate account alongside it."
                      : "Choose an app in the sidebar, or add a new one.")
-                .font(.subheadline)
+                .font(.rowSubtitle)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 280)
@@ -356,7 +356,7 @@ private struct SidebarAddButton: View {
                         .font(.system(size: 15))
                         .foregroundStyle(palette.accentColor)
                     Text("Add App…")
-                        .font(.subheadline)
+                        .font(.listItem)
                         .foregroundStyle(.primary)
                     Spacer(minLength: 0)
                 }
@@ -519,16 +519,16 @@ private struct AppDetailView: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("Can’t run this app twice")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.cardTitle)
 
                 Text(blocker)
-                    .font(.subheadline)
+                    .font(.rowSubtitle)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 if let note = library.alternativeNote(for: app) {
                     Text(note)
-                        .font(.subheadline)
+                        .font(.rowSubtitle)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -555,7 +555,7 @@ private struct AppDetailView: View {
     private var accountsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Accounts")
-                .font(.system(size: 13, weight: .semibold))
+                .font(.cardTitle)
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
 
@@ -594,7 +594,7 @@ private struct AppDetailView: View {
             }
 
             Text(footerText)
-                .font(.callout)
+                .font(.rowSubtitle)
                 .foregroundStyle(.secondary)
         }
     }
@@ -616,7 +616,7 @@ private struct AppDetailView: View {
             .padding(.top, 4)
         } label: {
             Text("Advanced Settings")
-                .font(.system(size: 13, weight: .semibold))
+                .font(.cardTitle)
         }
         .padding(16)
         .background(palette.cardBackground, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -635,7 +635,7 @@ private struct AppDetailView: View {
     ) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text(label)
-                .font(.callout)
+                .font(.rowSubtitle)
                 .foregroundStyle(.secondary)
                 .frame(width: 150, alignment: .leading)
 
@@ -651,7 +651,7 @@ private struct AppDetailView: View {
 
     private func pathLabel(_ path: String) -> some View {
         Text(path)
-            .font(.system(size: 11, design: .monospaced))
+            .font(.metaMono)
             .foregroundStyle(.secondary)
             .lineLimit(1)
             .truncationMode(.head)
@@ -666,9 +666,9 @@ private struct AppDetailView: View {
         )) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Separate Dock icon per account")
-                    .font(.subheadline)
+                    .font(.rowTitle)
                 Text("Runs each account from its own copy so the Dock can show its colour. Uses more disk and opens slower.")
-                    .font(.footnote)
+                    .font(.rowSubtitle)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -682,12 +682,12 @@ private struct AppDetailView: View {
     private var isolationRows: some View {
         advancedRow("Isolation") {
             Text(library.strategy(for: app)?.label ?? String(localized: "Unknown"))
-                .font(.callout)
+                .font(.rowSubtitle)
         }
 
         if let explanation = library.strategy(for: app)?.explanation {
             Text(explanation)
-                .font(.subheadline)
+                .font(.rowSubtitle)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.bottom, 4)
@@ -702,7 +702,7 @@ private struct AppDetailView: View {
         // wrong name.
         Label {
             Text("Shell config, SSH and GPG keys, and git identity are shared with every account — only \(app.name)’s own data is separate.")
-                .font(.subheadline)
+                .font(.rowSubtitle)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         } icon: {
@@ -744,7 +744,7 @@ private struct AppDetailView: View {
     private var originRows: some View {
         advancedRow("Version") {
             Text(library.currentVersion(for: app) ?? String(localized: "Unknown"))
-                .font(.callout)
+                .font(.rowSubtitle)
                 .monospacedDigit()
         }
 
@@ -1117,7 +1117,7 @@ private struct AccountCard: View {
                     Text(isRunning ? "Stop" : "Open")
                 }
             }
-            .font(.system(size: 12, weight: .semibold))
+            .font(.controlLabel)
             .lineLimit(1)
             .padding(.horizontal, density == .comfortable ? 14 : 10)
             .padding(.vertical, density == .comfortable ? 7 : 4)
@@ -1184,7 +1184,7 @@ private struct AccountCard: View {
                 .help("Still running \(outdatedVersion). Stop and open it again to pick up the newer version.")
             }
         }
-        .font(.caption)
+        .font(.meta)
         .foregroundStyle(.secondary)
     }
 }
@@ -1252,16 +1252,18 @@ private struct UpdateBanner: View {
                 .foregroundStyle(palette.accentColor)
 
             Text("Double Bubble \(release.version) is available.")
-                .font(.subheadline)
+                .font(.listItem)
 
             Link("What's new", destination: release.url)
-                .font(.subheadline.weight(.medium))
+                .font(.listItem)
+                .fontWeight(.medium)
 
             Spacer(minLength: 0)
 
             Button(action: onDismiss) {
                 Image(systemName: "xmark")
-                    .font(.caption.weight(.semibold))
+                    .font(.meta)
+                    .fontWeight(.semibold)
             }
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)

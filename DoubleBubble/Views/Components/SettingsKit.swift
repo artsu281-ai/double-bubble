@@ -20,7 +20,7 @@ struct SettingsPage<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text(title)
-                .font(.system(size: 28, weight: .regular, design: .serif))
+                .font(.pageTitle)
                 .padding(.horizontal, 32)
                 .padding(.top, 30)
                 .padding(.bottom, 22)
@@ -49,7 +49,7 @@ struct SettingsCard<Content: View>: View {
         VStack(alignment: .leading, spacing: 9) {
             if let header {
                 Text(header.uppercased())
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.sectionLabel)
                     .kerning(0.8)
                     .foregroundStyle(.tertiary)
                     .padding(.leading, 4)
@@ -91,10 +91,10 @@ struct SettingsRow<Control: View>: View {
             HStack(alignment: .center, spacing: 16) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title)
-                        .font(.system(size: 13.5, weight: .medium))
+                        .font(.rowTitle)
                     if let subtitle {
                         Text(subtitle)
-                            .font(.system(size: 12.5))
+                            .font(.rowSubtitle)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -129,10 +129,10 @@ struct SettingsWideRow<Content: View>: View {
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title)
-                        .font(.system(size: 13.5, weight: .medium))
+                        .font(.rowTitle)
                     if let subtitle {
                         Text(subtitle)
-                            .font(.system(size: 12.5))
+                            .font(.rowSubtitle)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
