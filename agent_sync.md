@@ -5,41 +5,40 @@ Keep this short. Overwrite, don't append — history lives in git, not here.
 
 **LAST_ACTION:**
 [Claude Code] -> [next agent]:
-Dark app-icon theme, drawn and now actually shown (cc30ba1, 4b38e18).
-make_app_icon.py renders both themes from one geometry. The dark mark keeps
-the *relationships*, not the colours: discs 43 luma apart (what stops them
-merging at 16pt), weaker disc ~80 luma above its plate (matching the lighter
-disc on cream). Plate is warm near-black — neutral grey under terracotta
-reads as a different brand.
+Icon now has a Liquid Glass treatment, offered as a choice, and settings were
+rebuilt in Intact's language. Four icon variants ship (light/dark x
+glass/flat) as .icns in Resources; DockIcon resolves (DockIconTheme x glass x
+system appearance) and swaps NSApp.applicationIconImage. All 12 combinations
+checked against what actually ships.
 
-Two load-bearing findings, do not re-litigate by trial:
-1. **A .appiconset cannot carry a dark macOS app icon.** Adding
-   `appearances: luminosity/dark` does NOT fail the build — it looks like it
-   worked — but actool logs "unassigned children" and drops the images, and
-   `assetutil --info` on the built Assets.car shows every AppIcon entry with
-   Appearance absent. Verified both ways.
-2. **Icon Composer's `.icon` is layered**, handing shape/shadow/material to
-   macOS. Adopting it would restyle the light mark under Liquid Glass, not
-   just add a dark variant — the user likes the current flat drawing, so this
-   was deliberately not done. `ictool` (inside Icon Composer.app/Contents/
-   Executables) only *exports* from an existing .icon; it cannot author one,
-   and no schema or template ships, so nobody should invent icon.json.
+Glass is one number, GLASS=0.65 in make_app_icon.py, scaling the whole stack.
+Past ~0.8 the plate reads as plastic. Every effect is proportional to the
+tile, so it fades out by 16pt and leaves the flat mark — which is where
+legibility matters. The tell is not the gradient but the edge pair (lit top
+lip, shaded foot) plus the mark casting onto the plate. Highlights are warm
+(SPARK); pure white desaturates terracotta to grey. Each theme carries its own
+strengths — a sheen sized for cream washes the near-black plate out.
 
-So DockIcon.swift sets NSApp.applicationIconImage from
-Resources/AppIcon-dark.icns, keyed on NSApp.effectiveAppearance via KVO with
-.initial. nil restores the bundle icon, so light needs no second asset. Known
-trade, stated in the commit and docs/UI.md: it only applies while the app
-runs. Verified both branches in the running app (light -> cleared to bundle;
-forced darkAqua -> dark icns installed, all 10 reps).
+Settings: new Views/Components/SettingsKit.swift (SettingsPage / SettingsCard /
+SettingsRow / SettingsWideRow), ThemePalette gained `hairline`. Popover kept
+rather than converted to Intact's sidebar window — a second window would claim
+the comma shortcut and split controls in two, which the code had already
+reasoned through. Popover grew to 520x600.
 
-Light PNGs are byte-identical across both commits — 0 of them appear in
-either — so neither change touched the existing rendering.
+**Verification gap, be honest about it:** computer-use MCP is disconnected in
+this session, so SwiftUI output was never seen. Builds clean and the app
+launches and stays up with no crash reports, but no screen was inspected. The
+user has to eyeball the settings.
 
 **STATUS:**
 - Released through **v1.0.2** (notify-on-new-release), Latest. v1.0.1 was
   the Dock fix. Endpoint now serves v1.0.2, so anyone on 1.0.1 gets the bar.
-- Dark icon shipped in-tree (cc30ba1 + 4b38e18); cc30ba1 pushed, 4b38e18 not
-  pushed yet and not in any release — newest release is still v1.0.2.
+- Icon + settings work is committed but **not pushed**, and in no release —
+  newest release is still v1.0.2, which has none of it.
+- Main window (LibraryView) has NOT been redesigned yet. The user asked for
+  settings *and* main window; only settings are done.
+- Reference project for the design language: ~/work_tree/voice (Intact).
+  Sources/Intact/Views/Theme.swift holds its Palette + Card/Row/SettingsPage.
 - User is on macOS 27 / Xcode 26.6. README still claims Xcode 16+.
 - Version lives in `project.yml` (`info.properties` + `settings.base`), which
   *generates* `DoubleBubble/Info.plist` — editing the plist directly is
