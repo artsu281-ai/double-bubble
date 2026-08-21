@@ -1,8 +1,8 @@
 # AI AGENT SYNC STATE
 Keep this short. Overwrite, don't append — history lives in git, not here.
 
-**CURRENT_GOAL:** Update mechanism. Phase 1 (notify) done; phase 2 (Sparkle
-auto-install) not started.
+**CURRENT_GOAL:** Update mechanism. Phase 1 (notify) shipped as v1.0.2;
+phase 2 (Sparkle auto-install) not started.
 
 **LAST_ACTION:**
 [Claude Code] -> [next agent]:
@@ -25,8 +25,8 @@ LibraryView's .task, both throttled — the delegate covers launch regardless
 of which window opens, the view covers a session left running for days.
 
 **STATUS:**
-- v1.0.1 released (the Dock fix). Working tree now at **1.0.2**, committed
-  but NOT yet released — ask before cutting it.
+- Released through **v1.0.2** (notify-on-new-release), Latest. v1.0.1 was
+  the Dock fix. Endpoint now serves v1.0.2, so anyone on 1.0.1 gets the bar.
 - Version lives in `project.yml` (`info.properties` + `settings.base`), which
   *generates* `DoubleBubble/Info.plist` — editing the plist directly is
   pointless, `xcodegen generate` overwrites it.
