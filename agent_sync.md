@@ -1,32 +1,39 @@
 # AI AGENT SYNC STATE
 Keep this short. Overwrite, don't append — history lives in git, not here.
 
-**CURRENT_GOAL:** Update mechanism. Phase 1 (notify) shipped as v1.0.2;
-phase 2 (Sparkle auto-install) not started.
+**CURRENT_GOAL:** —
 
 **LAST_ACTION:**
 [Claude Code] -> [next agent]:
-Shipped the Dock-launch fix as v1.0.1 (see git log for the mechanism), then
-found the app had *no* update mechanism at all — no Sparkle, no version
-check, not a single URLSession or https:// anywhere. So nobody on an older
-build could ever learn a fix existed.
+Drew a dark theme for the app icon (commit cc30ba1). make_app_icon.py now
+renders either theme from one set of geometry. The dark mark holds the two
+relationships that make it legible rather than the literal colours: discs 43
+luma apart (what separates them at 16pt), weaker disc ~80 luma above its
+plate (matching the lighter disc on cream). Plate is warm near-black —
+neutral grey under terracotta reads as a different brand.
 
-Added Services/UpdateChecker.swift: anonymous once-a-day GET of the GitHub
-"releases/latest" API, numeric version compare, a dismissible banner above
-the main window, a Settings toggle, and a manual check in About. It
-notifies only — never installs — because ad-hoc signing means the user has
-to clear Gatekeeper by hand anyway. Verified all four paths in the running
-app via temporary file markers (all removed): same version -> no banner;
-older -> banner; dismissed version -> stays hidden; toggle off -> no request
-at all. Version compare unit-tested incl. 1.0.10 vs 1.0.9 and junk input.
+Load-bearing finding, do not re-litigate by trial: **a .appiconset cannot
+carry a dark macOS app icon.** Adding `appearances: luminosity/dark` does NOT
+fail the build — it looks like it worked — but actool logs the dark images as
+"unassigned children" and drops them, and `assetutil --info` on the built
+Assets.car then shows every AppIcon entry with Appearance absent. Verified
+both ways. Dark app icons on current macOS come from Icon Composer's `.icon`
+format. Icon Composer.app ships inside Xcode 26 but is a GUI app, and it
+carries no template or JSON schema to author `.icon` by hand, so nobody
+should invent that format speculatively.
 
-The check runs from AppDelegate.applicationDidFinishLaunching *and* from
-LibraryView's .task, both throttled — the delegate covers launch regardless
-of which window opens, the view covers a session left running for days.
+So the dark art lives in Scripts/AppIcon-dark/ (+ AppIcon-dark.icns) as
+design source, ready to hand to Icon Composer. The asset catalogue is
+light-only and the build is warning-free. Light PNGs are byte-identical to
+what was committed before — 0 of them appear in the commit — so the refactor
+provably changed no rendering.
 
 **STATUS:**
 - Released through **v1.0.2** (notify-on-new-release), Latest. v1.0.1 was
   the Dock fix. Endpoint now serves v1.0.2, so anyone on 1.0.1 gets the bar.
+- cc30ba1 (dark icon) is committed but **not pushed** — user hasn't been
+  asked, and the icon direction may still change.
+- User is on macOS 27 / Xcode 26.6. README still claims Xcode 16+.
 - Version lives in `project.yml` (`info.properties` + `settings.base`), which
   *generates* `DoubleBubble/Info.plist` — editing the plist directly is
   pointless, `xcodegen generate` overwrites it.
@@ -48,6 +55,10 @@ of which window opens, the view covers a session left running for days.
   scope per the user.
 
 **NEXT (queue):**
+Open with the user: push cc30ba1, and whether to move the icon pipeline to
+Icon Composer `.icon` so the dark variant actually ships (GUI work — the
+dark art is already rendered and waiting).
+
 Phase 2, if the user greenlights it: integrate Sparkle for real auto-install.
 Unresolved question that decides whether it is even viable — whether Sparkle
 validates an update whose app is only ad-hoc signed (no Developer ID). Docs
