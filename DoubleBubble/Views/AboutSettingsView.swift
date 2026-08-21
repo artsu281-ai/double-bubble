@@ -1,26 +1,167 @@
 import SwiftUI
 import AppKit
 
-/// Settings, reachable via ⌘, or the toolbar. Still one scrolling surface in a
-/// popover rather than a window with a sidebar: a second window would claim ⌘,
-/// as well and split the same controls across two places.
+/// Which page of Settings is showing.
+enum SettingsSection: String, CaseIterable, Identifiable {
+    case general, appearance, dockIcon, language, advanced, about
+
+    var id: String { rawValue }
+
+    /// Split the way the sidebar groups them: things you change, then things
+    /// you only read.
+    var isInformational: Bool { self == .about }
+
+    var title: String {
+        switch self {
+        case .general:    return String(localized: "General")
+        case .appearance: return String(localized: "Appearance")
+        case .dockIcon:   return String(localized: "Dock Icon")
+        case .language:   return String(localized: "Language")
+        case .advanced:   return String(localized: "Advanced")
+        case .about:      return String(localized: "About")
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .general:    return "slider.horizontal.3"
+        case .appearance: return "paintpalette"
+        case .dockIcon:   return "dock.rectangle"
+        case .language:   return "character.bubble"
+        case .advanced:   return "gearshape.2"
+        case .about:      return "info.circle"
+        }
+    }
+}
+
+/// Settings, in a window of its own.
 ///
-/// What changed is the language, borrowed from Intact so the two apps in this
-/// house read as siblings — every control now says what it does next to
-/// itself. A settings screen where each line is two words and a switch is
-/// compact and tells you nothing.
+/// It began as a popover in the main window's toolbar, on the reasoning that a
+/// second window would claim the comma shortcut and split the same controls
+/// across two places. The first half of that never happened — the `Settings`
+/// scene owns the shortcut, and the toolbar button opens the same window — and
+/// the second half was outweighed by what the popover actually became: a single
+/// column too tall to fit beside the window it hung off. A sidebar solves the
+/// height by splitting the column into short pages, and a sidebar needs a
+/// window to live in.
 struct SettingsView: View {
     @ObservedObject var library: AppLibrary
+    @State private var section: SettingsSection = .general
+
+    @Environment(\.themePalette) private var palette
 
     var body: some View {
-        SettingsPage(title: String(localized: "Settings")) {
-            AppearanceSection()
-            DockIconSection()
-            GeneralSection()
-            LanguageSection()
-            AdvancedSection(library: library)
-            AboutSection()
+        HStack(spacing: 0) {
+            sidebar
+            Rectangle().fill(palette.hairline).frame(width: 1)
+            detail
         }
+        .frame(minWidth: 760, idealWidth: 820, minHeight: 520, idealHeight: 600)
+        .background(palette.windowBackground)
+    }
+
+    private var sidebar: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            group(String(localized: "Settings"), SettingsSection.allCases.filter { !$0.isInformational }, top: 26)
+            group(String(localized: "Information"), SettingsSection.allCases.filter(\.isInformational), top: 20)
+            Spacer(minLength: 16)
+            footer
+        }
+        .padding(.horizontal, 10)
+        .padding(.bottom, 14)
+        .frame(width: 208)
+        .background(palette.sidebarBackground ?? Color(nsColor: .windowBackgroundColor))
+    }
+
+    @ViewBuilder
+    private func group(_ label: String, _ items: [SettingsSection], top: CGFloat) -> some View {
+        Text(label.uppercased())
+            .font(.system(size: 11, weight: .semibold))
+            .kerning(0.8)
+            .foregroundStyle(.tertiary)
+            .padding(.horizontal, 12)
+            .padding(.top, top)
+            .padding(.bottom, 6)
+
+        ForEach(items) { item in
+            SettingsSidebarRow(item: item, isSelected: item == section) { section = item }
+        }
+    }
+
+    /// The same at-a-glance line Intact keeps down here: what the app is doing
+    /// right now, and which build is saying so.
+    private var footer: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Rectangle().fill(palette.hairline).frame(height: 1)
+            HStack(spacing: 7) {
+                Circle()
+                    .fill(library.totalRunningCount > 0 ? palette.success : Color.secondary.opacity(0.5))
+                    .frame(width: 7, height: 7)
+                Text(library.totalRunningCount == 0
+                     ? String(localized: "Nothing running")
+                     : String(localized: "\(library.totalRunningCount) running"))
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+            Text("Double Bubble \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
+                .font(.system(size: 11))
+                .foregroundStyle(.tertiary)
+        }
+        .padding(.horizontal, 10)
+        .padding(.top, 4)
+    }
+
+    @ViewBuilder
+    private var detail: some View {
+        switch section {
+        case .general:
+            SettingsPage(title: section.title) { GeneralSection() }
+        case .appearance:
+            SettingsPage(title: section.title) { AppearanceSection() }
+        case .dockIcon:
+            SettingsPage(title: section.title) { DockIconSection() }
+        case .language:
+            SettingsPage(title: section.title) { LanguageSection() }
+        case .advanced:
+            SettingsPage(title: section.title) { AdvancedSection(library: library) }
+        case .about:
+            SettingsPage(title: section.title) { AboutSection() }
+        }
+    }
+}
+
+private struct SettingsSidebarRow: View {
+    let item: SettingsSection
+    let isSelected: Bool
+    let action: () -> Void
+
+    @Environment(\.themePalette) private var palette
+    @State private var hovering = false
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: item.icon)
+                    .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
+                    .foregroundStyle(isSelected ? palette.accentColor : Color.secondary)
+                    .frame(width: 19)
+                Text(item.title)
+                    .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
+                    .foregroundStyle(isSelected ? Color.primary : Color.secondary)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 11)
+            .padding(.vertical, 7)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(isSelected ? palette.accentColor.opacity(0.14)
+                                     : (hovering ? palette.hairline.opacity(0.6) : .clear))
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 }
 
@@ -35,7 +176,7 @@ private struct AppearanceSection: View {
     private var density: InterfaceDensity { InterfaceDensity(rawValue: densityRaw) ?? .comfortable }
 
     var body: some View {
-        SettingsCard(header: String(localized: "Appearance")) {
+        SettingsCard() {
             SettingsRow(
                 title: String(localized: "Theme"),
                 subtitle: theme == .terracotta
@@ -86,7 +227,7 @@ private struct DockIconSection: View {
     private var theme: DockIconTheme { DockIconTheme(rawValue: themeRaw) ?? .auto }
 
     var body: some View {
-        SettingsCard(header: String(localized: "Dock Icon")) {
+        SettingsCard() {
             SettingsWideRow(
                 title: String(localized: "Tile"),
                 subtitle: String(localized: "Applies while Double Bubble is running. When it isn't, macOS shows the icon baked into the app."),
@@ -179,7 +320,7 @@ private struct GeneralSection: View {
     @ObservedObject private var updates = UpdateChecker.shared
 
     var body: some View {
-        SettingsCard(header: String(localized: "General")) {
+        SettingsCard() {
             SettingsRow(
                 title: String(localized: "Launch at Login"),
                 subtitle: String(localized: "Keeps Double Bubble in the menu bar from sign-in, so accounts you left running are never orphaned by a restart."),
@@ -224,7 +365,7 @@ private struct LanguageSection: View {
     private var language: AppLanguage { AppLanguage(rawValue: raw) ?? .system }
 
     var body: some View {
-        SettingsCard(header: String(localized: "Language")) {
+        SettingsCard() {
             SettingsRow(
                 title: String(localized: "Interface Language"),
                 subtitle: String(localized: "macOS decides an app's language when it launches, so this takes effect next time Double Bubble starts."),
@@ -263,7 +404,7 @@ private struct AdvancedSection: View {
     @State private var showingResetConfirm = false
 
     var body: some View {
-        SettingsCard(header: String(localized: "Advanced")) {
+        SettingsCard() {
             SettingsRow(
                 title: String(localized: "Data Folder"),
                 subtitle: String(localized: "Every account's isolated data and any re-signed app copies live here."),
@@ -317,7 +458,7 @@ private struct AboutSection: View {
     }
 
     var body: some View {
-        SettingsCard(header: String(localized: "About")) {
+        SettingsCard() {
             SettingsRow(
                 title: "Double Bubble",
                 subtitle: String(localized: "Version \(version) (\(build)) · by ConstantaAI"),
@@ -354,5 +495,5 @@ private struct AboutSection: View {
 }
 
 #Preview {
-    SettingsView(library: AppLibrary()).frame(width: 520, height: 600)
+    SettingsView(library: AppLibrary())
 }

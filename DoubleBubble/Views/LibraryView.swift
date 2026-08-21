@@ -253,7 +253,7 @@ struct LibraryView: View {
         .background(palette.windowBackground)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                SettingsToolbarButton(library: library)
+                SettingsToolbarButton()
             }
         }
     }
@@ -384,24 +384,18 @@ private struct SidebarAddButton: View {
 
 // MARK: - Settings
 
-/// Settings live in the main window, top right — there is no separate Settings
-/// scene, so this is the only way in besides ⌘,.
+/// Opens the Settings scene. Kept in the toolbar because that is where people
+/// had learned to find it — the window is new, the way in is not.
 private struct SettingsToolbarButton: View {
-    @ObservedObject var library: AppLibrary
-    @State private var isPresented = false
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         Button {
-            isPresented = true
+            openSettings()
         } label: {
             Image(systemName: "gearshape")
         }
         .help("Settings")
-        .keyboardShortcut(",", modifiers: .command)
-        .popover(isPresented: $isPresented, arrowEdge: .bottom) {
-            SettingsView(library: library)
-                .frame(width: 520, height: 600)
-        }
     }
 }
 
@@ -492,7 +486,7 @@ private struct AppDetailView: View {
                 .help("Remove \(app.name) from Double Bubble")
             }
             ToolbarItem(placement: .primaryAction) {
-                SettingsToolbarButton(library: library)
+                SettingsToolbarButton()
             }
         }
         .alert("Couldn’t Open", isPresented: .constant(errorMessage != nil)) {

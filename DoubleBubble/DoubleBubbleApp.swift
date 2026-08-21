@@ -26,9 +26,14 @@ struct DoubleBubbleApp: App {
         }
         .menuBarExtraStyle(.menu)
 
-        // No Settings scene: settings live in the main window's toolbar, top
-        // right, and ⌘, opens that popover. A second copy in its own window
-        // would claim ⌘, as well and split the same controls across two places.
+        // Settings get a window of their own. The toolbar button opens this
+        // same scene rather than a second copy of the controls, so there is
+        // still one settings surface — it just isn't wedged into a popover
+        // beside the window any more.
+        Settings {
+            SettingsView(library: library)
+                .themed()
+        }
     }
 }
 
