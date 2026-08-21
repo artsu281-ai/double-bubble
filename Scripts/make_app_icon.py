@@ -8,13 +8,22 @@ are defined once here and every size is rendered from the same numbers.
 
 House style is ConstantaAI's — flat terracotta marks on cream, no gradients.
 The product idea is two instances of one app, so the mark is two circles that
-just touch; the cream keyline between them is what keeps them readable as two
-at 16pt, where tone alone blurs into one blob.
+just touch; the keyline between them is what keeps them readable as two at
+16pt, where tone alone blurs into one blob.
+
+Two themes are rendered. The dark one is not the light one with an inverted
+background: it keeps the *relationships* that make the mark legible. The gap
+between the two discs is held at the same 43 points of luma, which is what
+separates them at small sizes, and the weaker disc keeps the same ~80 points
+of contrast against its tile that the lighter disc has on cream. Simply
+darkening the plate under the existing clays would have collapsed the deeper
+disc into the background.
 
 Requires Pillow (`pip3 install Pillow`) and macOS `iconutil`.
 """
 
 from PIL import Image, ImageDraw, ImageFilter
+import json
 import math
 import os
 import subprocess
@@ -25,6 +34,28 @@ import tempfile
 CREAM = (226, 221, 205)
 CLAY = (193, 118, 87)
 CLAY_DEEP = (142, 78, 51)
+
+# Dark counterparts. INK is a warm near-black rather than a neutral one — a
+# grey plate under terracotta reads as a different brand. The clays are lifted
+# rather than reused: see the module docstring for the luma the pair holds to.
+INK = (45, 37, 33)
+CLAY_LIT = (216, 146, 112)
+CLAY_MID = (176, 101, 72)
+
+
+class Theme:
+    """A plate colour and the two discs drawn on it. The keyline is always the
+    plate's own colour, so it reads as a gap rather than as a third mark."""
+
+    def __init__(self, name, plate, near, far):
+        self.name = name
+        self.plate = plate
+        self.near = near      # left disc, the lighter of the two
+        self.far = far        # right disc, laid over the keyline
+
+
+LIGHT = Theme("light", CREAM, CLAY, CLAY_DEEP)
+DARK = Theme("dark", INK, CLAY_LIT, CLAY_MID)
 
 SS = 4        # supersample factor; PIL has no antialiased polygon fill
 BASE = 1024   # master size
@@ -60,7 +91,7 @@ def squircle(size, n=5.0, steps=720):
     return pts
 
 
-def render(px):
+def render(px, theme=LIGHT):
     canvas = px * SS
     tile = canvas * TILE
     offset = (canvas - tile) / 2
@@ -78,7 +109,7 @@ def render(px):
     img.paste(Image.new("RGBA", (canvas, canvas), (0, 0, 0, 255)), (0, 0), shadow_mask)
 
     plate = Image.new("RGBA", (canvas, canvas), (0, 0, 0, 0))
-    ImageDraw.Draw(plate).polygon(outline, fill=CREAM + (255,))
+    ImageDraw.Draw(plate).polygon(outline, fill=theme.plate + (255,))
     img.alpha_composite(plate)
 
     draw = ImageDraw.Draw(img)
@@ -99,11 +130,50 @@ def render(px):
             fill=colour + (255,),
         )
 
-    disc((cx - gap, cy), r, CLAY)
-    disc((cx + gap, cy), r + keyline, CREAM)   # separates the two at 16pt
-    disc((cx + gap, cy), r, CLAY_DEEP)
+    disc((cx - gap, cy), r, theme.near)
+    disc((cx + gap, cy), r + keyline, theme.plate)   # separates the two at 16pt
+    disc((cx + gap, cy), r, theme.far)
 
     return img.resize((px, px), Image.LANCZOS)
+
+
+def filename(points, scale):
+    suffix = "" if scale == 1 else f"@{scale}x"
+    return f"icon_{points}x{points}{suffix}.png"
+
+
+def contents_json():
+    """Written here rather than left to Xcode, so the catalogue can never drift
+    from the files this script actually produced.
+
+    Light only, and not for want of trying: a `.appiconset` has no slot for a
+    dark macOS app icon. Adding `appearances: luminosity/dark` entries compiles
+    without failing, but `actool` reports the dark images as "unassigned
+    children" and drops them — `assetutil` on the built Assets.car then shows
+    every AppIcon entry with no appearance at all. Dark app icons on current
+    macOS come from Icon Composer's `.icon` format instead, which is why the
+    dark art below is rendered to Scripts/ as design source rather than here.
+    """
+    images = [
+        {
+            "filename": filename(points, scale),
+            "idiom": "mac",
+            "scale": f"{scale}x",
+            "size": f"{points}x{points}",
+        }
+        for points, scale in SIZES
+    ]
+    return json.dumps(
+        {"images": images, "info": {"author": "xcode", "version": 1}}, indent=2
+    ) + "\n"
+
+
+def write_iconset(directory, theme):
+    os.makedirs(directory, exist_ok=True)
+    for points, scale in SIZES:
+        render(points * scale, theme).save(
+            os.path.join(directory, filename(points, scale))
+        )
 
 
 def main():
@@ -112,26 +182,33 @@ def main():
     if not os.path.isdir(out):
         sys.exit(f"asset catalogue not found: {out}")
 
-    for points, scale in SIZES:
-        px = points * scale
-        suffix = "" if scale == 1 else f"@{scale}x"
-        name = f"icon_{points}x{points}{suffix}.png"
-        render(px).save(os.path.join(out, name))
+    write_iconset(out, LIGHT)
+    with open(os.path.join(out, "Contents.json"), "w") as fh:
+        fh.write(contents_json())
 
-    # A master .icns is handy for previews and store artwork.
-    with tempfile.TemporaryDirectory() as tmp:
-        iconset = os.path.join(tmp, "AppIcon.iconset")
-        os.makedirs(iconset)
-        for points, scale in SIZES:
-            suffix = "" if scale == 1 else f"@{scale}x"
-            render(points * scale).save(
-                os.path.join(iconset, f"icon_{points}x{points}{suffix}.png")
+    # The dark mark, kept as design source: ready to hand to Icon Composer, and
+    # usable anywhere the light one would look wrong on a dark page.
+    dark_dir = os.path.join(root, "Scripts", "AppIcon-dark")
+    write_iconset(dark_dir, DARK)
+
+    # Master .icns per theme, handy for previews and store artwork.
+    for theme, name in ((LIGHT, "AppIcon.icns"), (DARK, "AppIcon-dark.icns")):
+        with tempfile.TemporaryDirectory() as tmp:
+            iconset = os.path.join(tmp, "AppIcon.iconset")
+            os.makedirs(iconset)
+            for points, scale in SIZES:
+                render(points * scale, theme).save(
+                    os.path.join(iconset, filename(points, scale))
+                )
+            subprocess.run(
+                ["iconutil", "-c", "icns", "-o",
+                 os.path.join(root, "Scripts", name), iconset],
+                check=True,
             )
-        icns = os.path.join(root, "Scripts", "AppIcon.icns")
-        subprocess.run(["iconutil", "-c", "icns", "-o", icns, iconset], check=True)
 
-    print(f"wrote {len(SIZES)} sizes to {out}")
-    print("also wrote Scripts/AppIcon.icns")
+    print(f"wrote {len(SIZES)} light sizes to {out}")
+    print(f"wrote {len(SIZES)} dark sizes to {dark_dir}")
+    print("also wrote Contents.json, Scripts/AppIcon.icns, Scripts/AppIcon-dark.icns")
 
 
 if __name__ == "__main__":

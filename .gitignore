@@ -17,3 +17,6 @@ DerivedData/
 
 # Claude Code — machine-local tool permissions, not project configuration.
 .claude/settings.local.json
+
+# Python bytecode from Scripts/
+__pycache__/
