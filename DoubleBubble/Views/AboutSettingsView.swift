@@ -142,6 +142,8 @@ private struct InterfaceSettingsTab: View {
 private struct GeneralSettingsTab: View {
     @State private var launchAtLogin = LaunchAtLogin.isEnabled
     @AppStorage("notifyOnLaunchFailure") private var notifyOnLaunchFailure = true
+    @AppStorage(UpdateChecker.enabledKey) private var checkForUpdates = true
+    @ObservedObject private var updates = UpdateChecker.shared
 
     @ViewBuilder var body: some View {
             Section {
@@ -159,6 +161,18 @@ private struct GeneralSettingsTab: View {
                 Toggle("Notify Me if an Account Fails to Open", isOn: $notifyOnLaunchFailure)
             } footer: {
                 Text("Covers launches from the menu bar, where there's no window open to show an error in.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                Toggle("Check for Updates", isOn: $checkForUpdates)
+                    .onChange(of: checkForUpdates) { _, enabled in
+                        updates.setEnabled(enabled)
+                        if enabled { Task { await updates.check() } }
+                    }
+            } footer: {
+                Text("Asks GitHub once a day whether a newer release exists, and shows a link if so — nothing is downloaded or installed for you. This is the only time Double Bubble uses the network: the request is anonymous and says nothing about you or the accounts you run.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -230,6 +244,8 @@ private struct AdvancedSettingsTab: View {
 // MARK: - About
 
 private struct AboutSection: View {
+    @ObservedObject private var updates = UpdateChecker.shared
+
     private var version: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     }
@@ -253,8 +269,22 @@ private struct AboutSection: View {
                 }
 
                 Spacer(minLength: 0)
+
+                updateStatus
             }
             .padding(.vertical, 2)
+        }
+    }
+
+    @ViewBuilder private var updateStatus: some View {
+        if let release = updates.available {
+            Link("Version \(release.version) available", destination: release.url)
+                .font(.footnote)
+        } else {
+            Button("Check for Updates") {
+                Task { await updates.check() }
+            }
+            .font(.footnote)
         }
     }
 

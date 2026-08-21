@@ -42,6 +42,10 @@ common questions in plain language, no implementation details.
   window.
 - English/Russian localization, an appearance theme (Terracotta/Light/
   Dark/System), and two levels of interface density.
+- An optional once-a-day check for new releases, which links you to one
+  rather than installing anything. It is the app's only network request —
+  anonymous, and switched off with a single toggle. See
+  [docs/USER_GUIDE.md](docs/USER_GUIDE.md#updates).
 
 ## Requirements
 

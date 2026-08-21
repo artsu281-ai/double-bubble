@@ -1,47 +1,39 @@
 # AI AGENT SYNC STATE
 Keep this short. Overwrite, don't append — history lives in git, not here.
 
-**CURRENT_GOAL:** —
+**CURRENT_GOAL:** Update mechanism. Phase 1 (notify) done; phase 2 (Sparkle
+auto-install) not started.
 
 **LAST_ACTION:**
 [Claude Code] -> [next agent]:
-Fixed the reported bug: launching a copy from the Dock opened the app's
-ordinary account instead of the pinned one. Root cause was `copyThenFlag`
-(Claude Desktop's strategy) putting its isolation entirely in a
-command-line flag Double Bubble passed at launch — LaunchServices starts a
-bundle with no arguments, so a Dock/Finder/Spotlight/login-item launch fell
-straight back to the default profile, silently sharing the very data the
-copy exists to separate. Confirmed on disk first: both copies had the real
-Electron binary as `CFBundleExecutable`, unpatched `CFBundleName` ("Claude"
-in both copy and original → same `~/Library/Application Support/Claude`).
+Shipped the Dock-launch fix as v1.0.1 (see git log for the mechanism), then
+found the app had *no* update mechanism at all — no Sparkle, no version
+check, not a single URLSession or https:// anywhere. So nobody on an older
+build could ever learn a fix existed.
 
-Fix: `bakeIsolationFlag` writes the flag *into* the copy — a
-`doublebubble-launcher` shim becomes `CFBundleExecutable` and execs the real
-binary with the flag applied, so every launch path gets it. Two things that
-fall out of that and are easy to break later: the real binary is no longer
-the main executable, so `codesign --deep` skips it and it would keep the
-vendor's entitlements (the exact thing a copyThenFlag app is copied to
-shed) — `resignBundle(at:alsoSigning:)` now signs it explicitly; and the
-copy is now opened with `NSWorkspace.openApplication` like `.bundleCopy`,
-so Double Bubble's launch and a Dock click are literally the same path and
-cannot diverge again. Executable name is single-quoted — it comes from a
-third-party Info.plist, and bare interpolation would run `$(...)` in it.
-`copyFingerprint` gained the baked argument, which also forces the
-one-time rebuild that applies the fix to already-built copies.
+Added Services/UpdateChecker.swift: anonymous once-a-day GET of the GitHub
+"releases/latest" API, numeric version compare, a dismissible banner above
+the main window, a Settings toggle, and a manual check in About. It
+notifies only — never installs — because ad-hoc signing means the user has
+to clear Gatekeeper by hand anyway. Verified all four paths in the running
+app via temporary file markers (all removed): same version -> no banner;
+older -> banner; dismissed version -> stays hidden; toggle off -> no request
+at all. Version compare unit-tested incl. 1.0.10 vs 1.0.9 and junk input.
 
-Verified end-to-end on a scratch copy of the real Claude.app: launched with
-`open` and no arguments, 9 processes stayed up, argv carried
-`--user-data-dir`, the scratch profile filled from 0 → 29 entries, and the
-real `~/Library/Application Support/Claude` mtime never changed. Entitlement
-stripping re-checked (`keychain-access-groups` present before resign, gone
-after). Injection case checked separately: name is resolved literally.
+The check runs from AppDelegate.applicationDidFinishLaunching *and* from
+LibraryView's .task, both throttled — the delegate covers launch regardless
+of which window opens, the view covers a session left running for days.
 
 **STATUS:**
-- Shipped: pushed to main and released as **v1.0.1** (universal, ad-hoc
-  signed, Latest) — github.com/artsu281-ai/double-bubble/releases/tag/v1.0.1.
-  Version lives in `project.yml` (`info.properties` + `settings.base`), which
+- v1.0.1 released (the Dock fix). Working tree now at **1.0.2**, committed
+  but NOT yet released — ask before cutting it.
+- Version lives in `project.yml` (`info.properties` + `settings.base`), which
   *generates* `DoubleBubble/Info.plist` — editing the plist directly is
   pointless, `xcodegen generate` overwrites it.
+- DerivedData path is `DoubleBubble-gkknsnogypxvygavpkbmsdakwdaf`. An older
+  `-efuzpmiujmlskxayjezdsyyreyqm` tree survives from when the project lived in
+  ~/Documents; launching that one silently tests a months-old build. Get the
+  path from `xcodebuild -showBuildSettings`, don't hardcode it.
 - First Open of each existing account rebuilds its copy (fingerprint
   changed), which resets its ad-hoc signature — Screen Recording /
   Accessibility grants for those copies need granting once more. Unavoidable:
@@ -56,7 +48,14 @@ after). Injection case checked separately: name is resolved literally.
   scope per the user.
 
 **NEXT (queue):**
-No active task. The user has not yet confirmed the fix by clicking a pinned
-Dock tile on their own machine — verification so far is a scratch copy of
-Claude.app, not their live accounts. If picked up: the `.electronFlag`
-wrapper-deletion bug above is the natural follow-up.
+Phase 2, if the user greenlights it: integrate Sparkle for real auto-install.
+Unresolved question that decides whether it is even viable — whether Sparkle
+validates an update whose app is only ad-hoc signed (no Developer ID). Docs
+don't say; EdDSA is its documented integrity mechanism and is independent of
+Apple signing, and this app sets no hardened runtime / library validation
+(`flags=0x2(adhoc)` only), so the documented blocker doesn't apply. Only a
+real update cycle will settle it. If it fails, UpdateChecker stays as-is.
+
+Also still open: the user hasn't confirmed the v1.0.1 Dock fix on their own
+live accounts — verification was a scratch copy of Claude.app. And the
+`.electronFlag` wrapper-deletion bug above.

@@ -10,6 +10,7 @@
 		21659535C85B29C923F36757 /* BubbleMark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285FC1CD4519962DC37CA97 /* BubbleMark.swift */; };
 		23C027AFF76008B4CB93956A /* AboutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4A57756B638FCCB51EA8B4 /* AboutSettingsView.swift */; };
 		2F70244E5649C45A6BC507FC /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F864AE3E398BF1EE75B4C8AD /* NotificationService.swift */; };
+		2FF01334012B0072C075A87C /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 802F10C0860C8F855F6AB822 /* UpdateChecker.swift */; };
 		317A235DB0362B2D7F568272 /* ManagedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEFB751656938F8CED5DB241 /* ManagedApp.swift */; };
 		42F3161B6C5042F0AD603B0E /* AccountIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62048241210426CB09FE058E /* AccountIcon.swift */; };
 		66D6C78D13D10946351F4655 /* AppInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435C22C64AB594B21D0A2A93 /* AppInstance.swift */; };
@@ -47,6 +48,7 @@
 		66096C39D03543C29F7CDC9F /* DoubleBubble.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoubleBubble.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		67DE699110C48CF400F70840 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		69D23A9E62E97BEFEA81DC00 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		802F10C0860C8F855F6AB822 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		9731963773FAEB883ED95FD3 /* AppLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguage.swift; sourceTree = "<group>"; };
 		AEFB751656938F8CED5DB241 /* ManagedApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedApp.swift; sourceTree = "<group>"; };
 		B25327752194A2A8D93A7AA2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -93,6 +95,7 @@
 				F864AE3E398BF1EE75B4C8AD /* NotificationService.swift */,
 				19A34A759C778A4B977E4F11 /* ProcessMonitor.swift */,
 				B80ED456F7B0D1A0D3DE1622 /* SystemSettings.swift */,
+				802F10C0860C8F855F6AB822 /* UpdateChecker.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -236,6 +239,7 @@
 				9921FFBA2D04A2A4662E078E /* ProcessMonitor.swift in Sources */,
 				A894F640D335CAA73A8C1C13 /* Profile.swift in Sources */,
 				CF1F21D15E47FFC5475AB8DE /* SystemSettings.swift in Sources */,
+				2FF01334012B0072C075A87C /* UpdateChecker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -314,7 +318,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -333,7 +337,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -379,7 +383,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -392,7 +396,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "Double Bubble";

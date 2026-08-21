@@ -140,11 +140,28 @@ The settings icon in the top-right of the main window (or ⌘,):
 
 - **Interface** — appearance theme (Default/System/Light/Dark) and
   interface density (Comfortable/Compact).
-- **General** — launch at login, notifications on launch failure.
+- **General** — launch at login, notifications on launch failure, checking
+  for updates.
 - **Language** — interface language (EN/RU/System); switching requires a
   relaunch, and the app will tell you so itself.
 - **Advanced** — advanced library settings.
-- **About** — version, publisher.
+- **About** — version, publisher, and a manual update check.
+
+## Updates
+
+Double Bubble asks GitHub once a day whether a newer release exists. If one
+does, a bar appears at the top of the window with a link to it; dismissing
+that bar hides that particular version, and a later one will still show up.
+Nothing is downloaded or installed for you — the app is signed ad hoc, so
+installing an update always means unzipping it and approving it in
+Gatekeeper yourself, exactly as with the first install.
+
+**This check is the only time Double Bubble uses the network.** It is an
+anonymous GET of a public URL: no account is involved, nothing identifies
+you or your machine, and nothing is sent about which apps you manage or how
+many accounts you run. Turn it off in **Settings → General → Check for
+Updates** and the app makes no network requests at all; **About** still has
+a button to check by hand whenever you want.
 
 ## Known limitations
 

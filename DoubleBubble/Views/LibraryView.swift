@@ -6,6 +6,7 @@ import UniformTypeIdentifiers
 struct LibraryView: View {
     @ObservedObject var library: AppLibrary
     @ObservedObject private var monitor = ProcessMonitor.shared
+    @ObservedObject private var updates = UpdateChecker.shared
 
     @Environment(\.themePalette) private var palette
 
@@ -35,6 +36,16 @@ struct LibraryView: View {
     }
 
     var body: some View {
+        VStack(spacing: 0) {
+            if let release = updates.available {
+                UpdateBanner(release: release) { updates.skip(release) }
+            }
+            splitView
+        }
+        .task { await updates.checkIfDue() }
+    }
+
+    private var splitView: some View {
         NavigationSplitView {
             sidebar
                 .navigationSplitViewColumnWidth(min: 220, ideal: 244, max: 320)
@@ -1226,5 +1237,48 @@ private struct AddAccountCard: View {
         )
         .onHover { isHovering = $0 }
         .help("Add another account to run alongside this one")
+    }
+}
+
+// MARK: - Update banner
+
+/// Sits above the window's content when a newer release exists. Deliberately
+/// only a link: the app is signed ad hoc, so installing an update always means
+/// the user approving the new copy themselves — a one-click "Update" button
+/// here would be promising something it can't do.
+private struct UpdateBanner: View {
+    let release: UpdateChecker.Release
+    let onDismiss: () -> Void
+
+    @Environment(\.themePalette) private var palette
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "arrow.down.circle.fill")
+                .foregroundStyle(palette.accentColor)
+
+            Text("Double Bubble \(release.version) is available.")
+                .font(.subheadline)
+
+            Link("What's new", destination: release.url)
+                .font(.subheadline.weight(.medium))
+
+            Spacer(minLength: 0)
+
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .font(.caption.weight(.semibold))
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
+            .help("Hide until the next release")
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 9)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(palette.accentColor.opacity(0.12))
+        .overlay(alignment: .bottom) {
+            Divider()
+        }
     }
 }
