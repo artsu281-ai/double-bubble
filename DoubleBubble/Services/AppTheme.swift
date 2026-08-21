@@ -86,13 +86,21 @@ struct ThemePalette: Equatable {
     var success: Color
     var danger: Color
 
+    /// Divider between rows inside a card, and the card's own border.
+    ///
+    /// Not a grey: on the cream ground a neutral hairline reads as a pencil
+    /// line ruled across the surface, while a warm one reads as the edge of
+    /// the paper itself.
+    var hairline: Color
+
     static let systemDefault = ThemePalette(
         accent: nil,
         windowBackground: Color(nsColor: .windowBackgroundColor),
         cardBackground: Color(nsColor: .controlBackgroundColor),
         sidebarBackground: nil,
         success: Color(nsColor: .systemGreen),
-        danger: Color(nsColor: .systemRed)
+        danger: Color(nsColor: .systemRed),
+        hairline: Color(nsColor: .separatorColor)
     )
 
     /// Night side of the house theme. Same warmth, arrived at by darkening the
@@ -111,7 +119,8 @@ struct ThemePalette: Equatable {
         // Lifted and slightly desaturated so they read on a dark warm ground
         // without glowing the way the stock system colours do.
         success: Color(nsColor: NSColor(srgbRed: 0.494, green: 0.722, blue: 0.494, alpha: 1)),  // #7EB87E
-        danger: Color(nsColor: NSColor(srgbRed: 0.902, green: 0.451, blue: 0.400, alpha: 1))    // #E67366
+        danger: Color(nsColor: NSColor(srgbRed: 0.902, green: 0.451, blue: 0.400, alpha: 1)),   // #E67366
+        hairline: Color.white.opacity(0.085)
     )
 
     static let terracotta = ThemePalette(
@@ -123,7 +132,8 @@ struct ThemePalette: Equatable {
         // well past the clay accent in darkness and away from it in hue, so a
         // destructive control never reads as just another accented one.
         success: Color(nsColor: NSColor(srgbRed: 0.290, green: 0.502, blue: 0.302, alpha: 1)),  // #4A804D
-        danger: Color(nsColor: NSColor(srgbRed: 0.639, green: 0.176, blue: 0.145, alpha: 1))    // #A32D25
+        danger: Color(nsColor: NSColor(srgbRed: 0.639, green: 0.176, blue: 0.145, alpha: 1)),   // #A32D25
+        hairline: Color(nsColor: NSColor(srgbRed: 0.50, green: 0.40, blue: 0.30, alpha: 0.16))
     )
 }
 

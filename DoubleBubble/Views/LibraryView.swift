@@ -400,7 +400,7 @@ private struct SettingsToolbarButton: View {
         .keyboardShortcut(",", modifiers: .command)
         .popover(isPresented: $isPresented, arrowEdge: .bottom) {
             SettingsView(library: library)
-                .frame(width: 420, height: 420)
+                .frame(width: 520, height: 600)
         }
     }
 }
