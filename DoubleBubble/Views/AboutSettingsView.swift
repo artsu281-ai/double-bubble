@@ -57,35 +57,39 @@ struct SettingsView: View {
             detail
         }
         .frame(minWidth: 760, idealWidth: 820, minHeight: 520, idealHeight: 600)
-        .background(palette.windowBackground)
     }
 
+    /// A real sidebar `List`, not stacks painted to look like one. That is what
+    /// carries the system's vibrant material, and it is the same thing
+    /// `LibraryView` uses — so the two windows cannot end up with glass on one
+    /// side of ⌘, and flat paint on the other. The theme override is the same
+    /// rule too: a palette that brings its own surface gets it, and one that
+    /// doesn't keeps the system's.
     private var sidebar: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            group(String(localized: "Settings"), SettingsSection.allCases.filter { !$0.isInformational }, top: 26)
-            group(String(localized: "Information"), SettingsSection.allCases.filter(\.isInformational), top: 20)
-            Spacer(minLength: 16)
-            footer
+        List(selection: Binding(
+            get: { section },
+            set: { section = $0 ?? section }
+        )) {
+            Section(String(localized: "Settings")) {
+                ForEach(SettingsSection.allCases.filter { !$0.isInformational }) { item in
+                    Label(item.title, systemImage: item.icon)
+                        .font(.listItem)
+                        .tag(item)
+                }
+            }
+            Section(String(localized: "Information")) {
+                ForEach(SettingsSection.allCases.filter(\.isInformational)) { item in
+                    Label(item.title, systemImage: item.icon)
+                        .font(.listItem)
+                        .tag(item)
+                }
+            }
         }
-        .padding(.horizontal, 10)
-        .padding(.bottom, 14)
+        .listStyle(.sidebar)
+        .scrollContentBackground(palette.overridesSidebar ? .hidden : .automatic)
+        .background(palette.sidebarBackground ?? Color.clear)
         .frame(width: 208)
-        .background(palette.sidebarBackground ?? Color(nsColor: .windowBackgroundColor))
-    }
-
-    @ViewBuilder
-    private func group(_ label: String, _ items: [SettingsSection], top: CGFloat) -> some View {
-        Text(label.uppercased())
-            .font(.sectionLabel)
-            .kerning(0.8)
-            .foregroundStyle(.tertiary)
-            .padding(.horizontal, 12)
-            .padding(.top, top)
-            .padding(.bottom, 6)
-
-        ForEach(items) { item in
-            SettingsSidebarRow(item: item, isSelected: item == section) { section = item }
-        }
+        .safeAreaInset(edge: .bottom, spacing: 0) { footer }
     }
 
     /// The same at-a-glance line Intact keeps down here: what the app is doing
@@ -107,8 +111,10 @@ struct SettingsView: View {
                 .font(.meta)
                 .foregroundStyle(.tertiary)
         }
-        .padding(.horizontal, 10)
-        .padding(.top, 4)
+        .padding(.horizontal, 14)
+        .padding(.top, 6)
+        .padding(.bottom, 12)
+        .background(palette.sidebarBackground ?? Color.clear)
     }
 
     @ViewBuilder
@@ -127,43 +133,6 @@ struct SettingsView: View {
         case .about:
             SettingsPage(title: section.title) { AboutSection() }
         }
-    }
-}
-
-private struct SettingsSidebarRow: View {
-    let item: SettingsSection
-    let isSelected: Bool
-    let action: () -> Void
-
-    @Environment(\.themePalette) private var palette
-    @State private var hovering = false
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 10) {
-                Image(systemName: item.icon)
-                    .font(.listItem)
-                    .fontWeight(isSelected ? .semibold : .regular)
-                    .foregroundStyle(isSelected ? palette.accentColor : Color.secondary)
-                    .frame(width: 19)
-                Text(item.title)
-                    .font(.listItem)
-                    .fontWeight(isSelected ? .semibold : .regular)
-                    .foregroundStyle(isSelected ? Color.primary : Color.secondary)
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 11)
-            .padding(.vertical, 7)
-            .background(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(isSelected ? palette.accentColor.opacity(0.14)
-                                     : (hovering ? palette.hairline.opacity(0.6) : .clear))
-            )
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
-        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 }
 
