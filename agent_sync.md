@@ -5,34 +5,41 @@ Keep this short. Overwrite, don't append — history lives in git, not here.
 
 **LAST_ACTION:**
 [Claude Code] -> [next agent]:
-Drew a dark theme for the app icon (commit cc30ba1). make_app_icon.py now
-renders either theme from one set of geometry. The dark mark holds the two
-relationships that make it legible rather than the literal colours: discs 43
-luma apart (what separates them at 16pt), weaker disc ~80 luma above its
-plate (matching the lighter disc on cream). Plate is warm near-black —
-neutral grey under terracotta reads as a different brand.
+Dark app-icon theme, drawn and now actually shown (cc30ba1, 4b38e18).
+make_app_icon.py renders both themes from one geometry. The dark mark keeps
+the *relationships*, not the colours: discs 43 luma apart (what stops them
+merging at 16pt), weaker disc ~80 luma above its plate (matching the lighter
+disc on cream). Plate is warm near-black — neutral grey under terracotta
+reads as a different brand.
 
-Load-bearing finding, do not re-litigate by trial: **a .appiconset cannot
-carry a dark macOS app icon.** Adding `appearances: luminosity/dark` does NOT
-fail the build — it looks like it worked — but actool logs the dark images as
-"unassigned children" and drops them, and `assetutil --info` on the built
-Assets.car then shows every AppIcon entry with Appearance absent. Verified
-both ways. Dark app icons on current macOS come from Icon Composer's `.icon`
-format. Icon Composer.app ships inside Xcode 26 but is a GUI app, and it
-carries no template or JSON schema to author `.icon` by hand, so nobody
-should invent that format speculatively.
+Two load-bearing findings, do not re-litigate by trial:
+1. **A .appiconset cannot carry a dark macOS app icon.** Adding
+   `appearances: luminosity/dark` does NOT fail the build — it looks like it
+   worked — but actool logs "unassigned children" and drops the images, and
+   `assetutil --info` on the built Assets.car shows every AppIcon entry with
+   Appearance absent. Verified both ways.
+2. **Icon Composer's `.icon` is layered**, handing shape/shadow/material to
+   macOS. Adopting it would restyle the light mark under Liquid Glass, not
+   just add a dark variant — the user likes the current flat drawing, so this
+   was deliberately not done. `ictool` (inside Icon Composer.app/Contents/
+   Executables) only *exports* from an existing .icon; it cannot author one,
+   and no schema or template ships, so nobody should invent icon.json.
 
-So the dark art lives in Scripts/AppIcon-dark/ (+ AppIcon-dark.icns) as
-design source, ready to hand to Icon Composer. The asset catalogue is
-light-only and the build is warning-free. Light PNGs are byte-identical to
-what was committed before — 0 of them appear in the commit — so the refactor
-provably changed no rendering.
+So DockIcon.swift sets NSApp.applicationIconImage from
+Resources/AppIcon-dark.icns, keyed on NSApp.effectiveAppearance via KVO with
+.initial. nil restores the bundle icon, so light needs no second asset. Known
+trade, stated in the commit and docs/UI.md: it only applies while the app
+runs. Verified both branches in the running app (light -> cleared to bundle;
+forced darkAqua -> dark icns installed, all 10 reps).
+
+Light PNGs are byte-identical across both commits — 0 of them appear in
+either — so neither change touched the existing rendering.
 
 **STATUS:**
 - Released through **v1.0.2** (notify-on-new-release), Latest. v1.0.1 was
   the Dock fix. Endpoint now serves v1.0.2, so anyone on 1.0.1 gets the bar.
-- cc30ba1 (dark icon) is committed but **not pushed** — user hasn't been
-  asked, and the icon direction may still change.
+- Dark icon shipped in-tree (cc30ba1 + 4b38e18); cc30ba1 pushed, 4b38e18 not
+  pushed yet and not in any release — newest release is still v1.0.2.
 - User is on macOS 27 / Xcode 26.6. README still claims Xcode 16+.
 - Version lives in `project.yml` (`info.properties` + `settings.base`), which
   *generates* `DoubleBubble/Info.plist` — editing the plist directly is
@@ -55,9 +62,8 @@ provably changed no rendering.
   scope per the user.
 
 **NEXT (queue):**
-Open with the user: push cc30ba1, and whether to move the icon pipeline to
-Icon Composer `.icon` so the dark variant actually ships (GUI work — the
-dark art is already rendered and waiting).
+Ask before pushing 4b38e18 / cutting v1.0.3. The dark icon is only visible in
+a build the user runs, so it needs a release to reach anyone.
 
 Phase 2, if the user greenlights it: integrate Sparkle for real auto-install.
 Unresolved question that decides whether it is even viable — whether Sparkle
