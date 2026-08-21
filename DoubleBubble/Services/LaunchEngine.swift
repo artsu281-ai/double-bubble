@@ -546,18 +546,22 @@ final class LaunchEngine: @unchecked Sendable {
 
     /// Everything that would change what gets baked into a `bundleCopy`/
     /// `copyThenFlag` copy: the source app's version, and whatever
-    /// `patchInfoPlist`/`IconFactory.brand` stamp onto it for this account.
+    /// `patchInfoPlist`/`IconFactory.brand`/`bakeIsolationFlag` stamp onto it
+    /// for this account.
     ///
     /// Deliberately not just `account` itself — `Account` also carries fields
     /// like `lastOpenedAt` that have nothing to do with the copy's contents,
     /// and comparing the whole struct would force a rebuild (and a fresh
     /// ad-hoc signature) on every single launch, defeating the point.
-    private func copyFingerprint(appURL: URL, account: Account) -> String {
+    private func copyFingerprint(
+        appURL: URL, account: Account, bakedArgument: String?
+    ) -> String {
         let version = Self.bundleVersion(at: appURL) ?? "unknown"
         let iconDigest = account.iconData.map {
             SHA256.hash(data: $0).map { String(format: "%02x", $0) }.joined()
         } ?? "none"
-        return [version, account.name, account.colorHex, iconDigest].joined(separator: "\u{0}")
+        return [version, account.name, account.colorHex, iconDigest,
+                bakedArgument ?? "none"].joined(separator: "\u{0}")
     }
 
     // MARK: - Strategy: Electron / Chromium
@@ -796,7 +800,18 @@ final class LaunchEngine: @unchecked Sendable {
         let appName = appURL.deletingPathExtension().lastPathComponent
         let copyURL = accountDir.appendingPathComponent(appName + ".app")
         let fingerprintURL = accountDir.appendingPathComponent(".doublebubble-fingerprint")
-        let fingerprint = copyFingerprint(appURL: appURL, account: account)
+
+        // The isolation flag is baked into the copy rather than passed on the
+        // command line, so that it applies however the copy is started. See
+        // `bakeIsolationFlag`.
+        let bakedArgument: String? = workdir.map { w in
+            let dataDir = dataDirectory(slug: slug, account: account)
+            return w.separateValue
+                ? "\(Self.shellQuoted(w.flag)) \(Self.shellQuoted(dataDir.path))"
+                : Self.shellQuoted("\(w.flag)=\(dataDir.path)")
+        }
+        let fingerprint = copyFingerprint(
+            appURL: appURL, account: account, bakedArgument: bakedArgument)
 
         // Reusing an up-to-date copy, instead of rebuilding unconditionally on
         // every single launch, is what lets a Screen Recording or Accessibility
@@ -821,6 +836,13 @@ final class LaunchEngine: @unchecked Sendable {
             let plistURL = copyURL.appendingPathComponent("Contents/Info.plist")
             try patchInfoPlist(at: plistURL, displayName: account.name, key: account.isolationKey)
 
+            // Bake the isolation flag in before signing, for the same reason as
+            // the icon: this rewrites Info.plist and adds an executable.
+            var realBinary: URL?
+            if let bakedArgument {
+                realBinary = try bakeIsolationFlag(into: copyURL, argument: bakedArgument)
+            }
+
             // Brand the Dock tile before signing — editing resources afterwards
             // would invalidate the signature. A failure here is cosmetic, so the
             // launch carries on with the original artwork.
@@ -832,7 +854,7 @@ final class LaunchEngine: @unchecked Sendable {
                 accountImage: account.icon
             )
 
-            resignBundle(at: copyURL)
+            resignBundle(at: copyURL, alsoSigning: realBinary)
 
             // Written last, only once everything above actually succeeded — a
             // build that crashed or threw partway through must never be mistaken
@@ -840,37 +862,23 @@ final class LaunchEngine: @unchecked Sendable {
             try? fingerprint.write(to: fingerprintURL, atomically: true, encoding: .utf8)
         }
 
-        // Re-signing dropped the sandbox entitlement, so the copy may now be
-        // pointed at a directory of our choosing. Without this the copies share
-        // one support folder and the second exits on the first one's lock.
-        if let workdir {
-            guard let binary = findMainBinary(in: copyURL) else { throw LaunchError.launchFailed }
-
-            let dataDir = dataDirectory(slug: slug, account: account)
-            try FileManager.default.createDirectory(at: dataDir, withIntermediateDirectories: true)
-
-            let process = Process()
-            process.executableURL = URL(fileURLWithPath: binary)
-            process.arguments = workdir.separateValue
-                ? [workdir.flag, dataDir.path]
-                : ["\(workdir.flag)=\(dataDir.path)"]
-            process.environment = ProcessInfo.processInfo.environment
-            try process.run()
-
-            try await Task.sleep(nanoseconds: 1_500_000_000)
-
-            guard process.isRunning else { throw LaunchError.launchFailed }
-
-            let inst = AppInstance(id: UUID(), accountId: account.id,
-                                   pid: process.processIdentifier,
-                                   bundleCopyURL: copyURL,
-                                   launchedAt: Date(),
-                                   strategy: .copyThenFlag(flag: workdir.flag,
-                                                           separateValue: workdir.separateValue))
-            ProcessMonitor.shared.registerProcess(process, pid: inst.pid)
-            return inst
+        // Re-signing dropped the sandbox entitlement, so the copy may be
+        // pointed at a directory of our choosing — which `bakeIsolationFlag`
+        // has already written into it. Without that the copies share one
+        // support folder and the second exits on the first one's lock; the
+        // directory itself still has to exist before the app opens.
+        if workdir != nil {
+            try FileManager.default.createDirectory(
+                at: dataDirectory(slug: slug, account: account),
+                withIntermediateDirectories: true)
         }
 
+        // Opened as a bundle, not by running the binary with the flag appended:
+        // the flag now lives inside the copy, so this is the very same launch a
+        // Dock click performs. Anything that only worked when Double Bubble
+        // passed the flag itself would be a bug users hit the moment they pin
+        // the copy — this way there is no separate path left to diverge.
+        //
         // Use async-compatible completion handler bridge (no semaphore!)
         let app: NSRunningApplication = try await withCheckedThrowingContinuation { continuation in
             let config = NSWorkspace.OpenConfiguration()
@@ -890,7 +898,10 @@ final class LaunchEngine: @unchecked Sendable {
                                pid: app.processIdentifier,
                                bundleCopyURL: copyURL,
                                launchedAt: Date(),
-                               strategy: .bundleCopy)
+                               strategy: workdir.map {
+                                   .copyThenFlag(flag: $0.flag,
+                                                 separateValue: $0.separateValue)
+                               } ?? .bundleCopy)
         ProcessMonitor.shared.registerApp(pid: inst.pid)
         return inst
     }
@@ -943,6 +954,78 @@ final class LaunchEngine: @unchecked Sendable {
         try? p.run(); p.waitUntilExit()
     }
 
+    /// Name of the shim installed as the copy's `CFBundleExecutable`.
+    /// Prefixed so it can never collide with the app's own executable.
+    private static let launcherName = "doublebubble-launcher"
+
+    /// Wraps `'` in a POSIX-safe single-quoted string.
+    private static func shellQuoted(_ value: String) -> String {
+        "'" + value.replacingOccurrences(of: "'", with: "'\\''") + "'"
+    }
+
+    /// Writes the isolation flag *into* the copy instead of passing it on the
+    /// command line at launch.
+    ///
+    /// A flag passed by Double Bubble only exists for launches Double Bubble
+    /// performs. Everything else that can start an app bundle — clicking a
+    /// pinned Dock tile, Finder, Spotlight, `open`, a login item — runs the
+    /// executable with no arguments at all, so the app fell back to its
+    /// default profile: the user pinned their second account to the Dock,
+    /// clicked it, and silently got their *first* account, sharing exactly the
+    /// data the copy exists to keep apart. Pinning is a supported workflow
+    /// (`cleanUpOrphanedBundles` deliberately spares pinned copies), so the
+    /// flag has to be a property of the copy, not of one launch path.
+    ///
+    /// The copy's real executable stays where it is and a shim takes its place
+    /// as `CFBundleExecutable`, exec'ing it with the flag already applied.
+    /// Because the real binary is no longer the bundle's main executable,
+    /// `codesign --deep` would leave it under the *vendor's* signature — and
+    /// the vendor's entitlements are precisely what a `copyThenFlag` app like
+    /// Claude Desktop is copied to shed (see `AppKnowledgeBase`). Its path is
+    /// returned so `resignBundle` re-signs it ad-hoc explicitly.
+    @discardableResult
+    private func bakeIsolationFlag(into copyURL: URL, argument: String) throws -> URL {
+        let contentsDir = copyURL.appendingPathComponent("Contents")
+        let plistURL = contentsDir.appendingPathComponent("Info.plist")
+        let data = try Data(contentsOf: plistURL)
+        guard var plist = try PropertyListSerialization.propertyList(
+                from: data, options: [], format: nil) as? [String: Any],
+              let realExecName = plist["CFBundleExecutable"] as? String,
+              realExecName != Self.launcherName else {
+            throw LaunchError.plistReadFailed
+        }
+
+        let macosDir = contentsDir.appendingPathComponent("MacOS")
+        let realBinary = macosDir.appendingPathComponent(realExecName)
+        guard FileManager.default.isExecutableFile(atPath: realBinary.path) else {
+            throw LaunchError.launchFailed
+        }
+
+        // Resolved relative to the shim rather than baked in as an absolute
+        // path, so the copy still works if it is ever moved.
+        //
+        // The executable name comes out of a third-party Info.plist, so it is
+        // single-quoted like any other untrusted value: interpolated bare into
+        // a double-quoted word, a name containing `$(...)` would run as a
+        // command every time the copy launched.
+        let script = """
+        #!/bin/sh
+        DIR=$(cd "$(dirname "$0")" && pwd)
+        exec "$DIR"/\(Self.shellQuoted(realExecName)) \(argument) "$@"
+        """
+        let launcherURL = macosDir.appendingPathComponent(Self.launcherName)
+        try script.write(to: launcherURL, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0o755], ofItemAtPath: launcherURL.path)
+
+        plist["CFBundleExecutable"] = Self.launcherName
+        let newData = try PropertyListSerialization.data(
+            fromPropertyList: plist, format: .xml, options: 0)
+        try newData.write(to: plistURL)
+
+        return realBinary
+    }
+
     private func patchInfoPlist(at plistURL: URL, displayName: String, key: String) throws {
         let data = try Data(contentsOf: plistURL)
         guard var plist = try PropertyListSerialization.propertyList(
@@ -956,7 +1039,11 @@ final class LaunchEngine: @unchecked Sendable {
         try newData.write(to: plistURL)
     }
 
-    private func resignBundle(at url: URL) {
+    /// `alsoSigning` is the copy's real executable once `bakeIsolationFlag`
+    /// has demoted it from `CFBundleExecutable` to an ordinary file in
+    /// `Contents/MacOS`, which `--deep` no longer re-signs on its own. Signing
+    /// it ad-hoc is what strips the vendor entitlements the copy has to shed.
+    private func resignBundle(at url: URL, alsoSigning realBinary: URL? = nil) {
         let fm = FileManager.default
         for sub in ["Contents/Frameworks", "Contents/PlugIns"] {
             let dir = url.appendingPathComponent(sub)
@@ -965,6 +1052,7 @@ final class LaunchEngine: @unchecked Sendable {
                 codesign(path: dir.appendingPathComponent($0).path)
             }
         }
+        if let realBinary { codesign(path: realBinary.path) }
         codesign(path: url.path, deep: true)
     }
 

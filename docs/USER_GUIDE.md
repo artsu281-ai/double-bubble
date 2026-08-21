@@ -59,20 +59,28 @@ screen) without opening the main window at all.
 Double Bubble creates a separate copy (or wrapper) of the app for each
 account under `~/.double_bubble/bundles/`, and a separate data folder under
 `~/.double_bubble/data/`. Nothing technically stops you from finding that
-copy in Finder and double-clicking it directly — it'll launch. **Don't do
-that:**
+copy in Finder and double-clicking it directly — it'll launch, and it will
+be signed into the right account: the copy carries its own identity and
+its own data folder no matter what starts it, so a copy pinned to the Dock
+opens the account you pinned, not the app's ordinary profile.
 
-- Double Bubble only learns an account is running when it launches it
-  itself. A process opened around it won't show as "running" — the **Open**
-  button stays clickable, and clicking it can launch a third copy right on
-  top of the one already running.
+What you lose by going around Double Bubble is only the bookkeeping:
+
+- Double Bubble notices accounts started elsewhere when it next launches,
+  not while it's already open. Until then such an account won't show as
+  "running" — the **Open** button stays clickable, and clicking it can
+  launch a second copy on top of the one already running.
 - **Stop**, "Bring to Front," and switching accounts from the menu bar only
-  work with what Double Bubble itself launched.
+  work with what Double Bubble itself launched this session.
 
-Open and close accounts **only with the Open/Stop buttons** — in the main
-window or the menu bar. If you do end up with a stray process launched
-around Double Bubble (say, from experimenting), just close it the normal
+So while Double Bubble is open, use the **Open/Stop buttons**. If you do
+end up with a stray process launched around it, just close it the normal
 way (⌘Q or Activity Monitor) — Double Bubble itself won't be affected.
+
+This applies to accounts that run from their own copy. Apps that can't be
+copied at all (see [Distinct icons](#distinct-icons) below) are started
+through a small temporary wrapper that's discarded on **Stop**, so there's
+nothing there worth pinning.
 
 ## Distinct icons
 

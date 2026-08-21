@@ -24,7 +24,7 @@ API.
 | `.jetbrains(binaryPath:)` | Launches the original binary with `IDEA_PROPERTIES=<.properties file>` in the environment | The IntelliJ platform (IDEA, PyCharm, WebStorm, GoLand, RustRover, Rider, CLion) |
 | `.configDir(binaryPath:flag:separateValue:)` | Launches the original binary with an arbitrary config-directory flag | Apps with their own CLI flag (Zed: `--config-dir=`, Telegram Desktop: `-workdir`) |
 | `.bundleCopy` | Copies the whole `.app`, patches `CFBundleIdentifier`/`CFBundleDisplayName` in its `Info.plist`, re-signs it ad hoc, launches the copy | "Native" Cocoa apps with no flag for pointing at a data directory |
-| `.copyThenFlag(flag:separateValue:)` | A combination: copies and re-signs the bundle, then launches the **copy** with a data-directory flag | Sandboxed apps where the data flag doesn't help while still sandboxed (re-signing drops the entitlement) |
+| `.copyThenFlag(flag:separateValue:)` | A combination: copies and re-signs the bundle, with a data-directory flag baked **into the copy** so every launch path gets it | Sandboxed apps where the data flag doesn't help while still sandboxed (re-signing drops the entitlement) |
 
 `displayName`, `label`, `symbolName`, `explanation` are all the same enum,
 just with text/an icon for the UI (the badges on an app's card).
@@ -141,17 +141,43 @@ single GNU-style string (`--config-dir=/path`).
 6. Opens the copy via `NSWorkspace.openApplication` with
    `createsNewApplicationInstance = true`.
 
-### `.copyThenFlag` — a copy that then gets handed a flag
+### `.copyThenFlag` — a copy with the flag baked into it
 
-The same copy/re-sign as above, but instead of
-`NSWorkspace.openApplication`, the copy is launched directly through
-`Process` with a data flag pointing at its own directory under
-`~/.double_bubble/data/...`. Needed for apps that, while sandboxed,
-*accept* a working-directory flag but can't actually use it — re-signing
-drops the sandbox entitlement, and only then does the flag start working
-(otherwise both copies would keep falling back to the shared system
-support directory, and the second would exit on the first one's file
-lock).
+The same copy/re-sign as above, plus a data flag pointing at the copy's
+own directory under `~/.double_bubble/data/...`. Needed for apps that,
+while sandboxed, *accept* a working-directory flag but can't actually use
+it — re-signing drops the sandbox entitlement, and only then does the flag
+start working (otherwise both copies would keep falling back to the shared
+system support directory, and the second would exit on the first one's
+file lock).
+
+The flag is written **into the copy**, not passed on the command line:
+
+```
+Contents/
+  Info.plist               — CFBundleExecutable → doublebubble-launcher
+  MacOS/doublebubble-launcher  — exec "$(dirname "$0")/<real exec>" <flag> "$@"
+  MacOS/<real exec>        — untouched, re-signed ad-hoc
+```
+
+A flag passed at launch only exists for launches *Double Bubble* performs.
+Every other way to start an app bundle — a pinned Dock tile, Finder,
+Spotlight, `open`, a login item — runs the executable with no arguments,
+so the app fell back to its default profile: pin the second account to the
+Dock, click it, and you silently got the *first* account, sharing exactly
+the data the copy exists to keep apart. Pinning is a supported workflow
+(`cleanUpOrphanedBundles` deliberately spares pinned copies), so the flag
+has to belong to the copy rather than to one launch path.
+
+Two consequences worth knowing:
+
+- Because the real executable is no longer `CFBundleExecutable`,
+  `codesign --deep` no longer re-signs it, and it would keep the vendor's
+  signature *and entitlements* — the very things a `copyThenFlag` app is
+  copied to shed. `resignBundle(at:alsoSigning:)` signs it explicitly.
+- Double Bubble now opens the copy with `NSWorkspace.openApplication`,
+  exactly like `.bundleCopy` and exactly like a Dock click, so there is no
+  longer a privileged launch path that could work when the Dock's doesn't.
 
 ## Upgrading to distinct icons
 
