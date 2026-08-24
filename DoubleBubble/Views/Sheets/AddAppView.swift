@@ -22,16 +22,32 @@ struct AddAppView: View {
     @State private var isScanning = true
     @State private var search = ""
     @State private var selection: String?
+    /// An app picked through "Choose Another…" that the scan didn't list. It
+    /// joins the list rather than being added straight away, so it goes
+    /// through exactly the same check as everything else.
+    @State private var manual: InstalledApps.Entry?
+
+    /// Below this the list fits on screen whole, and a search field is a
+    /// control that explains nothing and takes the keyboard focus for no
+    /// reason. It appears when there is actually something to search.
+    private let searchThreshold = 8
 
     private var alreadyAdded: Set<String> {
         Set(library.apps.compactMap { library.url(for: $0)?.path })
     }
 
-    private var visible: [InstalledApps.Entry] {
-        let notAdded = entries.filter { !alreadyAdded.contains($0.url.path) }
-        guard !search.isEmpty else { return notAdded }
-        return notAdded.filter { $0.name.localizedCaseInsensitiveContains(search) }
+    private var candidates: [InstalledApps.Entry] {
+        var all = entries.filter { !alreadyAdded.contains($0.url.path) }
+        if let manual, !all.contains(manual) { all.insert(manual, at: 0) }
+        return all
     }
+
+    private var visible: [InstalledApps.Entry] {
+        guard !search.isEmpty else { return candidates }
+        return candidates.filter { $0.name.localizedCaseInsensitiveContains(search) }
+    }
+
+    private var showsSearch: Bool { candidates.count > searchThreshold }
 
     private var selected: InstalledApps.Entry? {
         visible.first { $0.id == selection }
@@ -42,9 +58,6 @@ struct AddAppView: View {
             title: L("Add Application"),
             subtitle: L("Applications on this Mac that Double Bubble knows how to keep separate.")
         ) {
-            TextField(L("Search installed applications"), text: $search)
-                .textFieldStyle(.roundedBorder)
-
             if isScanning {
                 HStack(spacing: Metrics.s) {
                     ProgressView().controlSize(.small)
@@ -57,7 +70,7 @@ struct AddAppView: View {
             } else if visible.isEmpty {
                 emptyState
             } else {
-                list
+                picker
                 Text(L("\(visible.count) applications with a known way to isolate them."))
                     .font(.meta)
                     .foregroundStyle(.secondary)
@@ -78,59 +91,119 @@ struct AddAppView: View {
             Button(L("Add")) { add(selected) }
                 .keyboardShortcut(.defaultAction)
                 .buttonStyle(.borderedProminent)
-                .disabled(selected == nil)
-                .help(selected == nil ? L("Choose an application from the list") : L("Add \(selected?.name ?? "")"))
+                .disabled(selected == nil || selected?.blocked == true)
+                .help(addHelp)
         }
         .task { await scan() }
     }
 
+    private var addHelp: String {
+        guard let selected else { return L("Choose an application from the list") }
+        // A disabled default button has to say why, and here the reason is the
+        // whole point of the screen.
+        if selected.blocked { return L("This app can’t be run twice") }
+        return L("Add \(selected.name)")
+    }
+
     // MARK: Pieces
 
-    private var list: some View {
-        List(selection: $selection) {
-            ForEach(visible) { entry in
-                HStack(spacing: Metrics.m) {
-                    if let icon = entry.icon {
-                        Image(nsImage: icon).resizable().scaledToFit()
-                            .frame(width: 22, height: 22)
-                    } else {
-                        Image(systemName: "app.dashed")
-                            .frame(width: 22, height: 22)
-                            .foregroundStyle(.secondary)
-                    }
+    /// Search and list share one bezel.
+    ///
+    /// They were two separate controls stacked, which put a focus ring around
+    /// an empty rounded box sitting a couple of points wider than the bordered
+    /// list beneath it — a highlight with no visible cause, on something that
+    /// didn't line up with anything. One container, a plain field inside it,
+    /// no ring.
+    private var picker: some View {
+        VStack(spacing: 0) {
+            if showsSearch {
+                HStack(spacing: Metrics.xs + 2) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
 
-                    Text(entry.name)
-                        .font(.listItem)
-                        .lineLimit(1)
+                    TextField(L("Search installed applications"), text: $search)
+                        .textFieldStyle(.plain)
 
-                    Spacer(minLength: Metrics.s)
-
-                    if entry.blocked {
-                        Label(entry.isolationLabel, systemImage: "exclamationmark.triangle.fill")
-                            .font(.meta)
-                            .foregroundStyle(palette.warning)
-                            .labelStyle(.titleAndIcon)
-                    } else {
-                        Text(entry.isolationLabel)
-                            .font(.meta)
-                            .foregroundStyle(.secondary)
+                    if !search.isEmpty {
+                        Button { search = "" } label: {
+                            Image(systemName: "xmark.circle.fill")
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.secondary)
+                        .help(L("Clear search"))
+                        .accessibilityLabel(L("Clear search"))
                     }
                 }
-                .padding(.vertical, 2)
-                .tag(entry.id)
-                .accessibilityElement(children: .combine)
-                .accessibilityLabel("\(entry.name), \(entry.isolationLabel)")
+                .padding(.horizontal, Metrics.s)
+                .padding(.vertical, 6)
+
+                Divider()
+            }
+
+            List(selection: $selection) {
+                ForEach(visible) { entry in
+                    row(entry).tag(entry.id)
+                }
+            }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .frame(height: 200)
+            // Double-clicking a row is the gesture people try first in a list
+            // like this, and having it do nothing reads as the sheet being
+            // broken. Blocked apps stay inert, same as the Add button.
+            .contextMenu(forSelectionType: String.self) { _ in
+            } primaryAction: { ids in
+                guard let id = ids.first,
+                      let entry = visible.first(where: { $0.id == id }) else { return }
+                add(entry)
             }
         }
-        .listStyle(.bordered)
-        .frame(height: 240)
-        // Double-clicking a row is the gesture people try first in a list like
-        // this, and having it do nothing reads as the sheet being broken.
-        .contextMenu(forSelectionType: String.self) { _ in
-        } primaryAction: { ids in
-            guard let id = ids.first, let entry = visible.first(where: { $0.id == id }) else { return }
-            add(entry)
+        .background(
+            RoundedRectangle(cornerRadius: Metrics.cardRadius, style: .continuous)
+                .fill(palette.cardBackground)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: Metrics.cardRadius, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Metrics.cardRadius, style: .continuous)
+                .strokeBorder(palette.hairline, lineWidth: 1)
+        )
+    }
+
+    private func row(_ entry: InstalledApps.Entry) -> some View {
+        HStack(spacing: Metrics.m) {
+            if let icon = entry.icon {
+                Image(nsImage: icon).resizable().scaledToFit()
+                    .frame(width: 22, height: 22)
+            } else {
+                Image(systemName: "app.dashed")
+                    .frame(width: 22, height: 22)
+                    .foregroundStyle(.secondary)
+            }
+
+            Text(entry.name)
+                .font(.listItem)
+                .lineLimit(1)
+                // Greyed like any unavailable choice, rather than looking
+                // identical to the rows that will work.
+                .foregroundStyle(entry.blocked ? .secondary : .primary)
+
+            Spacer(minLength: Metrics.s)
+
+            if entry.blocked {
+                Label(entry.isolationLabel, systemImage: "exclamationmark.triangle.fill")
+                    .font(.meta)
+                    .foregroundStyle(palette.warning)
+                    .labelStyle(.titleAndIcon)
+            } else {
+                Text(entry.isolationLabel)
+                    .font(.meta)
+                    .foregroundStyle(.secondary)
+            }
         }
+        .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(entry.name), \(entry.isolationLabel)")
     }
 
     private var emptyState: some View {
@@ -147,14 +220,18 @@ struct AddAppView: View {
         .padding(.vertical, Metrics.l)
     }
 
-    /// Not a block — an app that can't be isolated can still be run from here
-    /// on its own profile, with its own name and icon, which is the whole
-    /// point of `usesDefaultProfile`. It just must not be a surprise.
+    /// Why this one can't be added.
+    ///
+    /// It used to end with "you can still add it and launch it on the account
+    /// it's already signed into" — true of the data model, and an odd thing to
+    /// offer on a screen whose only job is picking something to run twice.
+    /// Now the row is a dead end with a reason attached, and the alternative
+    /// build, where one is known, is the way forward.
     private func blockedNotice(for entry: InstalledApps.Entry) -> some View {
         NoticeCard(tone: .warning, symbol: "exclamationmark.triangle.fill") {
             Text(L("\(entry.name) can’t run two accounts"))
                 .font(.cardTitle)
-            Text(L("It has to run from the bundle it was installed in, which leaves nowhere to put a second, separate profile. You can still add it and launch it from here on the account it is already signed into."))
+            Text(L("It has to run from the bundle it was installed in, so there is nowhere for a second, separate profile to live."))
                 .font(.rowSubtitle)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -177,19 +254,32 @@ struct AddAppView: View {
         isScanning = false
     }
 
+    /// Picks any bundle, then puts it through the same check as the list.
     private func chooseManually() {
         guard let url = AppChooser.pickApplication() else { return }
+
         // Already in the library? Select it rather than adding a duplicate.
         if let existing = library.apps.first(where: { library.url(for: $0)?.path == url.path }) {
             onAdded(existing.id)
             dismiss()
             return
         }
+
+        let entry = InstalledApps.entry(for: url)
+        if entry.blocked {
+            // Surfaced in the list with its reason instead of being added and
+            // then explained — which is exactly the order this sheet exists
+            // to reverse.
+            manual = entry
+            search = ""
+            selection = entry.id
+            return
+        }
         finish(library.addApp(at: url))
     }
 
     private func add(_ entry: InstalledApps.Entry?) {
-        guard let entry else { return }
+        guard let entry, !entry.blocked else { return }
         finish(library.addApp(at: entry.url))
     }
 

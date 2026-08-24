@@ -1222,6 +1222,17 @@
         }
       }
     },
+    "Clear search": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистить поиск"
+          }
+        }
+      }
+    },
     "Clear selection": {
       "extractionState": "manual",
       "localizations": {
@@ -2146,13 +2157,13 @@
         }
       }
     },
-    "It has to run from the bundle it was installed in, which leaves nowhere to put a second, separate profile. You can still add it and launch it from here on the account it is already signed into.": {
+    "It has to run from the bundle it was installed in, so there is nowhere for a second, separate profile to live.": {
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Приложение обязано запускаться из того бандла, куда было установлено, поэтому второму отдельному профилю просто негде разместиться. Его всё равно можно добавить и запускать отсюда на том аккаунте, под которым оно уже вошло."
+            "value": "Приложение обязано запускаться из своего бандла — второму отдельному профилю негде разместиться."
           }
         }
       }

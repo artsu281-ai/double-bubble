@@ -65,7 +65,7 @@ enum InstalledApps {
     /// copying the bundle, which works for some and fails for many, and a list
     /// that promises 300 apps and delivers on 30 is worse than a short one.
     /// `Choose Another…` is still there for anything not listed.
-    private static func describe(_ url: URL) -> Entry? {
+    static func describe(_ url: URL) -> Entry? {
         guard let bundle = Bundle(url: url),
               let bundleID = bundle.bundleIdentifier else { return nil }
 
@@ -100,5 +100,35 @@ enum InstalledApps {
             ? L("Can’t run twice")
             : (LaunchEngine.shared.detectStrategy(for: entry.url).label)
         return copy
+    }
+}
+
+
+// MARK: - Arbitrary applications
+
+extension InstalledApps {
+
+    /// An entry for any application, listed or not.
+    ///
+    /// "Choose Another…" reaches apps the scan deliberately leaves out, and
+    /// those have to be checked for the same thing the list checks for — an
+    /// app that can only run from its installed bundle can't be isolated,
+    /// whether it was picked from the list or from a file panel.
+    @MainActor
+    static func entry(for url: URL) -> Entry {
+        if let known = describe(url) { return decorate(known) }
+
+        let name = Bundle(url: url)
+            .flatMap { $0.object(forInfoDictionaryKey: "CFBundleName") as? String }
+            ?? url.deletingPathExtension().lastPathComponent
+
+        return decorate(Entry(
+            url: url,
+            name: name,
+            bundleID: Bundle(url: url)?.bundleIdentifier,
+            isolationLabel: "",
+            blocked: LaunchEngine.shared.requiresOriginalBundle(for: url),
+            icon: nil
+        ))
     }
 }
