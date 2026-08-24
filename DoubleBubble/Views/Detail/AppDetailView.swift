@@ -169,7 +169,13 @@ struct AppDetailView: View {
             Text(footerText)
                 .font(.rowSubtitle)
                 .foregroundStyle(.secondary)
+                // A `List` section footer clamps to a single line, so this
+                // sentence was being cut off with an ellipsis instead of
+                // wrapping. `fixedSize` alone doesn't lift that.
+                .lineLimit(nil)
+                .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.top, Metrics.m)
         .padding(.bottom, Metrics.xl)

@@ -122,8 +122,28 @@ struct AccountRow: View {
 
     /// Live where it can be — `Text(_:style:.relative)` keeps counting — and a
     /// single flat sentence for assistive technology, via the label above.
+    ///
+    /// Narrow the window and this line runs out of room. Left to itself,
+    /// SwiftUI squeezes whichever `Text` is longest, which is the date — so
+    /// the row read "Last opened th… · 283.4 MB", truncating the useful half
+    /// to keep a number that is also in the inspector. `ViewThatFits` drops
+    /// the trailing detail whole instead, in the order it can be spared.
     @ViewBuilder
     private var status: some View {
+        ViewThatFits(in: .horizontal) {
+            statusLine(detail: .full)
+            statusLine(detail: .sizeOnly)
+            statusLine(detail: .none)
+        }
+        .font(.meta)
+        .foregroundStyle(.secondary)
+        .lineLimit(1)
+    }
+
+    private enum StatusDetail { case full, sizeOnly, none }
+
+    @ViewBuilder
+    private func statusLine(detail: StatusDetail) -> some View {
         HStack(spacing: Metrics.xs) {
             if isRunning, let instance {
                 RunningDot(size: 5)
@@ -136,26 +156,34 @@ struct AccountRow: View {
                 Text(L("Never opened"))
             }
 
-            if account.usesDefaultProfile {
+            if detail == .full, account.usesDefaultProfile {
                 Text(verbatim: "·")
                 Text(L("App’s own account"))
             }
 
-            if showDiskUsage, let sizeText {
+            if detail != .none, showDiskUsage, let sizeText {
                 Text(verbatim: "·")
                 Text(sizeText).monospacedDigit()
             }
 
+            // Kept at every width: it is the one thing here that asks for an
+            // action, and dropping it silently would hide the reason an
+            // account is running a build that no longer exists on disk.
             if let outdated = library.outdatedVersion(for: account, in: app) {
                 Text(verbatim: "·")
-                Label(L("Restart to update"), systemImage: "arrow.triangle.2.circlepath")
-                    .foregroundStyle(palette.warning)
-                    .help(L("Still running \(outdated). Stop and open it again to pick up the newer version."))
+                Group {
+                    if detail == .full {
+                        Label(L("Restart to update"), systemImage: "arrow.triangle.2.circlepath")
+                    } else {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                            .accessibilityLabel(L("Restart to update"))
+                    }
+                }
+                .foregroundStyle(palette.warning)
+                .help(L("Still running \(outdated). Stop and open it again to pick up the newer version."))
             }
         }
-        .font(.meta)
-        .foregroundStyle(.secondary)
-        .lineLimit(1)
+        .fixedSize(horizontal: true, vertical: false)
     }
 
     private var quickActions: some View {
