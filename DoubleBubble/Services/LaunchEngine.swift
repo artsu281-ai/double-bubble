@@ -30,13 +30,14 @@ enum LaunchStrategy: Equatable {
     /// Short label for badges. Phrased as a description of the isolation, not
     /// as a verb — a chip reading "Copy" next to a button gets misread as an
     /// action the user can take.
+    @MainActor
     var label: String {
         switch self {
-        case .electronFlag:  return String(localized: "Separate data")
-        case .jetbrains:     return String(localized: "Separate config")
-        case .configDir:     return String(localized: "Separate config")
-        case .bundleCopy:    return String(localized: "Separate copy")
-        case .copyThenFlag:  return String(localized: "Separate copy")
+        case .electronFlag:  return L("Separate data")
+        case .jetbrains:     return L("Separate config")
+        case .configDir:     return L("Separate config")
+        case .bundleCopy:    return L("Separate copy")
+        case .copyThenFlag:  return L("Separate copy")
         }
     }
 
@@ -52,18 +53,19 @@ enum LaunchStrategy: Equatable {
     }
 
     /// One line explaining how this account stays separate from the other.
+    @MainActor
     var explanation: String {
         switch self {
         case .electronFlag:
-            return String(localized: "Runs the app with its own user-data directory.")
+            return L("Runs the app with its own user-data directory.")
         case .jetbrains:
-            return String(localized: "Runs the IDE with its own config, system, and plugin folders.")
+            return L("Runs the IDE with its own config, system, and plugin folders.")
         case .configDir:
-            return String(localized: "Runs the app with its own config directory.")
+            return L("Runs the app with its own config directory.")
         case .bundleCopy:
-            return String(localized: "Runs a re-signed copy of the app bundle with its own identifier.")
+            return L("Runs a re-signed copy of the app bundle with its own identifier.")
         case .copyThenFlag:
-            return String(localized: "Runs a re-signed copy of the app bundle, pointed at its own data directory.")
+            return L("Runs a re-signed copy of the app bundle, pointed at its own data directory.")
         }
     }
 }

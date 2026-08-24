@@ -16,9 +16,18 @@ import SwiftUI
 // who changed it.
 extension Font {
 
-    /// The title of a settings page. The only serif in the app — it marks a
-    /// page as a destination rather than a panel.
-    static let pageTitle = system(.largeTitle, design: .serif, weight: .regular)
+    /// The title of a settings page.
+    ///
+    /// Was the one serif in the app, on the reasoning that it marked a page as
+    /// a destination rather than a panel. It marked it as belonging to a
+    /// different app: New York next to a system sidebar reads as a magazine
+    /// masthead dropped into System Settings. The brand still has the accent
+    /// colour, the mark and the account palette to live in — the type is the
+    /// one place on macOS where being unremarkable is the whole job.
+    static let pageTitle = system(.largeTitle, weight: .bold)
+
+    /// The name of whatever the detail pane is currently showing.
+    static let windowTitle = system(.title2, weight: .semibold)
 
     /// The headline of an empty state, where there is nothing else to look at.
     static let emptyTitle = system(.title3, weight: .semibold)
@@ -46,4 +55,8 @@ extension Font {
 
     /// Metadata that has to line up character by character, like a path.
     static let metaMono = system(.subheadline, design: .monospaced)
+
+    /// A number small enough to sit in a badge, wide enough not to reflow the
+    /// row when it ticks over.
+    static let badge = system(.caption, weight: .medium)
 }

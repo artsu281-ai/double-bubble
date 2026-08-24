@@ -14,19 +14,21 @@ enum DockIconTheme: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    @MainActor
     var label: String {
         switch self {
-        case .auto:  return String(localized: "Automatic")
-        case .light: return String(localized: "Light")
-        case .dark:  return String(localized: "Dark")
+        case .auto:  return L("Automatic")
+        case .light: return L("Light")
+        case .dark:  return L("Dark")
         }
     }
 
+    @MainActor
     var detail: String {
         switch self {
-        case .auto:  return String(localized: "Follows the macOS appearance")
-        case .light: return String(localized: "Cream tile, always")
-        case .dark:  return String(localized: "Near-black tile, always")
+        case .auto:  return L("Follows the macOS appearance")
+        case .light: return L("Cream tile, always")
+        case .dark:  return L("Near-black tile, always")
         }
     }
 

@@ -13,8 +13,14 @@ final class AppLibrary: ObservableObject {
     /// accountID -> running instance. In-memory only; a relaunch starts clean.
     @Published var instances: [UUID: AppInstance] = [:]
 
+    /// Saved batch recipes. Deliberately app-agnostic — see `AccountPreset`.
+    @Published var presets: [AccountPreset] = [] {
+        didSet { savePresets() }
+    }
+
     private let storeKey = "com.doublebubble.library"
     private let legacyKey = "com.doublebubble.profiles"
+    private let presetKey = "com.doublebubble.presets"
 
     // Resolving a bookmark and reading an icon are syscalls, and both are
     // touched from view bodies — cache them per app.
@@ -36,6 +42,11 @@ final class AppLibrary: ObservableObject {
             save()
         }
 
+        if let data = UserDefaults.standard.data(forKey: presetKey),
+           let decoded = try? JSONDecoder().decode([AccountPreset].self, from: data) {
+            presets = decoded
+        }
+
         let isolationKeys = Set(apps.flatMap { $0.accounts.map(\.isolationKey) })
         LaunchEngine.shared.cleanUpOrphanedBundles(keeping: isolationKeys)
         LaunchEngine.shared.cleanUpOrphanedData(keeping: isolationKeys)
@@ -53,7 +64,15 @@ final class AppLibrary: ObservableObject {
                 guard let self else { return }
                 let dead = self.instances.filter { !live.contains($0.value.pid) }
                 guard !dead.isEmpty else { return }
-                for (accountID, _) in dead { self.instances[accountID] = nil }
+                for (accountID, _) in dead {
+                    self.instances[accountID] = nil
+                    // Anything reaching here died on its own: `stop(account:)`
+                    // clears the record before the process goes, so a copy the
+                    // user stopped is never in this set. Nothing else in the
+                    // interface distinguishes "you stopped it" from "it
+                    // crashed" — the row simply goes quiet either way.
+                    self.announceUnexpectedExit(of: accountID)
+                }
             }
             .store(in: &cancellables)
     }
@@ -83,11 +102,41 @@ final class AppLibrary: ObservableObject {
         }
     }
 
+    /// Tells the user about a copy that quit without being asked to.
+    private func announceUnexpectedExit(of accountID: UUID) {
+        for app in apps {
+            guard let account = app.account(accountID) else { continue }
+            NotificationService.notifyUnexpectedExit(
+                accountName: account.name, appName: app.name, accountID: accountID
+            )
+            return
+        }
+    }
+
     // MARK: - Persistence
 
     private func save() {
         guard let data = try? JSONEncoder().encode(apps) else { return }
         UserDefaults.standard.set(data, forKey: storeKey)
+    }
+
+    private func savePresets() {
+        guard let data = try? JSONEncoder().encode(presets) else { return }
+        UserDefaults.standard.set(data, forKey: presetKey)
+    }
+
+    /// Drops everything derived from an app's bundle.
+    ///
+    /// Needed whenever the bundle underneath changes identity — relocating the
+    /// app is the case that matters. Leaving the caches would keep the old
+    /// icon, the old strategy and, worst of all, the old resolved URL, so the
+    /// repair would appear to do nothing.
+    func invalidateCaches(for id: ManagedApp.ID) {
+        urlCache[id] = nil
+        iconCache[id] = nil
+        strategyCache[id] = nil
+        sandboxCache[id] = nil
+        libraryValidationCache[id] = nil
     }
 
     /// One-time upgrade from the old two-slot model.

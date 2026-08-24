@@ -17,15 +17,16 @@ enum AppTheme: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    @MainActor
     var label: String {
         switch self {
         // Named for what it is — the app's own look — rather than for its
         // colour: the option people want is "the normal one", and a colour
         // name reads like one choice among equals.
-        case .terracotta: return String(localized: "Default")
-        case .system: return String(localized: "System")
-        case .light: return String(localized: "Light")
-        case .dark: return String(localized: "Dark")
+        case .terracotta: return L("Default")
+        case .system: return L("System")
+        case .light: return L("Light")
+        case .dark: return L("Dark")
         }
     }
 
@@ -66,10 +67,19 @@ struct ThemePalette: Equatable {
     var accent: Color?
     var windowBackground: Color
     var cardBackground: Color
-    var sidebarBackground: Color?
-    /// Whether to take the sidebar's own vibrancy out of the way. Only worth
-    /// doing for a theme that brings its own surface colour.
-    var overridesSidebar: Bool { sidebarBackground != nil }
+
+    /// A wash laid *over* the sidebar's own vibrancy, never in place of it.
+    ///
+    /// The first pass hid the system material (`.scrollContentBackground
+    /// (.hidden)`) and painted a flat colour instead. That is the one thing a
+    /// macOS sidebar must not do: the material is what makes it read as a
+    /// source list rather than a coloured panel, and it is also what carries
+    /// Reduce Transparency and Increase Contrast for free. Tinting on top
+    /// keeps the house colour and keeps the sidebar a sidebar.
+    ///
+    /// Already carries its own alpha — low enough that the vibrancy still
+    /// shows through, which is the whole point.
+    var sidebarTint: Color?
 
     /// Use this anywhere the accent is drawn explicitly. `Color.accentColor`
     /// resolves to the *system* accent and quietly ignores `.tint()`, so a
@@ -85,6 +95,10 @@ struct ThemePalette: Equatable {
     /// says running without leaving the palette.
     var success: Color
     var danger: Color
+    /// "Something needs your attention", distinct from "this will destroy
+    /// data". Stock `.orange` glows on a cream ground the same way the stock
+    /// green does, so each theme brings its own.
+    var warning: Color
 
     /// Divider between rows inside a card, and the card's own border.
     ///
@@ -97,9 +111,10 @@ struct ThemePalette: Equatable {
         accent: nil,
         windowBackground: Color(nsColor: .windowBackgroundColor),
         cardBackground: Color(nsColor: .controlBackgroundColor),
-        sidebarBackground: nil,
+        sidebarTint: nil,
         success: Color(nsColor: .systemGreen),
         danger: Color(nsColor: .systemRed),
+        warning: Color(nsColor: .systemOrange),
         hairline: Color(nsColor: .separatorColor)
     )
 
@@ -115,11 +130,15 @@ struct ThemePalette: Equatable {
         accent: Color(nsColor: NSColor(srgbRed: 0.878, green: 0.541, blue: 0.384, alpha: 1)),        // #E08A62
         windowBackground: Color(nsColor: NSColor(srgbRed: 0.169, green: 0.141, blue: 0.114, alpha: 1)), // #2B241D
         cardBackground: Color(nsColor: NSColor(srgbRed: 0.212, green: 0.176, blue: 0.141, alpha: 1)),   // #362D24
-        sidebarBackground: Color(nsColor: NSColor(srgbRed: 0.149, green: 0.125, blue: 0.098, alpha: 1)), // #262019
+        // Warm wash over the dark sidebar material. Heavier than the light
+        // one because a dark vibrancy is already close to neutral and a 14%
+        // clay simply disappears into it.
+        sidebarTint: Color(nsColor: NSColor(srgbRed: 0.36, green: 0.25, blue: 0.16, alpha: 1)).opacity(0.34),
         // Lifted and slightly desaturated so they read on a dark warm ground
         // without glowing the way the stock system colours do.
         success: Color(nsColor: NSColor(srgbRed: 0.494, green: 0.722, blue: 0.494, alpha: 1)),  // #7EB87E
         danger: Color(nsColor: NSColor(srgbRed: 0.902, green: 0.451, blue: 0.400, alpha: 1)),   // #E67366
+        warning: Color(nsColor: NSColor(srgbRed: 0.875, green: 0.663, blue: 0.333, alpha: 1)),  // #DFA955
         hairline: Color.white.opacity(0.085)
     )
 
@@ -127,12 +146,13 @@ struct ThemePalette: Equatable {
         accent: Color(nsColor: NSColor(srgbRed: 0.76, green: 0.38, blue: 0.24, alpha: 1)),   // #C2613D clay
         windowBackground: Color(nsColor: NSColor(srgbRed: 0.96, green: 0.93, blue: 0.88, alpha: 1)), // #F5EDE1 cream
         cardBackground: Color(nsColor: NSColor(srgbRed: 0.99, green: 0.98, blue: 0.95, alpha: 1)),   // #FDFAF2
-        sidebarBackground: Color(nsColor: NSColor(srgbRed: 0.93, green: 0.89, blue: 0.83, alpha: 1)), // #EDE3D4
+        sidebarTint: Color(nsColor: NSColor(srgbRed: 0.72, green: 0.52, blue: 0.30, alpha: 1)).opacity(0.16),
         // Deeper and earthier than the system pair. The danger red is pushed
         // well past the clay accent in darkness and away from it in hue, so a
         // destructive control never reads as just another accented one.
         success: Color(nsColor: NSColor(srgbRed: 0.290, green: 0.502, blue: 0.302, alpha: 1)),  // #4A804D
         danger: Color(nsColor: NSColor(srgbRed: 0.639, green: 0.176, blue: 0.145, alpha: 1)),   // #A32D25
+        warning: Color(nsColor: NSColor(srgbRed: 0.616, green: 0.412, blue: 0.098, alpha: 1)),  // #9D6919
         hairline: Color(nsColor: NSColor(srgbRed: 0.50, green: 0.40, blue: 0.30, alpha: 0.16))
     )
 }
@@ -176,4 +196,32 @@ private struct ThemedModifier: ViewModifier {
 extension View {
     /// Applies the chosen theme. Put this at the root of each scene.
     func themed() -> some View { modifier(ThemedModifier()) }
+}
+
+
+// MARK: - Sidebar tint
+//
+// The house theme's colour laid over the sidebar's system material rather than
+// instead of it. Kept here beside the palette so the two can't drift.
+
+private struct SidebarTintModifier: ViewModifier {
+    @Environment(\.themePalette) private var palette
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    func body(content: Content) -> some View {
+        // With Reduce Transparency on, macOS already replaces the vibrancy
+        // with an opaque surface. Washing colour over that produces a muddy
+        // near-match to the window rather than a readable panel, so the theme
+        // steps back and lets the system's own opaque sidebar stand.
+        if let tint = palette.sidebarTint, !reduceTransparency {
+            content.background(tint)
+        } else {
+            content
+        }
+    }
+}
+
+extension View {
+    /// Tints a sidebar with the current theme without hiding its material.
+    func themedSidebar() -> some View { modifier(SidebarTintModifier()) }
 }

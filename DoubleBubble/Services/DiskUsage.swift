@@ -4,15 +4,19 @@ import Foundation
 /// (or its re-signed app copy) is actually costing on disk, the way a flasher
 /// tool shows the size of the image it's about to write.
 enum DiskUsage {
-    private static let formatter: ByteCountFormatter = {
-        let f = ByteCountFormatter()
-        f.countStyle = .file
-        return f
-    }()
-
     /// Off the main thread — a copied app bundle can be thousands of files.
     static func size(atPath path: String) async -> Int64? {
         await Task.detached(priority: .utility) {
+            measure(atPath: path)
+        }.value
+    }
+
+    /// The walk itself, deliberately synchronous.
+    ///
+    /// `FileManager.DirectoryEnumerator`'s iterator is unavailable from an
+    /// async context — a warning today, an error under Swift 6 — so the loop
+    /// lives in a plain function that the detached task calls.
+    private static func measure(atPath path: String) -> Int64? {
             let url = URL(fileURLWithPath: (path as NSString).expandingTildeInPath)
             guard let enumerator = FileManager.default.enumerator(
                 at: url,
@@ -30,10 +34,19 @@ enum DiskUsage {
                 found = true
             }
             return found ? total : nil
-        }.value
     }
 
+    /// A size, in the language the interface is currently drawn in.
+    ///
+    /// `ByteCountFormatter` was the obvious choice and the wrong one twice
+    /// over: it has no `locale`, so it kept saying "MB" after the interface
+    /// switched to Russian, and it spells zero out — "Zero KB" — which turned
+    /// the batch review's honest "nothing will be copied" into something that
+    /// reads like a bug. `ByteCountFormatStyle` fixes both.
     static func string(for bytes: Int64) -> String {
-        formatter.string(fromByteCount: bytes)
+        bytes.formatted(
+            .byteCount(style: .file, spellsOutZero: false)
+                .locale(AppLocale.current)
+        )
     }
 }

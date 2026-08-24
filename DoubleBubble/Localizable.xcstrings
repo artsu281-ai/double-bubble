@@ -1,7 +1,95 @@
 {
   "sourceLanguage": "en",
-  "version": "1.0",
   "strings": {
+    " This app will have no accounts left until you add one again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " После этого у приложения не останется аккаунтов, пока вы не добавите новый."
+          }
+        }
+      }
+    },
+    "%@": {},
+    "%@ across %lld accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — аккаунтов: %lld"
+          }
+        }
+      }
+    },
+    "%@ already exist. Accounts are kept apart by more than their name, so this works — it is just harder to read.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — такие имена уже есть. Аккаунты различаются не только именем, так что всё сработает, просто читать будет сложнее."
+          }
+        }
+      }
+    },
+    "%@ already has an account on its own profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У «%@» уже есть аккаунт на собственном профиле"
+          }
+        }
+      }
+    },
+    "%@ already has an account on its own profile.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У «%@» уже есть аккаунт на собственном профиле."
+          }
+        }
+      }
+    },
+    "%@ can’t run two accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ не запускается в двух аккаунтах"
+          }
+        }
+      }
+    },
+    "%@ copy": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ копия"
+          }
+        }
+      }
+    },
+    "%@ free": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "свободно %@"
+          }
+        }
+      }
+    },
     "%@ is installed and can run two accounts": {
       "extractionState": "manual",
       "localizations": {
@@ -9,6 +97,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "«%@» установлен и умеет работать с двумя аккаунтами"
+          }
+        }
+      }
+    },
+    "%@ is replaced with the number.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вместо %@ подставляется номер."
+          }
+        }
+      }
+    },
+    "%@ of %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ из %@"
+          }
+        }
+      }
+    },
+    "%@ per account.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "По %@ на аккаунт."
           }
         }
       }
@@ -24,6 +145,49 @@
         }
       }
     },
+    "%@, %lld of %lld accounts running": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, запущено аккаунтов: %lld из %lld"
+          }
+        }
+      }
+    },
+    "%@/%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@/%2$@"
+          }
+        }
+      }
+    },
+    "%lld accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Аккаунтов: %lld"
+          }
+        }
+      }
+    },
+    "%lld accounts are open": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыто аккаунтов: %lld"
+          }
+        }
+      }
+    },
     "%lld accounts are open and will be stopped.": {
       "extractionState": "manual",
       "localizations": {
@@ -31,6 +195,61 @@
           "stringUnit": {
             "state": "translated",
             "value": "Открыто аккаунтов: %lld — все будут остановлены."
+          }
+        }
+      }
+    },
+    "%lld accounts are still open. They’ll keep running in the background — Double Bubble will reconnect to them next time it launches.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ещё открыто аккаунтов: %lld. Они продолжат работать в фоне — Double Bubble снова подключится к ним при следующем запуске."
+          }
+        }
+      }
+    },
+    "%lld accounts of %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Аккаунтов «%2$@»: %1$lld"
+          }
+        }
+      }
+    },
+    "%lld applications with a known way to isolate them.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложений с известным способом изоляции: %lld."
+          }
+        }
+      }
+    },
+    "%lld of %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld из %lld"
+          }
+        }
+      }
+    },
+    "%lld of %lld accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Аккаунтов: %lld из %lld"
           }
         }
       }
@@ -46,6 +265,127 @@
         }
       }
     },
+    "%lld of them are running and will be stopped.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Из них запущено: %lld — они будут остановлены."
+          }
+        }
+      }
+    },
+    "%lld running": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запущено: %lld"
+          }
+        }
+      }
+    },
+    "%lld selected": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрано: %lld"
+          }
+        }
+      }
+    },
+    "%lld with something running": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "из них с запущенными: %lld"
+          }
+        }
+      }
+    },
+    "01, 02, 03": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "01, 02, 03"
+          }
+        }
+      }
+    },
+    "1, 2, 3": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1, 2, 3"
+          }
+        }
+      }
+    },
+    "A copy of an existing account": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копия существующего аккаунта"
+          }
+        }
+      }
+    },
+    "A copy of “%@”": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копия «%@»"
+          }
+        }
+      }
+    },
+    "A lit edge, a soft sheen and a shadow under the mark. It fades out on its own at small sizes, so the Dock stays legible.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Лёгкая обводка сверху, мягкий блеск и тень под значком. При уменьшении масштаба эффект сам сходит на нет, чтобы значок оставался чётким в Dock."
+          }
+        }
+      }
+    },
+    "A new %@ account with a copy of its data.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новый аккаунт %@ с копией данных оригинала."
+          }
+        }
+      }
+    },
+    "A separate sign-in with its own data.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отдельный вход со своими данными."
+          }
+        }
+      }
+    },
     "ACCOUNTS": {
       "extractionState": "manual",
       "localizations": {
@@ -53,6 +393,61 @@
           "stringUnit": {
             "state": "translated",
             "value": "АККАУНТЫ"
+          }
+        }
+      }
+    },
+    "About": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "О приложении"
+          }
+        }
+      }
+    },
+    "About %@ of data": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Около %@ данных"
+          }
+        }
+      }
+    },
+    "About %@ will be copied": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Будет скопировано около %@"
+          }
+        }
+      }
+    },
+    "Account": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Аккаунт"
+          }
+        }
+      }
+    },
+    "Account data": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Данные аккаунта"
           }
         }
       }
@@ -79,6 +474,28 @@
         }
       }
     },
+    "Add": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить"
+          }
+        }
+      }
+    },
+    "Add %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить «%@»"
+          }
+        }
+      }
+    },
     "Add %@ Instead": {
       "extractionState": "manual",
       "localizations": {
@@ -97,6 +514,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Добавить аккаунт"
+          }
+        }
+      }
+    },
+    "Add Application": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить приложение"
+          }
+        }
+      }
+    },
+    "Add Application…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить приложение…"
           }
         }
       }
@@ -145,6 +584,17 @@
         }
       }
     },
+    "Add an application": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить приложение"
+          }
+        }
+      }
+    },
     "Add another account to run alongside this one": {
       "extractionState": "manual",
       "localizations": {
@@ -152,6 +602,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Добавить ещё один аккаунт рядом с этим"
+          }
+        }
+      }
+    },
+    "Advanced": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дополнительно"
           }
         }
       }
@@ -167,6 +628,17 @@
         }
       }
     },
+    "All": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все"
+          }
+        }
+      }
+    },
     "All %lld accounts are removed from the list.": {
       "extractionState": "manual",
       "localizations": {
@@ -174,6 +646,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Все %lld аккаунтов удаляются из списка."
+          }
+        }
+      }
+    },
+    "All Accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все аккаунты"
           }
         }
       }
@@ -189,6 +672,50 @@
         }
       }
     },
+    "All of %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всего у «%@»"
+          }
+        }
+      }
+    },
+    "Already used by another account": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уже занят другим аккаунтом"
+          }
+        }
+      }
+    },
+    "Amber": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Янтарный"
+          }
+        }
+      }
+    },
+    "Another account already has this name.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Так уже называется другой аккаунт."
+          }
+        }
+      }
+    },
     "Another account already uses this color.": {
       "extractionState": "manual",
       "localizations": {
@@ -196,6 +723,61 @@
           "stringUnit": {
             "state": "translated",
             "value": "Этот цвет уже занят другим аккаунтом."
+          }
+        }
+      }
+    },
+    "Another account already uses this colour.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот цвет уже занят другим аккаунтом."
+          }
+        }
+      }
+    },
+    "Any application can still be added with “Choose Another…”.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Любое приложение всё равно можно добавить через «Выбрать другое…»."
+          }
+        }
+      }
+    },
+    "App copy": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копия приложения"
+          }
+        }
+      }
+    },
+    "App settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки приложения"
+          }
+        }
+      }
+    },
+    "Appearance": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оформление"
           }
         }
       }
@@ -222,6 +804,72 @@
         }
       }
     },
+    "Application not found": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложение не найдено"
+          }
+        }
+      }
+    },
+    "Application not found where it was": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложения нет на прежнем месте"
+          }
+        }
+      }
+    },
+    "Applications": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложения"
+          }
+        }
+      }
+    },
+    "Applications on this Mac that Double Bubble knows how to keep separate.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложения на этом Mac, которые Double Bubble умеет разделять."
+          }
+        }
+      }
+    },
+    "Applies right away — no need to restart.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Применяется сразу — перезапуск не нужен."
+          }
+        }
+      }
+    },
+    "Applies while Double Bubble is running. When it isn't, macOS shows the icon baked into the app.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Действует, пока Double Bubble запущен. Когда он не запущен, macOS показывает значок, встроенный в приложение."
+          }
+        }
+      }
+    },
     "Apps": {
       "extractionState": "manual",
       "localizations": {
@@ -240,6 +888,72 @@
           "stringUnit": {
             "state": "translated",
             "value": "Собственный аккаунт приложения"
+          }
+        }
+      }
+    },
+    "Asks GitHub once a day whether a newer release exists — nothing is downloaded or installed for you. This is the only time Double Bubble uses the network, and the request says nothing about you or the accounts you run.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раз в день проверяет на GitHub, не вышла ли новая версия — ничего не скачивается и не устанавливается автоматически. Это единственный случай, когда Double Bubble обращается к сети, и запрос не содержит никаких данных о вас или ваших аккаунтах."
+          }
+        }
+      }
+    },
+    "Automatic": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Автоматически"
+          }
+        }
+      }
+    },
+    "Back": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Назад"
+          }
+        }
+      }
+    },
+    "Bigger avatars and roomier buttons. Best for a handful of apps.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Крупнее аватары, просторнее кнопки. Хорошо подходит, если приложений немного."
+          }
+        }
+      }
+    },
+    "Blank": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "С нуля"
+          }
+        }
+      }
+    },
+    "Blank accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пустые аккаунты"
           }
         }
       }
@@ -266,6 +980,39 @@
         }
       }
     },
+    "By Last Opened": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "По последнему запуску"
+          }
+        }
+      }
+    },
+    "By Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "По имени"
+          }
+        }
+      }
+    },
+    "By When Added": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "По добавлению"
+          }
+        }
+      }
+    },
     "Cancel": {
       "extractionState": "manual",
       "localizations": {
@@ -288,6 +1035,72 @@
         }
       }
     },
+    "Can’t run twice": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нельзя запустить дважды"
+          }
+        }
+      }
+    },
+    "Can’t run two accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не запускается в двух аккаунтах"
+          }
+        }
+      }
+    },
+    "Check Now": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверить сейчас"
+          }
+        }
+      }
+    },
+    "Check for Updates": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверка обновлений"
+          }
+        }
+      }
+    },
+    "Choose": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать"
+          }
+        }
+      }
+    },
+    "Choose Another…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать другое…"
+          }
+        }
+      }
+    },
     "Choose a picture for %@": {
       "extractionState": "manual",
       "localizations": {
@@ -295,6 +1108,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Выбрать картинку для «%@»"
+          }
+        }
+      }
+    },
+    "Choose an Application": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите приложение"
           }
         }
       }
@@ -317,6 +1141,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Выберите приложение, чтобы завести для него второй отдельный аккаунт"
+          }
+        }
+      }
+    },
+    "Choose an application from the list": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите приложение из списка"
           }
         }
       }
@@ -376,6 +1211,28 @@
         }
       }
     },
+    "Clear data for “%@”?": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистить данные «%@»?"
+          }
+        }
+      }
+    },
+    "Clear selection": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Снять выделение"
+          }
+        }
+      }
+    },
     "Clears the app list along with account names and colors. Anything still running is stopped first. The apps themselves, and their data on disk, are not touched.": {
       "extractionState": "manual",
       "localizations": {
@@ -387,6 +1244,17 @@
         }
       }
     },
+    "Clear…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистить…"
+          }
+        }
+      }
+    },
     "Color": {
       "extractionState": "manual",
       "localizations": {
@@ -394,6 +1262,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Цвет"
+          }
+        }
+      }
+    },
+    "Colour": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цвет"
+          }
+        }
+      }
+    },
+    "Colours": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цвета"
           }
         }
       }
@@ -420,6 +1310,61 @@
         }
       }
     },
+    "ConstantaAI's warm clay and cream, tinting the app without repainting system controls.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тёплая глина и крем ConstantaAI — оттенок приложения без перекраски системных элементов."
+          }
+        }
+      }
+    },
+    "Copy": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копия"
+          }
+        }
+      }
+    },
+    "Copy Data Path": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопировать путь к данным"
+          }
+        }
+      }
+    },
+    "Copy from": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копировать из"
+          }
+        }
+      }
+    },
+    "Copy from the original": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Взять у оригинала"
+          }
+        }
+      }
+    },
     "Couldn’t Open": {
       "extractionState": "manual",
       "localizations": {
@@ -427,6 +1372,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Не удалось открыть"
+          }
+        }
+      }
+    },
+    "Couldn’t duplicate": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось дублировать"
           }
         }
       }
@@ -442,6 +1398,171 @@
         }
       }
     },
+    "Cream tile, always": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всегда кремовая плитка"
+          }
+        }
+      }
+    },
+    "Create": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Создать"
+          }
+        }
+      }
+    },
+    "Create %lld Accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Создать аккаунтов: %lld"
+          }
+        }
+      }
+    },
+    "Create Several %@ Accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Создать несколько аккаунтов «%@»"
+          }
+        }
+      }
+    },
+    "Create Several…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Создать несколько…"
+          }
+        }
+      }
+    },
+    "Create from Preset": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Создать по пресету"
+          }
+        }
+      }
+    },
+    "Create the account": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Создать аккаунт"
+          }
+        }
+      }
+    },
+    "Create the accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Создать аккаунты"
+          }
+        }
+      }
+    },
+    "Create the duplicate": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Создать копию"
+          }
+        }
+      }
+    },
+    "Created": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Создан"
+          }
+        }
+      }
+    },
+    "Created %lld accounts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Создано аккаунтов: %lld."
+          }
+        }
+      }
+    },
+    "Created %lld of %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Создано %lld из %lld"
+          }
+        }
+      }
+    },
+    "Creating": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Создаётся"
+          }
+        }
+      }
+    },
+    "Creating accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Создание аккаунтов"
+          }
+        }
+      }
+    },
+    "Custom colour": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Другой цвет"
+          }
+        }
+      }
+    },
     "Dark": {
       "extractionState": "manual",
       "localizations": {
@@ -449,6 +1570,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Тёмное"
+          }
+        }
+      }
+    },
+    "Data": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Данные"
           }
         }
       }
@@ -475,6 +1607,237 @@
         }
       }
     },
+    "Denim": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Джинсовый"
+          }
+        }
+      }
+    },
+    "Density": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Плотность"
+          }
+        }
+      }
+    },
+    "Disk": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Диск"
+          }
+        }
+      }
+    },
+    "Disk Usage per Account": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Место на диске по аккаунтам"
+          }
+        }
+      }
+    },
+    "Dock Icon": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Значок в Dock"
+          }
+        }
+      }
+    },
+    "Done": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готово"
+          }
+        }
+      }
+    },
+    "Double Bubble": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double Bubble"
+          }
+        }
+      }
+    },
+    "Double Bubble %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double Bubble %@"
+          }
+        }
+      }
+    },
+    "Double Bubble %@ is available.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доступна версия Double Bubble %@."
+          }
+        }
+      }
+    },
+    "Double Bubble Help": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Справка Double Bubble"
+          }
+        }
+      }
+    },
+    "Double Bubble can no longer find %@ where it was. It may have been moved, renamed, or updated under a new name.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double Bubble больше не находит «%@» там, где приложение было раньше. Его могли переместить, переименовать или обновить под новым именем."
+          }
+        }
+      }
+    },
+    "Double Bubble can’t find this application any more": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double Bubble больше не находит это приложение"
+          }
+        }
+      }
+    },
+    "Double Bubble can’t tell how this app stores its data.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double Bubble не может определить, как это приложение хранит данные."
+          }
+        }
+      }
+    },
+    "Duplicate": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дублировать"
+          }
+        }
+      }
+    },
+    "Duplicate %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дублировать «%@»"
+          }
+        }
+      }
+    },
+    "Duplicate Account…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дублировать аккаунт…"
+          }
+        }
+      }
+    },
+    "Duplicate the selected account": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дублировать выбранный аккаунт"
+          }
+        }
+      }
+    },
+    "Duplicate “%@”": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дублировать «%@»"
+          }
+        }
+      }
+    },
+    "Duplicate…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дублировать…"
+          }
+        }
+      }
+    },
+    "Duplicating “%@”": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дублирование «%@»"
+          }
+        }
+      }
+    },
+    "Duplicating…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дублирование…"
+          }
+        }
+      }
+    },
     "Each account runs at the same time, keeping its own login and data.": {
       "extractionState": "manual",
       "localizations": {
@@ -497,6 +1860,39 @@
         }
       }
     },
+    "Edit…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изменить…"
+          }
+        }
+      }
+    },
+    "Enter a name for the account": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введите имя аккаунта"
+          }
+        }
+      }
+    },
+    "Every account here has been opened at least once.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Каждый аккаунт хотя бы раз открывали."
+          }
+        }
+      }
+    },
     "Every account's isolated data and any re-signed app copies live here.": {
       "extractionState": "manual",
       "localizations": {
@@ -504,6 +1900,193 @@
           "stringUnit": {
             "state": "translated",
             "value": "Здесь лежат изолированные данные всех аккаунтов и переподписанные копии приложений."
+          }
+        }
+      }
+    },
+    "Everything Double Bubble recognises is already added.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё, что Double Bubble узнаёт, уже добавлено."
+          }
+        }
+      }
+    },
+    "Everything Has Been Opened": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё уже открывали"
+          }
+        }
+      }
+    },
+    "Failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось"
+          }
+        }
+      }
+    },
+    "Filter": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фильтр"
+          }
+        }
+      }
+    },
+    "Finishes the account being made now, then stops. The ones already created stay.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Досоздаст текущий аккаунт и остановится. Уже созданные останутся."
+          }
+        }
+      }
+    },
+    "Follows the macOS appearance": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Как в системном оформлении"
+          }
+        }
+      }
+    },
+    "Follows your macOS appearance setting.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Следует системному оформлению macOS."
+          }
+        }
+      }
+    },
+    "General": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Общие"
+          }
+        }
+      }
+    },
+    "Go to Application": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перейти к приложению"
+          }
+        }
+      }
+    },
+    "Grid": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сетка"
+          }
+        }
+      }
+    },
+    "Hide Inspector": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрыть инспектор"
+          }
+        }
+      }
+    },
+    "Hide the inspector": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрыть инспектор"
+          }
+        }
+      }
+    },
+    "Hide until the next release": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрыть до следующего выпуска"
+          }
+        }
+      }
+    },
+    "History and cache": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "История и кэш"
+          }
+        }
+      }
+    },
+    "How many": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сколько"
+          }
+        }
+      }
+    },
+    "How many and what to call them": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Количество и имена"
+          }
+        }
+      }
+    },
+    "How much space each account's copy or data folder takes, shown next to its status.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сколько места занимает копия или папка данных каждого аккаунта — показывается рядом с его статусом."
           }
         }
       }
@@ -519,6 +2102,39 @@
         }
       }
     },
+    "Information": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Информация"
+          }
+        }
+      }
+    },
+    "Inspector": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Инспектор"
+          }
+        }
+      }
+    },
+    "Interface Language": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Язык интерфейса"
+          }
+        }
+      }
+    },
     "Isolation": {
       "extractionState": "manual",
       "localizations": {
@@ -530,6 +2146,17 @@
         }
       }
     },
+    "It has to run from the bundle it was installed in, which leaves nowhere to put a second, separate profile. You can still add it and launch it from here on the account it is already signed into.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложение обязано запускаться из того бандла, куда было установлено, поэтому второму отдельному профилю просто негде разместиться. Его всё равно можно добавить и запускать отсюда на том аккаунте, под которым оно уже вошло."
+          }
+        }
+      }
+    },
     "Its account is removed from the list.": {
       "extractionState": "manual",
       "localizations": {
@@ -537,6 +2164,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Его аккаунт удаляется из списка."
+          }
+        }
+      }
+    },
+    "Its data is copied as it stands right now, so parts of it may be mid-write and end up incomplete.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Данные копируются в том виде, в каком они сейчас, поэтому часть из них может оказаться недописанной."
+          }
+        }
+      }
+    },
+    "Its data — login, history, everything specific to it — goes to the Trash.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Его данные — вход, история, всё, что относится только к нему, — отправятся в Корзину."
           }
         }
       }
@@ -563,6 +2212,17 @@
         }
       }
     },
+    "Keeps Double Bubble in the menu bar from sign-in, so accounts you left running are never orphaned by a restart.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Держит Double Bubble в строке меню с момента входа в систему, чтобы запущенные аккаунты не осиротели после перезагрузки."
+          }
+        }
+      }
+    },
     "Language": {
       "extractionState": "manual",
       "localizations": {
@@ -570,6 +2230,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Язык"
+          }
+        }
+      }
+    },
+    "Last opened": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Последний запуск"
           }
         }
       }
@@ -596,6 +2267,17 @@
         }
       }
     },
+    "Launch at Login": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запуск при входе в систему"
+          }
+        }
+      }
+    },
     "Light": {
       "extractionState": "manual",
       "localizations": {
@@ -603,6 +2285,127 @@
           "stringUnit": {
             "state": "translated",
             "value": "Светлое"
+          }
+        }
+      }
+    },
+    "Liquid Glass": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liquid Glass"
+          }
+        }
+      }
+    },
+    "List": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Список"
+          }
+        }
+      }
+    },
+    "Locate Application…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Указать приложение…"
+          }
+        }
+      }
+    },
+    "Locating it keeps every account and its data exactly as they are.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Если указать приложение заново, все аккаунты и их данные останутся нетронутыми."
+          }
+        }
+      }
+    },
+    "Location": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Расположение"
+          }
+        }
+      }
+    },
+    "Looking through your applications…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Просматриваю приложения…"
+          }
+        }
+      }
+    },
+    "Measuring what each account takes up…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Считаю, сколько занимает каждый аккаунт…"
+          }
+        }
+      }
+    },
+    "Measuring what’s there…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Считаю, что там есть…"
+          }
+        }
+      }
+    },
+    "Measuring…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подсчёт…"
+          }
+        }
+      }
+    },
+    "Method": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Способ"
+          }
+        }
+      }
+    },
+    "Missing": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не найдено"
           }
         }
       }
@@ -618,6 +2421,17 @@
         }
       }
     },
+    "More actions": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ещё действия"
+          }
+        }
+      }
+    },
     "More actions for %@": {
       "extractionState": "manual",
       "localizations": {
@@ -625,6 +2439,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Другие действия для «%@»"
+          }
+        }
+      }
+    },
+    "Moss": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мшистый"
           }
         }
       }
@@ -640,6 +2465,83 @@
         }
       }
     },
+    "Name pattern": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Шаблон имени"
+          }
+        }
+      }
+    },
+    "Name the preset, or turn saving off": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Назовите пресет или снимите галочку сохранения"
+          }
+        }
+      }
+    },
+    "Names: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Имена: %@"
+          }
+        }
+      }
+    },
+    "Near-black tile, always": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всегда почти чёрная плитка"
+          }
+        }
+      }
+    },
+    "Needs attention": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Требует внимания"
+          }
+        }
+      }
+    },
+    "Never": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Никогда"
+          }
+        }
+      }
+    },
+    "Never Opened": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ни разу не открывали"
+          }
+        }
+      }
+    },
     "Never opened": {
       "extractionState": "manual",
       "localizations": {
@@ -647,6 +2549,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ни разу не открывался"
+          }
+        }
+      }
+    },
+    "New %@ Account": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новый аккаунт «%@»"
+          }
+        }
+      }
+    },
+    "New Account": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новый аккаунт"
+          }
+        }
+      }
+    },
+    "Next": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Далее"
+          }
+        }
+      }
+    },
+    "No Accounts Yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока нет аккаунтов"
           }
         }
       }
@@ -673,6 +2619,17 @@
         }
       }
     },
+    "No accounts are running": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ни один аккаунт не запущен"
+          }
+        }
+      }
+    },
     "No accounts running": {
       "extractionState": "manual",
       "localizations": {
@@ -695,6 +2652,17 @@
         }
       }
     },
+    "No account’s data has grown past a gigabyte.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ни один аккаунт пока не перевалил за гигабайт."
+          }
+        }
+      }
+    },
     "No apps yet": {
       "extractionState": "manual",
       "localizations": {
@@ -702,6 +2670,105 @@
           "stringUnit": {
             "state": "translated",
             "value": "Пока нет приложений"
+          }
+        }
+      }
+    },
+    "Not enough space": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не хватает места"
+          }
+        }
+      }
+    },
+    "Not enough space on disk": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не хватает места на диске"
+          }
+        }
+      }
+    },
+    "Not running": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не запущен"
+          }
+        }
+      }
+    },
+    "Nothing Over 1 GB": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ничего больше 1 ГБ"
+          }
+        }
+      }
+    },
+    "Nothing Running": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ничего не запущено"
+          }
+        }
+      }
+    },
+    "Nothing matches “%@”.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "По запросу «%@» ничего нет."
+          }
+        }
+      }
+    },
+    "Nothing running": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ничего не запущено"
+          }
+        }
+      }
+    },
+    "Nothing stops you, but %lld copies of one app take a long time to open and a lot of room to keep.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ограничений нет, но %lld копий одного приложения долго открываются и занимают много места."
+          }
+        }
+      }
+    },
+    "Nothing to carry over": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Переносить нечего"
           }
         }
       }
@@ -717,6 +2784,28 @@
         }
       }
     },
+    "Notify on Launch Failure": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уведомлять о сбое запуска"
+          }
+        }
+      }
+    },
+    "Numbering": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нумерация"
+          }
+        }
+      }
+    },
     "OK": {
       "extractionState": "manual",
       "localizations": {
@@ -728,6 +2817,17 @@
         }
       }
     },
+    "On disk": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На диске"
+          }
+        }
+      }
+    },
     "One account is open and will be stopped.": {
       "extractionState": "manual",
       "localizations": {
@@ -735,6 +2835,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Один аккаунт открыт и будет остановлен."
+          }
+        }
+      }
+    },
+    "One account is still open. It will keep running in the background — Double Bubble will reconnect to it next time it launches.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Один аккаунт ещё открыт. Он продолжит работать в фоне — Double Bubble снова подключится к нему при следующем запуске."
+          }
+        }
+      }
+    },
+    "One colour for the batch": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Один цвет на всю партию"
+          }
+        }
+      }
+    },
+    "One is running and will be stopped.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Один из них запущен и будет остановлен."
           }
         }
       }
@@ -757,6 +2890,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Открыть «%@»"
+          }
+        }
+      }
+    },
+    "Open Accessibility Settings…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть «Универсальный доступ»…"
           }
         }
       }
@@ -794,6 +2938,39 @@
         }
       }
     },
+    "Open Only Stopped": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запустить только остановленные"
+          }
+        }
+      }
+    },
+    "Open Screen Recording Settings…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть «Доступ к экрану»…"
+          }
+        }
+      }
+    },
+    "Open an account and it will show up here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Откройте аккаунт — и он появится здесь."
+          }
+        }
+      }
+    },
     "Open every account": {
       "extractionState": "manual",
       "localizations": {
@@ -801,6 +2978,83 @@
           "stringUnit": {
             "state": "translated",
             "value": "Запустить все аккаунты"
+          }
+        }
+      }
+    },
+    "Open in Background": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть в фоне"
+          }
+        }
+      }
+    },
+    "Opens the app signed in as it already is, but with this name and icon — so you can start it from here instead of its Dock icon. Nothing is kept separately, and removing this account never touches that data.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открывает приложение под тем входом, что уже есть, но с этим именем и иконкой — чтобы запускать его отсюда, а не с его иконки в Dock. Отдельно ничего не хранится, и удаление такого аккаунта не трогает эти данные."
+          }
+        }
+      }
+    },
+    "Or leave the initial of the name.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Или оставьте первую букву имени."
+          }
+        }
+      }
+    },
+    "Over 1 GB": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Больше 1 ГБ"
+          }
+        }
+      }
+    },
+    "Overview": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обзор"
+          }
+        }
+      }
+    },
+    "Pick any application, including ones not listed here": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать любое приложение, в том числе не попавшее в список"
+          }
+        }
+      }
+    },
+    "Pick any other colour": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать любой другой цвет"
           }
         }
       }
@@ -816,6 +3070,50 @@
         }
       }
     },
+    "Pin": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрепить"
+          }
+        }
+      }
+    },
+    "Pinned": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закреплённые"
+          }
+        }
+      }
+    },
+    "Plum": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сливовый"
+          }
+        }
+      }
+    },
+    "Plus about %@ of app copies, made as each account first opens.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Плюс около %@ копий приложения — они создаются при первом запуске каждого аккаунта."
+          }
+        }
+      }
+    },
     "Preset color": {
       "extractionState": "manual",
       "localizations": {
@@ -823,6 +3121,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Готовый цвет"
+          }
+        }
+      }
+    },
+    "Preset name": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Название пресета"
+          }
+        }
+      }
+    },
+    "Preview": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предпросмотр"
+          }
+        }
+      }
+    },
+    "Process": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Процесс"
           }
         }
       }
@@ -849,13 +3180,24 @@
         }
       }
     },
-    "Relaunch": {
+    "Quit Double Bubble?": {
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Перезапустить"
+            "value": "Выйти из Double Bubble?"
+          }
+        }
+      }
+    },
+    "Relocate Application…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Указать приложение заново…"
           }
         }
       }
@@ -893,6 +3235,28 @@
         }
       }
     },
+    "Remove %lld Accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить аккаунтов: %lld"
+          }
+        }
+      }
+    },
+    "Remove %lld accounts?": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить аккаунтов: %lld?"
+          }
+        }
+      }
+    },
     "Remove Account…": {
       "extractionState": "manual",
       "localizations": {
@@ -911,6 +3275,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Удалить все"
+          }
+        }
+      }
+    },
+    "Remove All Apps": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить все приложения"
           }
         }
       }
@@ -959,6 +3334,17 @@
         }
       }
     },
+    "Remove the selected application": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить выбранное приложение"
+          }
+        }
+      }
+    },
     "Remove “%@” from Double Bubble?": {
       "extractionState": "manual",
       "localizations": {
@@ -977,6 +3363,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Удалить «%@»?"
+          }
+        }
+      }
+    },
+    "Remove…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить…"
+          }
+        }
+      }
+    },
+    "Removing: %@%@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удаляются: %@%@"
           }
         }
       }
@@ -1014,17 +3422,6 @@
         }
       }
     },
-    "Restart to finish switching.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Перезапустите, чтобы завершить переключение."
-          }
-        }
-      }
-    },
     "Restart to update": {
       "extractionState": "manual",
       "localizations": {
@@ -1032,6 +3429,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Перезапустите для обновления"
+          }
+        }
+      }
+    },
+    "Retry the Failed Ones": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторить неудавшиеся"
+          }
+        }
+      }
+    },
+    "Review": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверка"
+          }
+        }
+      }
+    },
+    "Rose": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розовый"
           }
         }
       }
@@ -1058,6 +3488,50 @@
         }
       }
     },
+    "Running accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запущено"
+          }
+        }
+      }
+    },
+    "Running for": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Работает"
+          }
+        }
+      }
+    },
+    "Running now": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запущено сейчас"
+          }
+        }
+      }
+    },
+    "Running only": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запущенные"
+          }
+        }
+      }
+    },
     "Runs a re-signed copy of the app bundle with its own identifier.": {
       "extractionState": "manual",
       "localizations": {
@@ -1076,6 +3550,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Запускается переподписанная копия приложения, направленная в свою папку данных."
+          }
+        }
+      }
+    },
+    "Runs again from the “Create Several” menu, on any app.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запускается снова из меню «Создать несколько» для любого приложения."
           }
         }
       }
@@ -1135,6 +3620,39 @@
         }
       }
     },
+    "Save changes": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохранить изменения"
+          }
+        }
+      }
+    },
+    "Save these settings as a preset": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохранить эти настройки как пресет"
+          }
+        }
+      }
+    },
+    "Saved presets": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохранённые пресеты"
+          }
+        }
+      }
+    },
     "Search Apps": {
       "extractionState": "manual",
       "localizations": {
@@ -1142,6 +3660,83 @@
           "stringUnit": {
             "state": "translated",
             "value": "Поиск приложений"
+          }
+        }
+      }
+    },
+    "Search installed applications": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поиск среди установленных"
+          }
+        }
+      }
+    },
+    "Section": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раздел"
+          }
+        }
+      }
+    },
+    "Select an account to duplicate": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите аккаунт для дублирования"
+          }
+        }
+      }
+    },
+    "Select an account to see its details.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите аккаунт, чтобы увидеть подробности."
+          }
+        }
+      }
+    },
+    "Select an application first": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сначала выберите приложение"
+          }
+        }
+      }
+    },
+    "Select an application to see its details.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите приложение, чтобы увидеть подробности."
+          }
+        }
+      }
+    },
+    "Separate Dock Icon per Account": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отдельная иконка в Dock для каждого аккаунта"
           }
         }
       }
@@ -1201,6 +3796,17 @@
         }
       }
     },
+    "Several accounts are selected. Choose one to see its details.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрано несколько аккаунтов. Выберите один, чтобы увидеть подробности."
+          }
+        }
+      }
+    },
     "Shell config, SSH and GPG keys, and git identity are shared with every account — only %@’s own data is separate.": {
       "extractionState": "manual",
       "localizations": {
@@ -1208,6 +3814,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Настройки shell, SSH- и GPG-ключи, git-identity — общие для всех аккаунтов. Отдельными остаются только собственные данные %@."
+          }
+        }
+      }
+    },
+    "Show": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать"
           }
         }
       }
@@ -1223,6 +3840,17 @@
         }
       }
     },
+    "Show %@ under %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать «%@» в разделе «%@»"
+          }
+        }
+      }
+    },
     "Show %@’s data in Finder": {
       "extractionState": "manual",
       "localizations": {
@@ -1230,6 +3858,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Показать данные «%@» в Finder"
+          }
+        }
+      }
+    },
+    "Show App Copy in Finder": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать копию приложения в Finder"
           }
         }
       }
@@ -1245,6 +3884,17 @@
         }
       }
     },
+    "Show Disk Usage": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать размер на диске"
+          }
+        }
+      }
+    },
     "Show Disk Usage per Account": {
       "extractionState": "manual",
       "localizations": {
@@ -1252,6 +3902,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Показывать занятое место по аккаунтам"
+          }
+        }
+      }
+    },
+    "Show Inspector": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать инспектор"
+          }
+        }
+      }
+    },
+    "Show Window": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать окно"
           }
         }
       }
@@ -1267,6 +3939,28 @@
         }
       }
     },
+    "Show the inspector": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать инспектор"
+          }
+        }
+      }
+    },
+    "Sign-in and session": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вход и сессия"
+          }
+        }
+      }
+    },
     "Signs it out and deletes everything it stored — login, history, settings. It's currently running, so it's stopped first. The account itself, its name and color, stay.": {
       "extractionState": "manual",
       "localizations": {
@@ -1278,6 +3972,17 @@
         }
       }
     },
+    "Signs it out and deletes everything it stored — login, history, settings. It’s currently running, so it’s stopped first. The account itself, its name and colour, stay. The data goes to the Trash.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выйдет из аккаунта и удалит всё, что он сохранил, — вход, историю, настройки. Сейчас он запущен, поэтому сначала будет остановлен. Сам аккаунт, его имя и цвет останутся. Данные отправятся в Корзину."
+          }
+        }
+      }
+    },
     "Signs it out and deletes everything it stored — login, history, settings. The account itself, its name and color, stay — next time you open it, it starts fresh.": {
       "extractionState": "manual",
       "localizations": {
@@ -1285,6 +3990,116 @@
           "stringUnit": {
             "state": "translated",
             "value": "Выходит из аккаунта и удаляет всё, что он сохранил: вход, историю, настройки. Сам аккаунт, его имя и цвет останутся — при следующем запуске он начнёт с чистого листа."
+          }
+        }
+      }
+    },
+    "Signs it out and deletes everything it stored — login, history, settings. The account itself, its name and colour, stay — next time you open it, it starts fresh. The data goes to the Trash.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выйдет из аккаунта и удалит всё, что он сохранил, — вход, историю, настройки. Сам аккаунт, его имя и цвет останутся: в следующий раз он откроется с чистого листа. Данные отправятся в Корзину."
+          }
+        }
+      }
+    },
+    "Some credentials live in the Keychain, tied to the app’s signature rather than to its data — those don’t copy, so you may still be asked to sign in.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Часть учётных данных лежит в Связке ключей и привязана к подписи приложения, а не к его данным, — они не копируются, поэтому войти, возможно, придётся заново."
+          }
+        }
+      }
+    },
+    "Some names are already taken": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Некоторые имена уже заняты"
+          }
+        }
+      }
+    },
+    "Sort": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сортировка"
+          }
+        }
+      }
+    },
+    "Sort Applications": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сортировка приложений"
+          }
+        }
+      }
+    },
+    "Spread across the palette": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разные цвета из палитры"
+          }
+        }
+      }
+    },
+    "Started on": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запущен на версии"
+          }
+        }
+      }
+    },
+    "Starting point": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Основа"
+          }
+        }
+      }
+    },
+    "State": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Состояние"
+          }
+        }
+      }
+    },
+    "Status": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Состояние"
           }
         }
       }
@@ -1333,6 +4148,39 @@
         }
       }
     },
+    "Stop Everything": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Остановить всё"
+          }
+        }
+      }
+    },
+    "Stop It First": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сначала остановить"
+          }
+        }
+      }
+    },
+    "Stop It and Duplicate": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Остановить и дублировать"
+          }
+        }
+      }
+    },
     "Stop every account": {
       "extractionState": "manual",
       "localizations": {
@@ -1344,6 +4192,39 @@
         }
       }
     },
+    "Stop every account to change this": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Остановите все аккаунты, чтобы изменить это"
+          }
+        }
+      }
+    },
+    "Stop every account to change this.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чтобы изменить, остановите все аккаунты."
+          }
+        }
+      }
+    },
+    "Stop this": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Остановить"
+          }
+        }
+      }
+    },
     "System": {
       "extractionState": "manual",
       "localizations": {
@@ -1351,6 +4232,138 @@
           "stringUnit": {
             "state": "translated",
             "value": "Системный"
+          }
+        }
+      }
+    },
+    "System Permissions": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешения системы"
+          }
+        }
+      }
+    },
+    "Takes up the most space and is almost never wanted in a copy. The app rebuilds it as it runs.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Занимает больше всего места и в копии почти никогда не нужен. Приложение соберёт его заново во время работы."
+          }
+        }
+      }
+    },
+    "Teal": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Бирюзовый"
+          }
+        }
+      }
+    },
+    "That’s a lot of accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это много аккаунтов"
+          }
+        }
+      }
+    },
+    "The app itself and everything it’s signed into stay exactly as they are.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Само приложение и всё, во что оно вошло, останутся как есть."
+          }
+        }
+      }
+    },
+    "The app’s own account": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Собственный аккаунт приложения"
+          }
+        }
+      }
+    },
+    "The copy opens already signed in as this account. Turn this off to sign in fresh.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копия откроется уже под этим входом. Снимите галочку, чтобы войти заново."
+          }
+        }
+      }
+    },
+    "The data of the isolated ones goes to the Trash. The one on the app’s own profile keeps everything it’s signed into.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Данные изолированных аккаунтов отправятся в Корзину. Аккаунт на собственном профиле приложения сохранит всё, во что вошёл."
+          }
+        }
+      }
+    },
+    "The number is added at the end.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Номер добавится в конец."
+          }
+        }
+      }
+    },
+    "The ones that failed were rolled back — nothing half-made was left behind.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неудавшиеся откатились — недоделанного не осталось."
+          }
+        }
+      }
+    },
+    "Their data — logins, history, everything specific to them — goes to the Trash.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Их данные — входы, история, всё, что относится только к ним, — отправятся в Корзину."
+          }
+        }
+      }
+    },
+    "Their isolated data — logins, history, settings — goes to the Trash. %@ itself stays installed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Их изолированные данные — входы, история, настройки — отправятся в Корзину. Само приложение «%@» останется установленным."
           }
         }
       }
@@ -1373,6 +4386,72 @@
           "stringUnit": {
             "state": "translated",
             "value": "Оформление"
+          }
+        }
+      }
+    },
+    "Theme, shortcuts, extensions — how the app is set up.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тема, горячие клавиши, расширения — то, как приложение настроено."
+          }
+        }
+      }
+    },
+    "This account runs on the app’s own profile, so Double Bubble keeps nothing separate for it. The duplicate starts empty.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот аккаунт работает на собственном профиле приложения, поэтому Double Bubble ничего не хранит для него отдельно. Копия начнёт с пустого места."
+          }
+        }
+      }
+    },
+    "This account runs on the app’s own profile. Double Bubble keeps nothing separate for it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот аккаунт работает на собственном профиле приложения. Double Bubble не хранит для него ничего отдельно."
+          }
+        }
+      }
+    },
+    "This app can’t be run twice": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это приложение нельзя запустить дважды"
+          }
+        }
+      }
+    },
+    "This app is isolated by copying its bundle, which is rebuilt from the original every time it opens. There is nothing separate to carry over.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это приложение изолируется копией бандла, а она пересоздаётся из оригинала при каждом запуске. Отдельных данных для переноса нет."
+          }
+        }
+      }
+    },
+    "This app will have no accounts left until you add one again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У приложения не останется ни одного аккаунта, пока вы не добавите новый."
           }
         }
       }
@@ -1421,6 +4500,72 @@
         }
       }
     },
+    "Tighter rows that fit more on screen — closer to a system list.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Более плотные строки — больше помещается на экране, ближе к системному списку."
+          }
+        }
+      }
+    },
+    "Tile": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Плитка"
+          }
+        }
+      }
+    },
+    "Total": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всего"
+          }
+        }
+      }
+    },
+    "Turn off “History and cache” on the first step to copy much less, or create fewer accounts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Снимите «Историю и кэш» на первом шаге, чтобы копировать намного меньше, или создайте меньше аккаунтов."
+          }
+        }
+      }
+    },
+    "Turn off “History and cache” to copy much less": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Снимите «Историю и кэш», чтобы копировать намного меньше"
+          }
+        }
+      }
+    },
+    "Turn this on for the account you were already signed into before Double Bubble. Everything then launches from one place, each with its own icon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включите это для аккаунта, под которым вы уже сидели до Double Bubble. Тогда всё запускается из одного места, и у каждого своя иконка."
+          }
+        }
+      }
+    },
     "Unknown": {
       "extractionState": "manual",
       "localizations": {
@@ -1432,6 +4577,17 @@
         }
       }
     },
+    "Unpin": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открепить"
+          }
+        }
+      }
+    },
     "Unpin %@": {
       "extractionState": "manual",
       "localizations": {
@@ -1439,6 +4595,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Открепить %@"
+          }
+        }
+      }
+    },
+    "Use": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Применить"
           }
         }
       }
@@ -1487,16 +4654,182 @@
         }
       }
     },
-    "macOS decides an app's language when it launches, so this takes effect next time Double Bubble starts.": {
+    "Version %@ (%@) · by ConstantaAI": {
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "macOS определяет язык приложения при запуске, поэтому изменение применится при следующем старте Double Bubble."
+            "value": "Версия %@ (%@) · ConstantaAI"
+          }
+        }
+      }
+    },
+    "Version %@ available": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доступна версия %@"
+          }
+        }
+      }
+    },
+    "View": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вид"
+          }
+        }
+      }
+    },
+    "View options": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Параметры вида"
+          }
+        }
+      }
+    },
+    "Waiting": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ожидает"
+          }
+        }
+      }
+    },
+    "What to carry over": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Что перенести"
+          }
+        }
+      }
+    },
+    "What’s new": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Что нового"
+          }
+        }
+      }
+    },
+    "all clear": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "всё в порядке"
+          }
+        }
+      }
+    },
+    "and %lld more": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "и ещё %lld"
+          }
+        }
+      }
+    },
+    "none running": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ничего не запущено"
+          }
+        }
+      }
+    },
+    "of %lld accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "из %lld аккаунтов"
+          }
+        }
+      }
+    },
+    "see below": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "см. ниже"
+          }
+        }
+      }
+    },
+    "·": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "·"
+          }
+        }
+      }
+    },
+    "“%@” has never been opened, so it has no data yet. The duplicate starts empty.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» ни разу не открывали, поэтому данных пока нет. Копия начнёт с пустого места."
+          }
+        }
+      }
+    },
+    "“%@” is running": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» сейчас запущен"
+          }
+        }
+      }
+    },
+    "“%@” is running an older version": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» работает на старой версии"
           }
         }
       }
     }
-  }
+  },
+  "version": "1.0"
 }

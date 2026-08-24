@@ -4,35 +4,52 @@ import AppKit
 @main
 struct DoubleBubbleApp: App {
     @StateObject private var library = AppLibrary()
+    /// One window means one shared state object; with a `WindowGroup` this
+    /// would have to be a `@FocusedObject` so the menu acted on the right one.
+    @StateObject private var ui = LibraryUIState()
+    @ObservedObject private var localizer = Localizer.shared
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
         Window("Double Bubble", id: "main") {
-            LibraryView(library: library)
-                .frame(minWidth: 720, minHeight: 460)
+            LibraryView(library: library, ui: ui)
+                .frame(minWidth: Metrics.windowMinWidth, minHeight: Metrics.windowMinHeight)
                 .onAppear { appDelegate.library = library }
                 .themed()
+                // Dates and byte counts SwiftUI formats for itself read this,
+                // not `AppleLanguages` — without it the interface came back in
+                // Russian with "3 days ago" still sitting next to it.
+                .environment(\.locale, localizer.locale)
+                // A picked language republishes `localizer`, but ordinary
+                // SwiftUI diffing can decide `library` alone is unchanged and
+                // skip re-rendering the subtree — this `.id()` forces a fresh
+                // one instead, the one reliable way to make every `L(...)`
+                // call in it re-resolve against the new bundle.
+                .id(localizer.language)
         }
         .windowResizability(.contentMinSize)
         .commands {
-            CommandGroup(replacing: .newItem) {}
+            LibraryCommands(library: library, ui: ui, localizer: localizer)
         }
 
         // Menu Bar Extra
         MenuBarExtra {
             MenuBarMenuView(library: library)
+                .environment(\.locale, localizer.locale)
+                .id(localizer.language)
         } label: {
-            Label("Double Bubble", systemImage: "bubbles.and.sparkles.fill")
+            Label(L("Double Bubble"), systemImage: "bubbles.and.sparkles.fill")
         }
         .menuBarExtraStyle(.menu)
 
-        // Settings get a window of their own. The toolbar button opens this
-        // same scene rather than a second copy of the controls, so there is
-        // still one settings surface — it just isn't wedged into a popover
-        // beside the window any more.
+        // Settings get a window of their own. The toolbar button that used to
+        // open this is gone — a gear in a document window's toolbar isn't a
+        // macOS pattern — so ⌘, and the application menu are the way in.
         Settings {
             SettingsView(library: library)
                 .themed()
+                .environment(\.locale, localizer.locale)
+                .id(localizer.language)
         }
     }
 }
@@ -53,91 +70,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Task { await UpdateChecker.shared.checkIfDue() }
     }
 
+    @MainActor
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard let library, library.totalRunningCount > 0 else { return .terminateNow }
 
+        // Was raw English regardless of the chosen language — `NSAlert` never
+        // went through the catalogue at all, so a Russian interface asked
+        // "Quit Double Bubble?" in English.
         let alert = NSAlert()
         let count = library.totalRunningCount
-        alert.messageText = "Quit Double Bubble?"
+        alert.messageText = L("Quit Double Bubble?")
         alert.informativeText = count == 1
-            ? "One account is still open. It will keep running in the background — Double Bubble will reconnect to it next time it launches."
-            : "\(count) accounts are still open. They'll keep running in the background — Double Bubble will reconnect to them next time it launches."
-        alert.addButton(withTitle: "Quit")
-        alert.addButton(withTitle: "Cancel")
+            ? L("One account is still open. It will keep running in the background — Double Bubble will reconnect to it next time it launches.")
+            : L("\(count) accounts are still open. They’ll keep running in the background — Double Bubble will reconnect to them next time it launches.")
+        alert.addButton(withTitle: L("Quit"))
+        alert.addButton(withTitle: L("Cancel"))
         alert.alertStyle = .warning
 
         return alert.runModal() == .alertFirstButtonReturn ? .terminateNow : .terminateCancel
     }
-}
 
-// MARK: - Menu Bar Quick Actions
-
-struct MenuBarMenuView: View {
-    @ObservedObject var library: AppLibrary
-    @ObservedObject private var monitor = ProcessMonitor.shared
-
-    @Environment(\.openWindow) private var openWindow
-
-    var body: some View {
-        Group {
-            if library.apps.isEmpty {
-                Text("No apps yet")
-            } else {
-                ForEach(library.apps) { app in
-                    if app.accounts.isEmpty {
-                        Text("\(app.name) — no accounts yet")
-                    } else {
-                        Section(app.name) {
-                            ForEach(app.accounts) { account in
-                                accountItem(app: app, account: account)
-                            }
-                        }
-                    }
-                }
-            }
-
-            Divider()
-
-            // openWindow recreates the scene's window. The old code only walked
-            // NSApp.windows, which is empty once the window has been closed —
-            // so the menu item silently did nothing.
-            Button("Open Double Bubble…") {
-                openWindow(id: "main")
-                NSApp.activate(ignoringOtherApps: true)
-            }
-
-            Divider()
-
-            Button("Quit") { NSApp.terminate(nil) }
-        }
-    }
-
-    @ViewBuilder
-    private func accountItem(app: ManagedApp, account: Account) -> some View {
-        let running = library.isRunning(account, monitor: monitor)
-
-        Button {
-            if running {
-                library.stop(account: account)
-            } else {
-                Task { @MainActor in
-                    do {
-                        try await library.open(account: account, in: app)
-                    } catch {
-                        NotificationService.notifyLaunchFailure(
-                            accountName: account.name,
-                            appName: app.name,
-                            reason: error.localizedDescription
-                        )
-                    }
-                }
-            }
-        } label: {
-            Label(
-                running ? "Stop \(account.name)" : "Open \(account.name)",
-                systemImage: running ? "stop.fill" : "play.fill"
-            )
-        }
-        .disabled(!running && !library.canOpen(app))
+    /// Brings the window back when the Dock icon is clicked with no window
+    /// open — otherwise the click does nothing and the app looks hung.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
+        guard !hasVisibleWindows else { return true }
+        NSApp.windows.first { $0.identifier?.rawValue.contains("main") == true }?
+            .makeKeyAndOrderFront(nil)
+        return true
     }
 }

@@ -11,14 +11,15 @@ enum SettingsSection: String, CaseIterable, Identifiable {
     /// you only read.
     var isInformational: Bool { self == .about }
 
+    @MainActor
     var title: String {
         switch self {
-        case .general:    return String(localized: "General")
-        case .appearance: return String(localized: "Appearance")
-        case .dockIcon:   return String(localized: "Dock Icon")
-        case .language:   return String(localized: "Language")
-        case .advanced:   return String(localized: "Advanced")
-        case .about:      return String(localized: "About")
+        case .general:    return L("General")
+        case .appearance: return L("Appearance")
+        case .dockIcon:   return L("Dock Icon")
+        case .language:   return L("Language")
+        case .advanced:   return L("Advanced")
+        case .about:      return L("About")
         }
     }
 
@@ -46,6 +47,9 @@ enum SettingsSection: String, CaseIterable, Identifiable {
 /// window to live in.
 struct SettingsView: View {
     @ObservedObject var library: AppLibrary
+    // See the same property on LibraryView: `L(...)` alone doesn't subscribe
+    // this view to language changes, only reading `localizer` during `body` does.
+    @ObservedObject private var localizer = Localizer.shared
     @State private var section: SettingsSection = .general
 
     @Environment(\.themePalette) private var palette
@@ -62,15 +66,15 @@ struct SettingsView: View {
 
     private var sidebar: some View {
         VStack(alignment: .leading, spacing: 2) {
-            group(String(localized: "Settings"), SettingsSection.allCases.filter { !$0.isInformational }, top: 26)
-            group(String(localized: "Information"), SettingsSection.allCases.filter(\.isInformational), top: 20)
+            group(L("Settings"), SettingsSection.allCases.filter { !$0.isInformational }, top: 26)
+            group(L("Information"), SettingsSection.allCases.filter(\.isInformational), top: 20)
             Spacer(minLength: 16)
             footer
         }
         .padding(.horizontal, 10)
         .padding(.bottom, 14)
         .frame(width: 208)
-        .background(palette.sidebarBackground ?? Color(nsColor: .windowBackgroundColor))
+        .sidebarSurface()
     }
 
     @ViewBuilder
@@ -98,12 +102,12 @@ struct SettingsView: View {
                     .fill(library.totalRunningCount > 0 ? palette.success : Color.secondary.opacity(0.5))
                     .frame(width: 7, height: 7)
                 Text(library.totalRunningCount == 0
-                     ? String(localized: "Nothing running")
-                     : String(localized: "\(library.totalRunningCount) running"))
+                     ? L("Nothing running")
+                     : L("\(library.totalRunningCount) running"))
                     .font(.meta)
                     .foregroundStyle(.secondary)
             }
-            Text("Double Bubble \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
+            Text(L("Double Bubble \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")"))
                 .font(.meta)
                 .foregroundStyle(.tertiary)
         }
@@ -180,10 +184,10 @@ private struct AppearanceSection: View {
     var body: some View {
         SettingsCard() {
             SettingsRow(
-                title: String(localized: "Theme"),
+                title: L("Theme"),
                 subtitle: theme == .terracotta
-                    ? String(localized: "ConstantaAI's warm clay and cream, tinting the app without repainting system controls.")
-                    : String(localized: "Follows your macOS appearance setting."),
+                    ? L("ConstantaAI's warm clay and cream, tinting the app without repainting system controls.")
+                    : L("Follows your macOS appearance setting."),
                 isFirst: true
             ) {
                 Picker("", selection: Binding(get: { theme }, set: { themeRaw = $0.rawValue })) {
@@ -194,10 +198,10 @@ private struct AppearanceSection: View {
             }
 
             SettingsRow(
-                title: String(localized: "Row Size"),
+                title: L("Row Size"),
                 subtitle: density == .comfortable
-                    ? String(localized: "Bigger avatars and roomier buttons. Best for a handful of apps.")
-                    : String(localized: "Tighter rows that fit more on screen — closer to a system list.")
+                    ? L("Bigger avatars and roomier buttons. Best for a handful of apps.")
+                    : L("Tighter rows that fit more on screen — closer to a system list.")
             ) {
                 Picker("", selection: Binding(get: { density }, set: { densityRaw = $0.rawValue })) {
                     ForEach(InterfaceDensity.allCases) { Text($0.label).tag($0) }
@@ -207,8 +211,8 @@ private struct AppearanceSection: View {
             }
 
             SettingsRow(
-                title: String(localized: "Disk Usage per Account"),
-                subtitle: String(localized: "How much space each account's copy or data folder takes, shown next to its status.")
+                title: L("Disk Usage per Account"),
+                subtitle: L("How much space each account's copy or data folder takes, shown next to its status.")
             ) {
                 Toggle("", isOn: $showDiskUsage).labelsHidden()
             }
@@ -231,8 +235,8 @@ private struct DockIconSection: View {
     var body: some View {
         SettingsCard() {
             SettingsWideRow(
-                title: String(localized: "Tile"),
-                subtitle: String(localized: "Applies while Double Bubble is running. When it isn't, macOS shows the icon baked into the app."),
+                title: L("Tile"),
+                subtitle: L("Applies while Double Bubble is running. When it isn't, macOS shows the icon baked into the app."),
                 isFirst: true
             ) {
                 HStack(spacing: 10) {
@@ -250,8 +254,8 @@ private struct DockIconSection: View {
             }
 
             SettingsRow(
-                title: String(localized: "Liquid Glass"),
-                subtitle: String(localized: "A lit edge, a soft sheen and a shadow under the mark. It fades out on its own at small sizes, so the Dock stays legible.")
+                title: L("Liquid Glass"),
+                subtitle: L("A lit edge, a soft sheen and a shadow under the mark. It fades out on its own at small sizes, so the Dock stays legible.")
             ) {
                 Toggle("", isOn: Binding(
                     get: { glass },
@@ -325,8 +329,8 @@ private struct GeneralSection: View {
     var body: some View {
         SettingsCard() {
             SettingsRow(
-                title: String(localized: "Launch at Login"),
-                subtitle: String(localized: "Keeps Double Bubble in the menu bar from sign-in, so accounts you left running are never orphaned by a restart."),
+                title: L("Launch at Login"),
+                subtitle: L("Keeps Double Bubble in the menu bar from sign-in, so accounts you left running are never orphaned by a restart."),
                 isFirst: true
             ) {
                 Toggle("", isOn: $launchAtLogin)
@@ -335,15 +339,15 @@ private struct GeneralSection: View {
             }
 
             SettingsRow(
-                title: String(localized: "Notify on Launch Failure"),
-                subtitle: String(localized: "Covers launches from the menu bar, where there's no window open to show an error in.")
+                title: L("Notify on Launch Failure"),
+                subtitle: L("Covers launches from the menu bar, where there's no window open to show an error in.")
             ) {
                 Toggle("", isOn: $notifyOnLaunchFailure).labelsHidden()
             }
 
             SettingsRow(
-                title: String(localized: "Check for Updates"),
-                subtitle: String(localized: "Asks GitHub once a day whether a newer release exists — nothing is downloaded or installed for you. This is the only time Double Bubble uses the network, and the request says nothing about you or the accounts you run.")
+                title: L("Check for Updates"),
+                subtitle: L("Asks GitHub once a day whether a newer release exists — nothing is downloaded or installed for you. This is the only time Double Bubble uses the network, and the request says nothing about you or the accounts you run.")
             ) {
                 Toggle("", isOn: Binding(
                     get: { checkForUpdates },
@@ -363,38 +367,27 @@ private struct GeneralSection: View {
 
 private struct LanguageSection: View {
     @AppStorage(AppLanguage.storageKey) private var raw = AppLanguage.system.rawValue
-    @State private var needsRelaunch = false
 
     private var language: AppLanguage { AppLanguage(rawValue: raw) ?? .system }
 
     var body: some View {
         SettingsCard() {
             SettingsRow(
-                title: String(localized: "Interface Language"),
-                subtitle: String(localized: "macOS decides an app's language when it launches, so this takes effect next time Double Bubble starts."),
+                title: L("Interface Language"),
+                subtitle: L("Applies right away — no need to restart."),
                 isFirst: true
             ) {
                 Picker("", selection: Binding(
                     get: { language },
                     set: { chosen in
                         AppLanguage.apply(chosen)
-                        needsRelaunch = chosen != AppLanguage.launchedWith
+                        Localizer.shared.set(chosen)
                     }
                 )) {
                     ForEach(AppLanguage.allCases) { Text($0.label).tag($0) }
                 }
                 .labelsHidden()
                 .fixedSize()
-            }
-
-            if needsRelaunch {
-                SettingsRow(
-                    title: String(localized: "Restart to finish switching."),
-                    subtitle: nil
-                ) {
-                    Button(String(localized: "Relaunch")) { AppLanguage.relaunch() }
-                        .controlSize(.small)
-                }
             }
         }
     }
@@ -409,41 +402,41 @@ private struct AdvancedSection: View {
     var body: some View {
         SettingsCard() {
             SettingsRow(
-                title: String(localized: "Data Folder"),
-                subtitle: String(localized: "Every account's isolated data and any re-signed app copies live here."),
+                title: L("Data Folder"),
+                subtitle: L("Every account's isolated data and any re-signed app copies live here."),
                 isFirst: true
             ) {
                 Button {
                     let path = ("~/.double_bubble" as NSString).expandingTildeInPath
                     NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: path)])
                 } label: {
-                    Label(String(localized: "Show"), systemImage: "folder")
+                    Label(L("Show"), systemImage: "folder")
                 }
                 .controlSize(.small)
             }
 
             SettingsRow(
-                title: String(localized: "Remove All Apps"),
-                subtitle: String(localized: "Clears the app list along with account names and colors. Anything still running is stopped first. The apps themselves, and their data on disk, are not touched.")
+                title: L("Remove All Apps"),
+                subtitle: L("Clears the app list along with account names and colors. Anything still running is stopped first. The apps themselves, and their data on disk, are not touched.")
             ) {
                 Button(role: .destructive) {
                     showingResetConfirm = true
                 } label: {
-                    Text(String(localized: "Remove…"))
+                    Text(L("Remove…"))
                 }
                 .controlSize(.small)
                 .disabled(library.apps.isEmpty)
             }
         }
         .confirmationDialog(
-            "Remove all apps from Double Bubble?",
+            L("Remove all apps from Double Bubble?"),
             isPresented: $showingResetConfirm,
             titleVisibility: .visible
         ) {
-            Button("Remove All", role: .destructive) {
+            Button(L("Remove All"), role: .destructive) {
                 for app in library.apps { library.removeApp(app.id) }
             }
-            Button("Cancel", role: .cancel) {}
+            Button(L("Cancel"), role: .cancel) {}
         }
     }
 }
@@ -464,7 +457,7 @@ private struct AboutSection: View {
         SettingsCard() {
             SettingsRow(
                 title: "Double Bubble",
-                subtitle: String(localized: "Version \(version) (\(build)) · by ConstantaAI"),
+                subtitle: L("Version \(version) (\(build)) · by ConstantaAI"),
                 isFirst: true
             ) {
                 HStack(spacing: 10) {
@@ -477,10 +470,10 @@ private struct AboutSection: View {
 
     @ViewBuilder private var updateStatus: some View {
         if let release = updates.available {
-            Link(String(localized: "Version \(release.version) available"), destination: release.url)
+            Link(L("Version \(release.version) available"), destination: release.url)
                 .font(.meta)
         } else {
-            Button(String(localized: "Check Now")) { Task { await updates.check() } }
+            Button(L("Check Now")) { Task { await updates.check() } }
                 .controlSize(.small)
         }
     }
