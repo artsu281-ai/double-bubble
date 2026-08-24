@@ -1,89 +1,58 @@
 # AI AGENT SYNC STATE
 Keep this short. Overwrite, don't append — history lives in git, not here.
 
-**CURRENT_GOAL:** —
+**CURRENT_GOAL:** Main-window redesign — DONE, built, run and verified on
+screen. Uncommitted. Goal is released; next agent may claim.
 
 **LAST_ACTION:**
-[Claude Code] -> [next agent]:
-Icon now has a Liquid Glass treatment, offered as a choice, and settings were
-rebuilt in Intact's language. Four icon variants ship (light/dark x
-glass/flat) as .icns in Resources; DockIcon resolves (DockIconTheme x glass x
-system appearance) and swaps NSApp.applicationIconImage. All 12 combinations
-checked against what actually ships.
-
-Glass is one number, GLASS=0.65 in make_app_icon.py, scaling the whole stack.
-Past ~0.8 the plate reads as plastic. Every effect is proportional to the
-tile, so it fades out by 16pt and leaves the flat mark — which is where
-legibility matters. The tell is not the gradient but the edge pair (lit top
-lip, shaded foot) plus the mark casting onto the plate. Highlights are warm
-(SPARK); pure white desaturates terracotta to grey. Each theme carries its own
-strengths — a sheen sized for cream washes the near-black plate out.
-
-Settings: new Views/Components/SettingsKit.swift (SettingsPage / SettingsCard /
-SettingsRow / SettingsWideRow), ThemePalette gained `hairline`. Now a real
-`Settings` scene — window with a sidebar, six pages, Intact-style grouping and
-footer. The popover is gone: the user said it was too tall to sit beside the
-main window. Its old rationale (a second window would steal the comma
-shortcut and split controls) doesn't apply — the Settings scene owns the
-shortcut and the toolbar button calls `openSettings()` into the same scene.
-
-Typography.swift now holds the app's only type scale: ten named roles, each
-built from a macOS text style rather than a point size, so it still answers to
-the system text-size setting. Before it there were 17 literal sizes beside 8
-semantic styles and the same role appeared at three different sizes. Three
-literals survive deliberately (two SF Symbol glyph sizes, one initial sized to
-its swatch); density's nameFont keeps its own two sizes because changing size
-is what that setting is for. Careful: applying the scale by search-and-replace
-put several explanations on the row-title step — anything mapped in bulk here
-has to be re-read against its surroundings.
-
-**Verification gap, be honest about it:** computer-use MCP is disconnected in
-this session, so SwiftUI output was never seen. Builds clean and the app
-launches and stays up with no crash reports, but no screen was inspected. The
-user has to eyeball the settings.
+[Claude Code] -> [next agent]: implemented the published redesign spec end to
+end. `Views/LibraryView.swift` (1287 lines, six private views) is now a shell;
+everything else lives in `Views/{Sidebar,Detail,Inspector,Sheets,Menus}/`.
+18 new files. Two features that did not exist: account duplication with
+selective data transfer (`Services/DataCopier.swift`), and bulk creation via a
+3-step wizard with saved presets (`Views/Sheets/BulkCreateView.swift`,
+`Models/AccountPreset.swift`). Plus: `Overview` and `All Accounts` screens, a
+`.inspector()` replacing the Advanced Settings disclosure, a real main menu
+(`Views/Menus/LibraryCommands.swift` — the app had none), multiple selection
+with an action bar, list/grid modes, and "Locate Application…" which repairs a
+stale `targetAppBookmark` without deleting every account's data.
 
 **STATUS:**
-- Released through **v1.0.2** (notify-on-new-release), Latest. v1.0.1 was
-  the Dock fix. Endpoint now serves v1.0.2, so anyone on 1.0.1 gets the bar.
-- Icon + settings work is committed but **not pushed**, and in no release —
-  newest release is still v1.0.2, which has none of it.
-- Main window (LibraryView) has NOT been redesigned yet. The user asked for
-  settings *and* main window; only settings are done.
-- Reference project for the design language: ~/work_tree/voice (Intact).
-  Sources/Intact/Views/Theme.swift holds its Palette + Card/Row/SettingsPage.
-- User is on macOS 27 / Xcode 26.6. README still claims Xcode 16+.
-- Version lives in `project.yml` (`info.properties` + `settings.base`), which
-  *generates* `DoubleBubble/Info.plist` — editing the plist directly is
-  pointless, `xcodegen generate` overwrites it.
-- DerivedData path is `DoubleBubble-gkknsnogypxvygavpkbmsdakwdaf`. An older
-  `-efuzpmiujmlskxayjezdsyyreyqm` tree survives from when the project lived in
-  ~/Documents; launching that one silently tests a months-old build. Get the
-  path from `xcodebuild -showBuildSettings`, don't hardcode it.
-- First Open of each existing account rebuilds its copy (fingerprint
-  changed), which resets its ad-hoc signature — Screen Recording /
-  Accessibility grants for those copies need granting once more. Unavoidable:
-  the copy has to be rebuilt to receive the shim.
-- `.electronFlag` (apps that can't be copied — Chrome et al.) still uses a
-  wrapper that `terminate` deletes 3s after Stop, so pinning one to the Dock
-  leaves a dead tile. Separate, less severe bug — not touched. Docs now tell
-  users not to pin those.
-- CLAUDE.md/agent_sync.md/.claude/hooks intentionally public — settled.
-- README's donation table (Solana-labeled address) still unconfirmed.
-- AppKnowledgeBase's `com.openai.chat` entry stale; ChatGPT/Codex out of
-  scope per the user.
+- Builds clean, zero warnings. Ran on screen and exercised: duplicate (real
+  876 MB Claude profile split 1,2 / 321,6 / 553,7 MB; copied the session group
+  and verified on disk that `Singleton*`/lock files were excluded), bulk create
+  (5 accounts, per-item progress, result screen), multi-select removal, live
+  language switch. Test accounts were created and removed again — the library
+  is back to Claude(2)/Antigravity IDE(1)/Gemini(1).
+- **Localization is the trap here.** Xcode does NOT auto-extract strings passed
+  through the `L()` wrapper — `-exportLocalizations` only re-emits what is
+  already in `Localizable.xcstrings`, so it cannot tell you what is missing.
+  Use `scratchpad/keys.py`-style tokenizing of `L("…")` call sites instead, and
+  note that the catalogue key depends on the *Swift type* of each
+  interpolation (`Int` → `%lld`, `String` → `%@`); guessing that wrong produces
+  a key that never matches. 265 keys added, all `ru`, verified by loading the
+  built `ru.lproj` and calling `String(localized:bundle:)`. A translation that
+  *reorders* two specifiers crashes — use positional `%1$@`/`%2$lld`. The whole
+  catalogue is now audited clean for this.
+- `Locale` needed the same treatment as `Bundle`: switching language left every
+  date reading "3 days ago". `AppLocale.current` + `.environment(\.locale,)`
+  fixes it; `DiskUsage` moved off `ByteCountFormatter` (no `locale`, and it
+  spells zero as "Zero KB") to `ByteCountFormatStyle`.
+- Two spec items deliberately not built, both because macOS says otherwise:
+  bare ⏎/⌫ menu shortcuts (AppKit checks key equivalents before the responder
+  chain — they would break Return in sheets and Backspace in text fields; ⌘⌫ is
+  used instead), and type-the-number-to-confirm bulk delete (a web pattern; the
+  button carries the count instead).
+- Not committed, not pushed. Icon/settings work from earlier sessions is still
+  committed-but-unpushed; newest release is still v1.0.2.
 
 **NEXT (queue):**
-Ask before pushing 4b38e18 / cutting v1.0.3. The dark icon is only visible in
-a build the user runs, so it needs a release to reach anyone.
-
-Phase 2, if the user greenlights it: integrate Sparkle for real auto-install.
-Unresolved question that decides whether it is even viable — whether Sparkle
-validates an update whose app is only ad-hoc signed (no Developer ID). Docs
-don't say; EdDSA is its documented integrity mechanism and is independent of
-Apple signing, and this app sets no hardened runtime / library validation
-(`flags=0x2(adhoc)` only), so the documented blocker doesn't apply. Only a
-real update cycle will settle it. If it fails, UpdateChecker stays as-is.
-
-Also still open: the user hasn't confirmed the v1.0.1 Dock fix on their own
-live accounts — verification was a scratch copy of Claude.app. And the
-`.electronFlag` wrapper-deletion bug above.
+Ask before committing — nothing here is committed. Then, still open from
+before: pushing the icon/settings work and cutting v1.0.3; Sparkle phase 2
+(does it validate an ad-hoc-only signature?); the `.electronFlag`
+wrapper-deletion-orphans-a-pinned-Dock-tile bug. `Overview`, `All Accounts` and the
+"Add Application" catalogue were all opened and checked on this machine — the
+catalogue found 8 installable apps and correctly flagged Chrome as unable to
+run twice *before* it can be added. Not seen on screen: the inspector's Disk
+tab with a bundle copy present, and any screen with an account actually
+running.
