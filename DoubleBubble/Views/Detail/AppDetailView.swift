@@ -140,9 +140,6 @@ struct AppDetailView: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.regular)
 
-                duplicateButton
-                    .controlSize(.regular)
-
                 bulkButton
                     .controlSize(.regular)
             }
@@ -158,43 +155,6 @@ struct AppDetailView: View {
         .padding(.top, Metrics.m)
         .padding(.bottom, Metrics.xl)
         .textCase(nil)
-    }
-
-    /// Duplicating needs a source, and with several accounts and nothing
-    /// selected there isn't one.
-    ///
-    /// The first pass disabled the button in that case, which is the state it
-    /// is in the moment anyone opens an app with two accounts — so the whole
-    /// feature read as broken until you happened to click a row first. Asking
-    /// which one, in a menu, costs one click and never looks broken.
-    @ViewBuilder
-    private var duplicateButton: some View {
-        if let source = duplicationSource {
-            Button {
-                ui.present(.duplicate(appID: app.id, account: source))
-            } label: {
-                Label(L("Duplicate"), systemImage: "plus.square.on.square")
-            }
-            .help(L("Duplicate “\(source.name)”"))
-        } else if !app.accounts.isEmpty {
-            Menu {
-                ForEach(app.accounts) { account in
-                    Button(account.name) {
-                        ui.present(.duplicate(appID: app.id, account: account))
-                    }
-                }
-            } label: {
-                Label(L("Duplicate"), systemImage: "plus.square.on.square")
-            }
-            .fixedSize()
-            .help(L("Select an account to duplicate"))
-        } else {
-            Button {} label: {
-                Label(L("Duplicate"), systemImage: "plus.square.on.square")
-            }
-            .disabled(true)
-            .help(L("Select an account to duplicate"))
-        }
     }
 
     /// A split button when presets exist, a plain one when they don't — a menu
@@ -222,13 +182,6 @@ struct AppDetailView: View {
             .menuStyle(.button)
             .fixedSize()
         }
-    }
-
-    /// What a duplicate would be made from: the selection, or the only account
-    /// there is. Guessing beyond that would pick something arbitrary.
-    private var duplicationSource: Account? {
-        if let id = ui.singleAccountID, let match = app.account(id) { return match }
-        return app.accounts.count == 1 ? app.accounts.first : nil
     }
 
     private var emptyAccounts: some View {

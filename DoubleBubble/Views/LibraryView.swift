@@ -159,9 +159,12 @@ struct LibraryView: View {
                 AccountEditorView(library: library, app: app, mode: .edit(account))
             }
 
+        // Same sheet as "New Account", with the source already picked — there
+        // is one idea here (make an account, optionally from an existing one),
+        // so there is one sheet.
         case .duplicate(let appID, let account):
             if let app = library.app(appID) {
-                DuplicateAccountView(library: library, app: app, source: account) { created in
+                AccountEditorView(library: library, app: app, mode: .create, source: account) { created in
                     ui.highlight([created.id])
                 }
             }

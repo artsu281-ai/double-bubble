@@ -46,7 +46,7 @@ struct LibraryCommands: Commands {
             .keyboardShortcut("n", modifiers: [.command, .shift])
             .disabled(app == nil)
 
-            Button(L("Duplicate Account…")) {
+            Button(L("New Account from Selected…")) {
                 guard let app, let source = duplicationSource(in: app) else { return }
                 ui.present(.duplicate(appID: app.id, account: source))
             }

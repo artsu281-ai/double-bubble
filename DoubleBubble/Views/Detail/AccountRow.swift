@@ -191,7 +191,7 @@ struct AccountRow: View {
         HStack(spacing: 0) {
             RowActionButton(
                 symbol: "plus.square.on.square",
-                help: L("Duplicate \(account.name)"),
+                help: L("New account starting from “\(account.name)”"),
                 glyphSize: density.actionGlyph
             ) {
                 ui.present(.duplicate(appID: app.id, account: account))
@@ -338,7 +338,7 @@ struct AccountMenu: View {
         Divider()
 
         Button(L("Rename…")) { ui.present(.editAccount(appID: app.id, account: account)) }
-        Button(L("Duplicate…")) { ui.present(.duplicate(appID: app.id, account: account)) }
+        Button(L("New Account from This…")) { ui.present(.duplicate(appID: app.id, account: account)) }
 
         // Nothing of ours to show or erase for an account on the app's own
         // profile — and offering "Clear Data" there would read as an offer to

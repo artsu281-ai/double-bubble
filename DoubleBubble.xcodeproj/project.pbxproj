@@ -28,7 +28,6 @@
 		4C45E4701B53546924D15956 /* IconAccent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD890DF3DEBDD9193D4CB225 /* IconAccent.swift */; };
 		56CD656B2A5D2018A20D0348 /* UpdateBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A233EF71501F6DB42BEAE19 /* UpdateBanner.swift */; };
 		64E40A1E9642777E6B05F85B /* AppChooser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73380AD71B8BC92020A4E4F6 /* AppChooser.swift */; };
-		65660A4047ACF854B5E1D977 /* DuplicateAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B690957A05352C4B697277EC /* DuplicateAccountView.swift */; };
 		66D6C78D13D10946351F4655 /* AppInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435C22C64AB594B21D0A2A93 /* AppInstance.swift */; };
 		6FD561026427BBACED195D26 /* AppLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C276686BE1DBB00973054F9C /* AppLibrary.swift */; };
 		72311BB88058F9B201A7FFA9 /* DockAccentPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96502F9B7E63FAAFAD61604 /* DockAccentPicker.swift */; };
@@ -116,7 +115,6 @@
 		AEFB751656938F8CED5DB241 /* ManagedApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedApp.swift; sourceTree = "<group>"; };
 		B25327752194A2A8D93A7AA2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B2559FCE07AA55948155EC5C /* AccountEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditorView.swift; sourceTree = "<group>"; };
-		B690957A05352C4B697277EC /* DuplicateAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateAccountView.swift; sourceTree = "<group>"; };
 		B80ED456F7B0D1A0D3DE1622 /* SystemSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemSettings.swift; sourceTree = "<group>"; };
 		BBB9424A3A220DDBD0A8CE4A /* AccountPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountPreset.swift; sourceTree = "<group>"; };
 		BDDC54EAEA95C8021FFFB9F8 /* InstalledApps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledApps.swift; sourceTree = "<group>"; };
@@ -227,7 +225,6 @@
 				B2559FCE07AA55948155EC5C /* AccountEditorView.swift */,
 				87462A9E5093E51C45B0F476 /* AddAppView.swift */,
 				DC71EC751B01158C318C223C /* BulkCreateView.swift */,
-				B690957A05352C4B697277EC /* DuplicateAccountView.swift */,
 				94B2FEE0CC9520A2C1BAE4BA /* SheetKit.swift */,
 			);
 			path = Sheets;
@@ -415,7 +412,6 @@
 				281F2636683A5AFE93AEB0FB /* DockIcon.swift in Sources */,
 				B9F7A6A60F001C4AD1D7C23B /* DockPins.swift in Sources */,
 				E77B0697B5AB30A47DB13222 /* DoubleBubbleApp.swift in Sources */,
-				65660A4047ACF854B5E1D977 /* DuplicateAccountView.swift in Sources */,
 				4C45E4701B53546924D15956 /* IconAccent.swift in Sources */,
 				E4967471ACBE044BFC95128D /* IconFactory.swift in Sources */,
 				3E1C00CBE03D796C65C9111D /* InstalledApps.swift in Sources */,

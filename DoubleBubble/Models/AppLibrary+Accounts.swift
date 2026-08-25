@@ -106,6 +106,8 @@ extension AppLibrary {
         named name: String,
         colorHex: String,
         iconData: Data? = nil,
+        accent: IconAccent = .tint,
+        usesDefaultProfile: Bool = false,
         in appID: ManagedApp.ID,
         copyingFrom source: Account? = nil,
         groups: Set<DataGroup> = [],
@@ -119,6 +121,8 @@ extension AppLibrary {
             colorHex: colorHex
         )
         account.iconData = iconData
+        account.iconAccent = accent.rawValue
+        account.defaultProfile = usesDefaultProfile
 
         if let source,
            !groups.isEmpty,

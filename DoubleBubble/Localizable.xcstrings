@@ -1409,13 +1409,13 @@
         }
       }
     },
-    "Couldn’t duplicate": {
+    "Couldn’t create the account": {
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Не удалось дублировать"
+            "value": "Не удалось создать аккаунт"
           }
         }
       }
@@ -1581,6 +1581,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Создание аккаунтов"
+          }
+        }
+      }
+    },
+    "Creating…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Создаётся…"
           }
         }
       }
@@ -1805,17 +1816,6 @@
         }
       }
     },
-    "Duplicate": {
-      "extractionState": "manual",
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дублировать"
-          }
-        }
-      }
-    },
     "Duplicate %@": {
       "extractionState": "manual",
       "localizations": {
@@ -1823,28 +1823,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Дублировать «%@»"
-          }
-        }
-      }
-    },
-    "Duplicate Account…": {
-      "extractionState": "manual",
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дублировать аккаунт…"
-          }
-        }
-      }
-    },
-    "Duplicate the selected account": {
-      "extractionState": "manual",
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дублировать выбранный аккаунт"
           }
         }
       }
@@ -1860,17 +1838,6 @@
         }
       }
     },
-    "Duplicate…": {
-      "extractionState": "manual",
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дублировать…"
-          }
-        }
-      }
-    },
     "Duplicating “%@”": {
       "extractionState": "manual",
       "localizations": {
@@ -1878,17 +1845,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Дублирование «%@»"
-          }
-        }
-      }
-    },
-    "Duplicating…": {
-      "extractionState": "manual",
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дублирование…"
           }
         }
       }
@@ -2648,6 +2604,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Новый аккаунт"
+          }
+        }
+      }
+    },
+    "New Account from Selected…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новый на основе выбранного…"
+          }
+        }
+      }
+    },
+    "New Account from This…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новый на основе этого…"
           }
         }
       }
@@ -3807,17 +3785,6 @@
         }
       }
     },
-    "Select an account to duplicate": {
-      "extractionState": "manual",
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Выберите аккаунт для дублирования"
-          }
-        }
-      }
-    },
     "Select an account to see its details.": {
       "extractionState": "manual",
       "localizations": {
@@ -4181,6 +4148,28 @@
         }
       }
     },
+    "Start empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Начать с чистого"
+          }
+        }
+      }
+    },
+    "Start from another account": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Взять за основу другой аккаунт"
+          }
+        }
+      }
+    },
     "Started on": {
       "extractionState": "manual",
       "localizations": {
@@ -4375,6 +4364,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Разрешения системы"
+          }
+        }
+      }
+    },
+    "Take an account’s settings — and, if you want, its sign-in — so the new one doesn’t start from nothing.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перенести настройки другого аккаунта — и, если нужно, его вход, — чтобы новый не начинал с нуля."
           }
         }
       }
