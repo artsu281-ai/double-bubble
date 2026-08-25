@@ -1,14 +1,6 @@
 import SwiftUI
 
 /// The strip along the bottom of the source list: add, remove, view options.
-///
-/// Replaces a full-width "Add App…" button that sat *above* the search field.
-/// The reasoning for putting it there was that adding an app is the first
-/// thing anyone does — true, and the empty state now carries that job with a
-/// prominent button and room to explain itself. What the top strip cost was
-/// the convention: every macOS source list that can be added to has these
-/// controls under it, and putting them somewhere else means they get looked
-/// for in two places.
 struct SidebarBottomBar: View {
     @ObservedObject var library: AppLibrary
     @ObservedObject var ui: LibraryUIState
@@ -26,15 +18,17 @@ struct SidebarBottomBar: View {
         VStack(spacing: 0) {
             Divider()
 
-            HStack(spacing: 0) {
+            HStack(spacing: 4) {
                 Button {
                     ui.present(.addApp)
                 } label: {
                     Image(systemName: "plus")
-                        .frame(width: Metrics.minHit, height: 24)
+                        .font(.system(size: 13, weight: .medium))
+                        .frame(width: Metrics.minHit, height: 26)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.borderless)
+                .foregroundStyle(.primary)
                 .help(L("Add an application"))
                 .accessibilityLabel(L("Add an application"))
 
@@ -43,11 +37,13 @@ struct SidebarBottomBar: View {
                     ui.confirmation = .removeApp(appID: app.id, name: app.name)
                 } label: {
                     Image(systemName: "minus")
-                        .frame(width: Metrics.minHit, height: 24)
+                        .font(.system(size: 13, weight: .medium))
+                        .frame(width: Metrics.minHit, height: 26)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.borderless)
                 .disabled(selectedApp == nil)
+                .foregroundStyle(selectedApp != nil ? Color.primary : Color.secondary.opacity(0.5))
                 .help(selectedApp.map { L("Remove \($0.name)") } ?? L("Select an application first"))
                 .accessibilityLabel(L("Remove the selected application"))
 
@@ -75,18 +71,19 @@ struct SidebarBottomBar: View {
                     Toggle(L("Show Disk Usage"), isOn: $showDiskUsage)
                 } label: {
                     Image(systemName: "ellipsis")
-                        .frame(width: Metrics.minHit, height: 24)
+                        .font(.system(size: 13, weight: .medium))
+                        .frame(width: Metrics.minHit, height: 26)
                         .contentShape(Rectangle())
                 }
                 .menuStyle(.borderlessButton)
                 .menuIndicator(.hidden)
                 .fixedSize()
+                .foregroundStyle(.primary)
                 .help(L("View options"))
                 .accessibilityLabel(L("View options"))
             }
-            .padding(.horizontal, Metrics.xs)
-            .padding(.vertical, 3)
-            .foregroundStyle(.secondary)
+            .padding(.horizontal, Metrics.m)
+            .padding(.vertical, 4)
         }
         .background(.bar)
     }

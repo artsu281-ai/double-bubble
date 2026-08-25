@@ -31,47 +31,37 @@ struct AppDetailView: View {
             } else {
                 gridBody
             }
+
+            if ui.hasMultipleSelected {
+                SelectionBar(library: library, ui: ui, app: app)
+            }
         }
         .background(palette.windowBackground)
         .navigationTitle(app.name)
-        .navigationSubtitle(subtitle)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            if ui.hasMultipleSelected {
-                SelectionBar(library: library, ui: ui, app: app)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-        }
-        .motion(Motion.state, value: ui.hasMultipleSelected)
         .toolbar { toolbar }
-        .onChange(of: app.id) { _, _ in ui.accountSelection = [] }
     }
 
     // MARK: - List
 
     private var listBody: some View {
-        List(selection: $ui.accountSelection) {
-            Section {
-                ForEach(app.accounts) { account in
-                    AccountRow(library: library, ui: ui, app: app, account: account, density: density)
-                        .tag(account.id)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(
-                            top: density.rowGap / 2, leading: 0,
-                            bottom: density.rowGap / 2, trailing: 0
-                        ))
-                        .listRowBackground(Color.clear)
-                }
-            } header: {
+        ScrollView {
+            VStack(alignment: .leading, spacing: Metrics.m) {
                 accountsHeader
-            } footer: {
+
+                if app.accounts.isEmpty {
+                    emptyAccounts
+                        .padding(.vertical, Metrics.xxl)
+                } else {
+                    LazyVStack(spacing: density.rowGap) {
+                        ForEach(app.accounts) { account in
+                            AccountRow(library: library, ui: ui, app: app, account: account, density: density)
+                        }
+                    }
+                }
+
                 footer
             }
-        }
-        .listStyle(.inset)
-        .scrollContentBackground(.hidden)
-        .environment(\.defaultMinListRowHeight, 0)
-        .overlay {
-            if app.accounts.isEmpty { emptyAccounts }
+            .padding(Metrics.xl)
         }
     }
 
@@ -138,40 +128,28 @@ struct AppDetailView: View {
     }
 
     /// Three ways to make an account, side by side.
-    ///
-    /// Bulk creation used to be nowhere; putting it in a menu would have kept
-    /// it nowhere. Next to the single-account button it is discovered by
-    /// anyone who has ever added a second account, which is everyone.
     @ViewBuilder
     private var footer: some View {
         VStack(alignment: .leading, spacing: Metrics.m) {
-            if ui.viewMode == .list {
-                HStack(spacing: Metrics.s) {
-                    Button {
-                        ui.present(.newAccount(appID: app.id))
-                    } label: {
-                        Label(L("Add Account"), systemImage: "plus")
-                    }
-
-                    duplicateButton
-
-                    bulkButton
+            HStack(spacing: Metrics.s) {
+                Button {
+                    ui.present(.newAccount(appID: app.id))
+                } label: {
+                    Label(L("Add Account"), systemImage: "plus")
                 }
+                .buttonStyle(.borderedProminent)
                 .controlSize(.regular)
-            } else {
-                HStack(spacing: Metrics.s) {
-                    duplicateButton
 
-                    bulkButton
-                }
+                duplicateButton
+                    .controlSize(.regular)
+
+                bulkButton
+                    .controlSize(.regular)
             }
 
             Text(footerText)
                 .font(.rowSubtitle)
                 .foregroundStyle(.secondary)
-                // A `List` section footer clamps to a single line, so this
-                // sentence was being cut off with an ellipsis instead of
-                // wrapping. `fixedSize` alone doesn't lift that.
                 .lineLimit(nil)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)

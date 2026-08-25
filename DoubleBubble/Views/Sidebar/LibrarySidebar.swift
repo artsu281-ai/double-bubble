@@ -2,13 +2,7 @@ import SwiftUI
 import AppKit
 import UniformTypeIdentifiers
 
-/// The source list: two summary destinations, then the apps, grouped.
-///
-/// The grouping is the point. Before, one flat "Apps" section was sorted with
-/// pinned items first — a rule that was completely invisible, since a pinned
-/// app looked exactly like an unpinned one and had merely floated upward.
-/// Sections say out loud what the order means, and "Running" gives the one
-/// question people open this window to answer a place of its own.
+/// The source list: smart destinations, then pinned and regular apps.
 struct LibrarySidebar: View {
     @ObservedObject var library: AppLibrary
     @ObservedObject var ui: LibraryUIState
@@ -20,7 +14,7 @@ struct LibrarySidebar: View {
 
     private var density: InterfaceDensity { InterfaceDensity(rawValue: densityRaw) ?? .comfortable }
 
-    // MARK: Data
+    // MARK: - Data
 
     private var matching: [ManagedApp] {
         guard !ui.appSearch.isEmpty else { return library.apps }
@@ -34,9 +28,6 @@ struct LibrarySidebar: View {
         case .name:
             return matching.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         case .lastOpened:
-            // Never-opened apps sink rather than sorting as "infinitely long
-            // ago" — they aren't stale, they're new, and mixing the two makes
-            // the order read as random.
             return matching.sorted { a, b in
                 let lhs = a.accounts.compactMap(\.lastOpenedAt).max()
                 let rhs = b.accounts.compactMap(\.lastOpenedAt).max()
@@ -50,112 +41,111 @@ struct LibrarySidebar: View {
         }
     }
 
-    private var running: [ManagedApp] {
-        sorted.filter { library.runningCount(for: $0, monitor: monitor) > 0 }
-    }
     private var pinned: [ManagedApp] { sorted.filter(\.isPinned) }
     private var rest: [ManagedApp] { sorted.filter { !$0.isPinned } }
+    private var totalAccounts: Int { library.apps.reduce(0) { $0 + $1.accounts.count } }
 
-    // MARK: Body
+    // MARK: - Body
 
     var body: some View {
-        List(selection: $ui.sidebarSelection) {
-            Section {
-                summaryRow(
-                    .overview,
-                    title: L("Overview"),
-                    symbol: "square.grid.2x2.fill",
-                    badge: nil
-                )
-                summaryRow(
-                    .allAccounts,
-                    title: L("All Accounts"),
-                    symbol: "person.2.fill",
-                    badge: library.apps.reduce(0) { $0 + $1.accounts.count }
-                )
-            }
+        VStack(spacing: 0) {
+            List(selection: $ui.sidebarSelection) {
+                Section {
+                    SidebarSmartRow(
+                        title: L("Overview"),
+                        symbol: "square.grid.2x2.fill",
+                        badge: nil,
+                        isSelected: ui.sidebarSelection == .overview,
+                        density: density
+                    )
+                    .tag(LibraryUIState.SidebarItem.overview)
 
-            if !running.isEmpty {
-                Section(L("Running")) {
-                    ForEach(running) { app in
-                        // The same app also stays in its own section below.
-                        // Moving it here on launch would make the list jump
-                        // under the cursor every time something started, and
-                        // take the muscle memory with it.
-                        appRow(app, isEcho: false)
+                    SidebarSmartRow(
+                        title: L("All Accounts"),
+                        symbol: "person.2.fill",
+                        badge: totalAccounts > 0 ? totalAccounts : nil,
+                        isSelected: ui.sidebarSelection == .allAccounts,
+                        density: density
+                    )
+                    .tag(LibraryUIState.SidebarItem.allAccounts)
+                }
+
+                if !pinned.isEmpty {
+                    Section(L("Pinned")) {
+                        ForEach(pinned) { app in
+                            SidebarAppRow(
+                                library: library,
+                                ui: ui,
+                                app: app,
+                                density: density
+                            )
+                            .tag(LibraryUIState.SidebarItem.app(app.id))
+                        }
                     }
                 }
-            }
 
-            if !pinned.isEmpty {
-                Section(L("Pinned")) {
-                    ForEach(pinned) { app in
-                        appRow(app, isEcho: library.runningCount(for: app, monitor: monitor) > 0)
+                if !rest.isEmpty {
+                    Section(L("Apps")) {
+                        ForEach(rest) { app in
+                            SidebarAppRow(
+                                library: library,
+                                ui: ui,
+                                app: app,
+                                density: density
+                            )
+                            .tag(LibraryUIState.SidebarItem.app(app.id))
+                        }
                     }
                 }
-            }
 
-            if !rest.isEmpty {
-                Section(L("Apps")) {
-                    ForEach(rest) { app in
-                        appRow(app, isEcho: library.runningCount(for: app, monitor: monitor) > 0)
-                    }
+                if library.apps.isEmpty {
+                    emptyLibraryState
+                } else if !ui.appSearch.isEmpty && matching.isEmpty {
+                    searchEmptyState
                 }
             }
-        }
-        .listStyle(.sidebar)
-        // The material stays; the theme washes over it. See `themedSidebar`.
-        .themedSidebar()
-        .overlay {
-            if library.apps.isEmpty {
-                Text(L("No Apps Yet"))
-                    .font(.listItem)
-                    .foregroundStyle(.secondary)
-            } else if matching.isEmpty {
-                ContentUnavailableView.search(text: ui.appSearch)
-            }
-        }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
+            .listStyle(.sidebar)
+            .searchable(text: $ui.appSearch, placement: .sidebar, prompt: Text(L("Search Apps")))
+
             SidebarBottomBar(library: library, ui: ui)
         }
+        .themedSidebar()
         .onDrop(of: [.fileURL], isTargeted: nil, perform: handleDrop)
     }
 
-    // MARK: Rows
+    // MARK: - Empty States
 
-    @ViewBuilder
-    private func summaryRow(
-        _ item: LibraryUIState.SidebarItem,
-        title: String,
-        symbol: String,
-        badge: Int?
-    ) -> some View {
-        Label {
-            Text(title).font(.listItem)
-        } icon: {
-            Image(systemName: symbol)
-                .foregroundStyle(palette.accentColor)
+    private var emptyLibraryState: some View {
+        VStack(spacing: Metrics.s) {
+            Image(systemName: "square.stack.3d.up.slash")
+                .font(.system(size: 28))
+                .foregroundStyle(.tertiary)
+            Text(L("No Apps Yet"))
+                .font(.listItem)
+                .foregroundStyle(.secondary)
         }
-        .badge(badge.map { $0 > 0 ? "\($0)" : "" } ?? "")
-        .tag(item)
+        .padding(Metrics.l)
+        .frame(maxWidth: .infinity)
     }
 
-    private func appRow(_ app: ManagedApp, isEcho: Bool) -> some View {
-        SidebarAppRow(
-            library: library,
-            ui: ui,
-            app: app,
-            density: density,
-            isEcho: isEcho
-        )
-        .tag(LibraryUIState.SidebarItem.app(app.id))
+    private var searchEmptyState: some View {
+        VStack(spacing: Metrics.xs) {
+            Image(systemName: "magnifyingglass")
+                .font(.title3)
+                .foregroundStyle(.tertiary)
+                .padding(.bottom, 2)
+            Text(L("Nothing matches “\(ui.appSearch)”."))
+                .font(.rowSubtitle)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+        }
+        .padding(Metrics.m)
+        .frame(maxWidth: .infinity)
     }
 
-    // MARK: Drop
+    // MARK: - Drag & Drop
 
-    /// Dropping an `.app` onto the sidebar adds it. The affordance nobody has
-    /// to be told about, and the one place where the file picker was never the
-    /// natural gesture.
     private func handleDrop(_ providers: [NSItemProvider]) -> Bool {
         var handled = false
         for provider in providers {
@@ -179,7 +169,46 @@ struct LibrarySidebar: View {
     }
 }
 
-// MARK: - App row
+// MARK: - Smart Row
+
+private struct SidebarSmartRow: View {
+    let title: String
+    let symbol: String
+    let badge: Int?
+    var isSelected: Bool = false
+    let density: InterfaceDensity
+
+    @Environment(\.themePalette) private var palette
+
+    var body: some View {
+        HStack(spacing: Metrics.s) {
+            Image(systemName: symbol)
+                .font(.system(size: density.sidebarIconSize * 0.85, weight: .semibold))
+                .frame(width: density.sidebarIconSize, height: density.sidebarIconSize)
+                .foregroundStyle(isSelected ? Color.white : palette.accentColor)
+
+            Text(title)
+                .font(.listItem)
+
+            Spacer(minLength: Metrics.xs)
+
+            if let badge, badge > 0 {
+                Text("\(badge)")
+                    .font(.badge)
+                    .monospacedDigit()
+                    .foregroundStyle(isSelected ? Color.white.opacity(0.9) : Color.secondary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 1)
+                    .background(
+                        Capsule().fill(isSelected ? Color.white.opacity(0.2) : Color.secondary.opacity(0.12))
+                    )
+            }
+        }
+        .padding(.vertical, density.sidebarRowPadding)
+    }
+}
+
+// MARK: - App Row
 
 private struct SidebarAppRow: View {
     @ObservedObject var library: AppLibrary
@@ -190,57 +219,40 @@ private struct SidebarAppRow: View {
 
     let app: ManagedApp
     let density: InterfaceDensity
-    /// This app is already listed under "Running" — this is its second
-    /// appearance, dimmed so the duplication reads as intentional.
-    let isEcho: Bool
 
     @State private var isHovering = false
 
+    private var isSelected: Bool { ui.sidebarSelection == .app(app.id) }
     private var running: Int { library.runningCount(for: app, monitor: monitor) }
-    private var isSelected: Bool { ui.selectedAppID == app.id }
-    private var showsActions: Bool { isHovering || isSelected }
 
     var body: some View {
         HStack(spacing: Metrics.s) {
             icon
                 .frame(width: density.sidebarIconSize, height: density.sidebarIconSize)
-                .opacity(isEcho ? 0.55 : 1)
 
             Text(app.name)
                 .font(.listItem)
                 .lineLimit(1)
                 .truncationMode(.tail)
-                .opacity(isEcho ? 0.55 : 1)
 
             if running > 0 { RunningDot() }
 
             Spacer(minLength: Metrics.xs)
 
-            // Both the counter and the actions occupy the same reserved strip,
-            // so the row doesn't reflow the instant the pointer touches it —
-            // which the old hover treatment did, and which made the pin button
-            // move out from under the cursor on its way to being clicked.
             ZStack(alignment: .trailing) {
-                counter.opacity(showsActions ? 0 : 1)
-                actions.opacity(showsActions ? 1 : 0).allowsHitTesting(showsActions)
+                counter
+                    .opacity(isHovering ? 0 : 1)
+                actions
+                    .opacity(isHovering ? 1 : 0)
+                    .allowsHitTesting(isHovering)
             }
             .frame(width: 2 * Metrics.minHit, alignment: .trailing)
         }
         .padding(.vertical, density.sidebarRowPadding)
         .contentShape(Rectangle())
         .onHover { isHovering = $0 }
-        .motion(Motion.quick, value: showsActions)
         .help(app.name)
-        // The hover actions are a shortcut, never the only way in: everything
-        // here is also on the context menu and, for VoiceOver, on the row.
-        .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityLabel)
-        .accessibilityAction(named: Text(app.isPinned ? L("Unpin") : L("Pin"))) {
-            library.togglePinned(app.id)
-        }
-        .accessibilityAction(named: Text(L("Remove App…"))) {
-            ui.confirmation = .removeApp(appID: app.id, name: app.name)
-        }
         .contextMenu { menu }
     }
 
@@ -252,7 +264,7 @@ private struct SidebarAppRow: View {
             Image(systemName: "app.dashed")
                 .resizable()
                 .scaledToFit()
-                .foregroundStyle(.secondary)
+                .foregroundStyle(isSelected ? Color.white : Color.secondary)
         }
     }
 
@@ -266,7 +278,7 @@ private struct SidebarAppRow: View {
         }
         .font(.badge)
         .monospacedDigit()
-        .foregroundStyle(.secondary)
+        .foregroundStyle(isSelected ? Color.white.opacity(0.9) : Color.secondary)
     }
 
     private var actions: some View {
@@ -278,7 +290,7 @@ private struct SidebarAppRow: View {
             ) {
                 library.togglePinned(app.id)
             }
-            .foregroundStyle(app.isPinned ? palette.accentColor : .secondary)
+            .foregroundStyle(isSelected ? Color.white : (app.isPinned ? palette.accentColor : Color.secondary))
 
             RowActionButton(
                 symbol: "trash",
@@ -287,7 +299,7 @@ private struct SidebarAppRow: View {
             ) {
                 ui.confirmation = .removeApp(appID: app.id, name: app.name)
             }
-            .foregroundStyle(.secondary)
+            .foregroundStyle(isSelected ? Color.white.opacity(0.9) : Color.secondary)
         }
     }
 

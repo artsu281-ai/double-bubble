@@ -2548,7 +2548,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ни разу не открывали"
+            "value": "Не открытые"
           }
         }
       }
@@ -3032,7 +3032,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Больше 1 ГБ"
+            "value": "> 1 ГБ"
           }
         }
       }

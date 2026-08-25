@@ -3,11 +3,8 @@ import AppKit
 
 /// The whole library at a glance.
 ///
-/// The question this window exists to answer is "what is running right now",
-/// and until this screen there was no way to answer it except walking the
-/// sidebar app by app, reading green dots. That is fine at two apps and
-/// useless at ten. The counts were always there — `runningCount`,
-/// `totalRunningCount` — they simply had nowhere to be shown.
+/// Answers "what is running right now", shows key metrics, and surfaces
+/// anything requiring user attention in a clean, modern dashboard.
 struct OverviewView: View {
     @ObservedObject var library: AppLibrary
     @ObservedObject var ui: LibraryUIState
@@ -45,12 +42,10 @@ struct OverviewView: View {
             VStack(alignment: .leading, spacing: Metrics.xl) {
                 HStack(spacing: Metrics.m) {
                     StatTile(
-                        // Not the row's "Running": that is an adjective
-                        // agreeing with one account, and Russian will not let
-                        // it double as the heading over a number.
                         title: L("Running accounts"),
                         value: "\(runningTotal)",
                         caption: L("of \(accountTotal) accounts"),
+                        symbol: "play.circle.fill",
                         tone: runningTotal > 0 ? .good : .neutral
                     )
                     StatTile(
@@ -59,12 +54,14 @@ struct OverviewView: View {
                         caption: runningApps.isEmpty
                             ? L("none running")
                             : L("\(runningApps.count) with something running"),
+                        symbol: "square.grid.2x2",
                         tone: .neutral
                     )
                     StatTile(
                         title: L("Needs attention"),
                         value: "\(attention.count)",
                         caption: attention.isEmpty ? L("all clear") : L("see below"),
+                        symbol: "exclamationmark.triangle.fill",
                         tone: attention.isEmpty ? .neutral : .warning
                     )
                 }
@@ -80,7 +77,7 @@ struct OverviewView: View {
                             library.stopEverything()
                         }
                         .controlSize(.small)
-                        .padding(.top, Metrics.s)
+                        .padding(.top, Metrics.xs)
                     }
                 }
 
@@ -103,9 +100,6 @@ struct OverviewView: View {
         }
         .background(palette.windowBackground)
         .navigationTitle(L("Overview"))
-        .navigationSubtitle(runningTotal == 0
-                            ? L("Nothing running")
-                            : L("\(runningTotal) of \(accountTotal) accounts running"))
         .toolbar {
             ToolbarItem {
                 Button {
@@ -144,36 +138,48 @@ struct OverviewView: View {
 
     private func runningRow(_ app: ManagedApp) -> some View {
         let running = app.accounts.filter { library.isRunning($0, monitor: monitor) }
-        return Button {
-            ui.select(app: app.id)
-        } label: {
-            HStack(spacing: Metrics.m) {
-                if let icon = library.icon(for: app) {
-                    Image(nsImage: icon).resizable().scaledToFit().frame(width: 24, height: 24)
+        return HStack(spacing: Metrics.m) {
+            Button {
+                ui.select(app: app.id)
+            } label: {
+                HStack(spacing: Metrics.m) {
+                    if let icon = library.icon(for: app) {
+                        Image(nsImage: icon).resizable().scaledToFit().frame(width: 26, height: 26)
+                    } else {
+                        Image(systemName: "app.dashed")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 26, height: 26)
+                            .foregroundStyle(.secondary)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(app.name).font(.rowTitle)
+                        Text(running.map(\.name).joined(separator: ", "))
+                            .font(.meta)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                    Spacer(minLength: Metrics.s)
+                    HStack(spacing: Metrics.xs) {
+                        RunningDot(size: 6)
+                        Text("\(running.count)/\(app.accounts.count)")
+                            .font(.meta)
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    }
                 }
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(app.name).font(.rowTitle)
-                    Text(running.map(\.name).joined(separator: ", "))
-                        .font(.meta)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-                Spacer(minLength: Metrics.s)
-                Text("\(running.count)/\(app.accounts.count)")
-                    .font(.meta)
-                    .monospacedDigit()
-                    .foregroundStyle(.secondary)
-                Button(L("Stop All")) { library.stopAll(in: app) }
-                    .controlSize(.small)
+                .contentShape(Rectangle())
             }
-            .padding(Metrics.m)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(cardShape)
-            .contentShape(RoundedRectangle(cornerRadius: Metrics.cardRadius, style: .continuous))
+            .buttonStyle(.plain)
+
+            Button(L("Stop All")) { library.stopAll(in: app) }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
         }
-        .buttonStyle(.plain)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(L("\(app.name), \(running.count) of \(app.accounts.count) accounts running"))
+        .padding(Metrics.m)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(cardShape)
+        .contentShape(RoundedRectangle(cornerRadius: Metrics.cardRadius, style: .continuous))
     }
 
     private func attentionRow(_ app: ManagedApp, message: String) -> some View {
@@ -183,7 +189,8 @@ struct OverviewView: View {
             HStack(spacing: Metrics.m) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(palette.warning)
-                VStack(alignment: .leading, spacing: 1) {
+                    .font(.system(size: 16))
+                VStack(alignment: .leading, spacing: 2) {
                     Text(app.name).font(.rowTitle)
                     Text(message)
                         .font(.meta)
@@ -202,7 +209,6 @@ struct OverviewView: View {
             .contentShape(RoundedRectangle(cornerRadius: Metrics.cardRadius, style: .continuous))
         }
         .buttonStyle(.plain)
-        .accessibilityElement(children: .combine)
         .accessibilityLabel("\(app.name), \(message)")
     }
 
@@ -234,7 +240,7 @@ struct OverviewView: View {
     }
 }
 
-/// One number, big, with what it counts underneath.
+/// One number, big, with what it counts underneath and an icon indicator.
 struct StatTile: View {
     enum Tone { case neutral, good, warning }
 
@@ -243,6 +249,7 @@ struct StatTile: View {
     let title: String
     let value: String
     let caption: String
+    var symbol: String? = nil
     var tone: Tone = .neutral
 
     private var valueColor: Color {
@@ -253,12 +260,28 @@ struct StatTile: View {
         }
     }
 
+    private var symbolColor: Color {
+        switch tone {
+        case .neutral: return .secondary.opacity(0.6)
+        case .good:    return palette.success
+        case .warning: return palette.warning
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: Metrics.xs) {
-            Text(title.uppercased())
-                .font(.sectionLabel)
-                .kerning(0.8)
-                .foregroundStyle(.tertiary)
+            HStack {
+                Text(title.uppercased())
+                    .font(.sectionLabel)
+                    .kerning(0.8)
+                    .foregroundStyle(.tertiary)
+                Spacer()
+                if let symbol {
+                    Image(systemName: symbol)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(symbolColor)
+                }
+            }
             Text(value)
                 .font(.system(.largeTitle, weight: .semibold))
                 .monospacedDigit()

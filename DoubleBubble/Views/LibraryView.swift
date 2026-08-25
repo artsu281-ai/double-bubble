@@ -29,26 +29,8 @@ struct LibraryView: View {
                     ideal: Metrics.sidebarIdeal,
                     max: Metrics.sidebarMax
                 )
-                .searchable(
-                    text: $ui.appSearch,
-                    placement: .sidebar,
-                    prompt: Text(L("Search Apps"))
-                )
         } detail: {
             detail
-        }
-        .inspector(isPresented: $ui.showInspector) {
-            LibraryInspector(library: library, ui: ui)
-                .inspectorColumnWidth(
-                    min: Metrics.inspectorWidth - 40,
-                    ideal: Metrics.inspectorWidth,
-                    max: Metrics.inspectorWidth + 80
-                )
-        }
-        .safeAreaInset(edge: .top, spacing: 0) {
-            if let release = updates.available {
-                UpdateBanner(release: release) { updates.skip(release) }
-            }
         }
         .toolbar { sharedToolbar }
         .sheet(item: $ui.route, content: sheet)
@@ -76,6 +58,7 @@ struct LibraryView: View {
         } message: {
             Text(ui.errorMessage ?? "")
         }
+        .background(WindowMinSizeEnforcer(minWidth: Metrics.windowMinWidth, minHeight: Metrics.windowMinHeight))
         .task { await updates.checkIfDue() }
         .onAppear(perform: restoreSelection)
     }
@@ -84,6 +67,24 @@ struct LibraryView: View {
 
     @ViewBuilder
     private var detail: some View {
+        HStack(spacing: 0) {
+            VStack(spacing: 0) {
+                if let release = updates.available {
+                    UpdateBanner(release: release) { updates.skip(release) }
+                }
+                detailContent
+            }
+
+            if ui.showInspector && ui.selectedAppID != nil {
+                Divider()
+                LibraryInspector(library: library, ui: ui)
+                    .frame(width: Metrics.inspectorWidth)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var detailContent: some View {
         switch ui.sidebarSelection {
         case .overview, .none:
             OverviewView(library: library, ui: ui)
@@ -92,7 +93,6 @@ struct LibraryView: View {
         case .app(let id):
             if let app = library.app(id) {
                 AppDetailView(library: library, ui: ui, app: app)
-                    .id(app.id)
             } else {
                 // The app was removed while it was on screen.
                 OverviewView(library: library, ui: ui)
@@ -114,13 +114,15 @@ struct LibraryView: View {
             }
         }
 
-        ToolbarItem(placement: .primaryAction) {
-            Button {
-                ui.showInspector.toggle()
-            } label: {
-                Label(L("Inspector"), systemImage: "sidebar.trailing")
+        if ui.selectedAppID != nil {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    ui.showInspector.toggle()
+                } label: {
+                    Label(L("Inspector"), systemImage: "sidebar.trailing")
+                }
+                .help(ui.showInspector ? L("Hide the inspector") : L("Show the inspector"))
             }
-            .help(ui.showInspector ? L("Hide the inspector") : L("Show the inspector"))
         }
     }
 
@@ -344,5 +346,26 @@ private struct TaskIndicator: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(job.title), \(job.detail ?? "")")
+    }
+}
+
+// MARK: - Window Min Size Enforcer
+
+private struct WindowMinSizeEnforcer: NSViewRepresentable {
+    let minWidth: CGFloat
+    let minHeight: CGFloat
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async {
+            view.window?.minSize = NSSize(width: minWidth, height: minHeight)
+        }
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        DispatchQueue.main.async {
+            nsView.window?.minSize = NSSize(width: minWidth, height: minHeight)
+        }
     }
 }

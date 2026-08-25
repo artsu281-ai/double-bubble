@@ -34,6 +34,16 @@ struct AccountRow: View {
     private var showsActions: Bool { isHovering || isSelected }
     private var dataPath: String { library.dataFolder(for: app, account: account) }
 
+    init(library: AppLibrary, ui: LibraryUIState, app: ManagedApp, account: Account, density: InterfaceDensity) {
+        self.library = library
+        self.ui = ui
+        self.app = app
+        self.account = account
+        self.density = density
+        let path = library.dataFolder(for: app, account: account)
+        _sizeText = State(initialValue: DiskUsage.cachedString(atPath: path))
+    }
+
     var body: some View {
         HStack(spacing: density.rowSpacing) {
             avatarButton
@@ -62,22 +72,7 @@ struct AccountRow: View {
         .motion(Motion.state, value: isHighlighted)
         .contextMenu { AccountMenu(library: library, ui: ui, app: app, account: account) }
         .task(id: dataPath) { await measure() }
-        // One element, one sentence. Six separate `Text` nodes with "·"
-        // between them meant VoiceOver announced the word "middle dot"
-        // between every fragment.
-        .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityLabel)
-        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
-        .accessibilityAction(named: Text(isRunning ? L("Stop") : L("Open"))) { toggle() }
-        .accessibilityAction(named: Text(L("Rename…"))) {
-            ui.present(.editAccount(appID: app.id, account: account))
-        }
-        .accessibilityAction(named: Text(L("Duplicate…"))) {
-            ui.present(.duplicate(appID: app.id, account: account))
-        }
-        .accessibilityAction(named: Text(L("Remove Account…"))) {
-            ui.confirmation = .removeAccounts(appID: app.id, ids: [account.id], names: [account.name])
-        }
     }
 
     // MARK: Pieces
@@ -91,8 +86,8 @@ struct AccountRow: View {
             // "this one is new". Tying it to the account colour, as the old
             // card did, made two unrelated things share one channel.
             shape.strokeBorder(
-                isHighlighted ? palette.accentColor : palette.hairline,
-                lineWidth: isHighlighted ? 2 : 1
+                isSelected || isHighlighted ? palette.accentColor : palette.hairline,
+                lineWidth: isSelected || isHighlighted ? 2 : 1
             )
         }
     }
@@ -217,43 +212,19 @@ struct AccountRow: View {
         .foregroundStyle(.secondary)
     }
 
-    /// A split button: the common action on the left, its variants under the
-    /// arrow. Replaces a `.buttonStyle(.plain)` capsule with a hand-painted
-    /// background, which had no pressed state, no focus ring and no keyboard
-    /// behaviour of any kind.
     private var launchControl: some View {
-        Menu {
-            if isRunning {
-                Button(L("Bring to Front")) { bringToFront() }
-                Button(L("Stop")) { toggle() }
-            } else {
-                Button(L("Open")) { toggle() }
-                Button(L("Open in Background")) { toggle(activate: false) }
-            }
-        } label: {
-            ZStack {
-                // Sized by the longer of its two labels rather than a number.
-                // A hard-coded width only ever fitted English — "Stop" is
-                // "Остановить", half again as long, and it was clipped.
-                Text(L("Open")).hidden()
-                Text(L("Stop")).hidden()
-
-                if isBusy {
-                    ProgressView().controlSize(.small)
-                } else {
-                    Text(isRunning ? L("Stop") : L("Open"))
-                }
-            }
-            .font(.controlLabel)
-            .lineLimit(1)
-        } primaryAction: {
+        Button {
             toggle()
+        } label: {
+            if isBusy {
+                ProgressView().controlSize(.small)
+            } else {
+                Text(isRunning ? L("Stop") : L("Open"))
+            }
         }
-        .menuStyle(.button)
         .buttonStyle(.bordered)
-        .controlSize(.large)
+        .controlSize(.regular)
         .tint(isRunning ? Color.secondary : palette.accentColor)
-        .fixedSize()
         .disabled(isBusy || (!isRunning && !canOpen))
         .help(launchHelp)
     }

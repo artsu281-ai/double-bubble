@@ -41,8 +41,8 @@ enum InterfaceDensity: String, CaseIterable, Identifiable {
 
     // MARK: - Sidebar
 
-    var sidebarIconSize: CGFloat { self == .comfortable ? 20 : 16 }
-    var sidebarRowPadding: CGFloat { self == .comfortable ? 5 : 2 }
+    var sidebarIconSize: CGFloat { self == .comfortable ? 24 : 18 }
+    var sidebarRowPadding: CGFloat { self == .comfortable ? 4 : 2 }
 
     static let storageKey = "interfaceDensity"
 }

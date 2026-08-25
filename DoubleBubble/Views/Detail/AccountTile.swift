@@ -80,13 +80,7 @@ struct AccountTile: View {
         .motion(Motion.quick, value: isHovering)
         .onTapGesture { handleTap() }
         .contextMenu { AccountMenu(library: library, ui: ui, app: app, account: account) }
-        .accessibilityElement(children: .combine)
         .accessibilityLabel(label)
-        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
-        .accessibilityAction(named: Text(isRunning ? L("Stop") : L("Open"))) { toggle() }
-        .accessibilityAction(named: Text(L("Duplicate…"))) {
-            ui.present(.duplicate(appID: app.id, account: account))
-        }
     }
 
     @ViewBuilder

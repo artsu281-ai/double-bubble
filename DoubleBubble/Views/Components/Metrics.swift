@@ -48,11 +48,11 @@ enum Metrics {
 
     // MARK: - Window
 
-    static let windowMinWidth: CGFloat = 820
-    static let windowMinHeight: CGFloat = 520
+    static let windowMinWidth: CGFloat = 780
+    static let windowMinHeight: CGFloat = 500
     static let sidebarMin: CGFloat = 200
-    static let sidebarIdeal: CGFloat = 236
-    static let sidebarMax: CGFloat = 320
+    static let sidebarIdeal: CGFloat = 230
+    static let sidebarMax: CGFloat = 300
     static let inspectorWidth: CGFloat = 280
 
     // MARK: - Sheets
