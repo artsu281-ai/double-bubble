@@ -694,6 +694,17 @@
         }
       }
     },
+    "Already added": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уже добавлено"
+          }
+        }
+      }
+    },
     "Already used by another account": {
       "extractionState": "manual",
       "localizations": {
@@ -1959,17 +1970,6 @@
         }
       }
     },
-    "Everything Double Bubble recognises is already added.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Всё, что Double Bubble узнаёт, уже добавлено."
-          }
-        }
-      }
-    },
     "Everything Has Been Opened": {
       "extractionState": "manual",
       "localizations": {
@@ -2736,6 +2736,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ни один аккаунт пока не перевалил за гигабайт."
+          }
+        }
+      }
+    },
+    "No applications here that Double Bubble recognises.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Здесь нет приложений, которые Double Bubble узнаёт."
           }
         }
       }
@@ -4595,6 +4606,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Это приложение нельзя запустить дважды"
+          }
+        }
+      }
+    },
+    "This app is already in your list": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это приложение уже есть в списке"
           }
         }
       }

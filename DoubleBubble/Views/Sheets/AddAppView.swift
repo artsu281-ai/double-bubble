@@ -36,10 +36,29 @@ struct AddAppView: View {
         Set(library.apps.compactMap { library.url(for: $0)?.path })
     }
 
+    /// Apps already in the library stay in the list, greyed and unselectable,
+    /// rather than being quietly dropped from it.
+    ///
+    /// Hiding them looked tidy and read as "your app isn't supported": someone
+    /// opens this sheet looking for the app they use every day, doesn't find
+    /// it, and concludes Double Bubble can't do it — when in fact they added it
+    /// weeks ago. An absence explains nothing; a greyed row saying "already
+    /// added" explains itself.
     private var candidates: [InstalledApps.Entry] {
-        var all = entries.filter { !alreadyAdded.contains($0.url.path) }
+        var all = entries
         if let manual, !all.contains(manual) { all.insert(manual, at: 0) }
         return all
+    }
+
+    private func isAdded(_ entry: InstalledApps.Entry) -> Bool {
+        alreadyAdded.contains(entry.url.path)
+    }
+
+    /// Why this row can't be chosen, or `nil` when it can.
+    private func unavailable(_ entry: InstalledApps.Entry) -> String? {
+        if isAdded(entry) { return L("Already added") }
+        if entry.blocked { return entry.isolationLabel }
+        return nil
     }
 
     private var visible: [InstalledApps.Entry] {
@@ -91,7 +110,7 @@ struct AddAppView: View {
             Button(L("Add")) { add(selected) }
                 .keyboardShortcut(.defaultAction)
                 .buttonStyle(.borderedProminent)
-                .disabled(selected == nil || selected?.blocked == true)
+                .disabled(selected == nil || selected.map { unavailable($0) != nil } ?? true)
                 .help(addHelp)
         }
         .task { await scan() }
@@ -101,6 +120,7 @@ struct AddAppView: View {
         guard let selected else { return L("Choose an application from the list") }
         // A disabled default button has to say why, and here the reason is the
         // whole point of the screen.
+        if isAdded(selected) { return L("This app is already in your list") }
         if selected.blocked { return L("This app can’t be run twice") }
         return L("Add \(selected.name)")
     }
@@ -155,7 +175,8 @@ struct AddAppView: View {
             .contextMenu(forSelectionType: String.self) { _ in
             } primaryAction: { ids in
                 guard let id = ids.first,
-                      let entry = visible.first(where: { $0.id == id }) else { return }
+                      let entry = visible.first(where: { $0.id == id }),
+                      unavailable(entry) == nil else { return }
                 add(entry)
             }
         }
@@ -186,11 +207,16 @@ struct AddAppView: View {
                 .lineLimit(1)
                 // Greyed like any unavailable choice, rather than looking
                 // identical to the rows that will work.
-                .foregroundStyle(entry.blocked ? .secondary : .primary)
+                .foregroundStyle(unavailable(entry) == nil ? .primary : .secondary)
 
             Spacer(minLength: Metrics.s)
 
-            if entry.blocked {
+            if isAdded(entry) {
+                Label(L("Already added"), systemImage: "checkmark")
+                    .font(.meta)
+                    .foregroundStyle(.secondary)
+                    .labelStyle(.titleAndIcon)
+            } else if entry.blocked {
                 Label(entry.isolationLabel, systemImage: "exclamationmark.triangle.fill")
                     .font(.meta)
                     .foregroundStyle(palette.warning)
@@ -203,13 +229,13 @@ struct AddAppView: View {
         }
         .padding(.vertical, 2)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(entry.name), \(entry.isolationLabel)")
+        .accessibilityLabel("\(entry.name), \(unavailable(entry) ?? entry.isolationLabel)")
     }
 
     private var emptyState: some View {
         VStack(alignment: .leading, spacing: Metrics.s) {
             Text(search.isEmpty
-                 ? L("Everything Double Bubble recognises is already added.")
+                 ? L("No applications here that Double Bubble recognises.")
                  : L("Nothing matches “\(search)”."))
                 .font(.rowSubtitle)
             Text(L("Any application can still be added with “Choose Another…”."))
@@ -279,7 +305,7 @@ struct AddAppView: View {
     }
 
     private func add(_ entry: InstalledApps.Entry?) {
-        guard let entry, !entry.blocked else { return }
+        guard let entry, unavailable(entry) == nil else { return }
         finish(library.addApp(at: entry.url))
     }
 
