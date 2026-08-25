@@ -54,8 +54,17 @@ struct BulkPlan: Codable, Equatable {
     static let softMaximum = 50
 
     /// The names this plan would produce, in order.
-    func names() -> [String] {
-        let width = numbering == .padded ? max(2, String(count).count) : 1
+    /// The names this plan produces, counting past the ones already taken.
+    ///
+    /// Numbering used to start at 1 every time, so asking for three more
+    /// accounts of an app that already had "Account 1" and "Account 3" produced
+    /// "Account 1", "Account 2", "Account 3" — two of them colliding with what
+    /// was already there on the very first try. "Three more" means three more,
+    /// so the count walks past whatever is in use.
+    ///
+    /// Both spellings of a number count as taken: someone with "Account 1" who
+    /// switches to padded numbering does not want "Account 01" beside it.
+    func names(avoiding taken: Set<String> = []) -> [String] {
         let template = nameTemplate.contains(Self.token)
             ? nameTemplate
             // No token means the number still has to land somewhere, and the
@@ -63,15 +72,30 @@ struct BulkPlan: Codable, Equatable {
             // preview beats a validation error explaining the syntax.
             : nameTemplate + " " + Self.token
 
-        return (1...max(1, count)).map { index in
-            let number = String(format: "%0\(width)d", index)
-            return template.replacingOccurrences(of: Self.token, with: number)
+        let used = Set(taken.map { $0.lowercased() })
+        func render(_ index: Int, width: Int) -> String {
+            template.replacingOccurrences(
+                of: Self.token, with: String(format: "%0\(width)d", index))
         }
+
+        // First pass picks the numbers, because the padding width depends on
+        // the highest one actually reached, not on how many were asked for.
+        var numbers: [Int] = []
+        var index = 1
+        while numbers.count < max(1, count), index < 10_000 {
+            let plain = render(index, width: 1).lowercased()
+            let padded = render(index, width: 2).lowercased()
+            if !used.contains(plain), !used.contains(padded) { numbers.append(index) }
+            index += 1
+        }
+
+        let width = numbering == .padded ? max(2, String(numbers.last ?? count).count) : 1
+        return numbers.map { render($0, width: width) }
     }
 
     /// First few names plus a count, for the live preview line.
-    func previewNames(limit: Int = 4) -> (shown: [String], remaining: Int) {
-        let all = names()
+    func previewNames(limit: Int = 4, avoiding taken: Set<String> = []) -> (shown: [String], remaining: Int) {
+        let all = names(avoiding: taken)
         guard all.count > limit else { return (all, 0) }
         return (Array(all.prefix(limit)), all.count - limit)
     }

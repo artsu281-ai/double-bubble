@@ -102,9 +102,15 @@ struct BulkCreateView: View {
         return totalDataBytes > freeSpace
     }
 
+    /// What this app already calls its accounts. The plan counts past these
+    /// rather than starting at 1 and landing on top of them.
+    private var existingNames: Set<String> { Set(app.accounts.map(\.name)) }
+
+    /// Only reachable now by a template that cannot avoid a collision at all —
+    /// kept as a safety net rather than as the common case it used to be.
     private var collidingNames: [String] {
         let existing = Set(app.accounts.map { $0.name.lowercased() })
-        return plan.names().filter { existing.contains($0.lowercased()) }
+        return plan.names(avoiding: existingNames).filter { existing.contains($0.lowercased()) }
     }
 
     private var succeeded: [Item] { items.filter { $0.state == .done } }
@@ -309,7 +315,7 @@ struct BulkCreateView: View {
     /// `qa-01 · qa-02 · qa-03 · … and 47 more` answers every question a
     /// syntax error message would have tried to.
     private var preview: some View {
-        let (shown, remaining) = plan.previewNames()
+        let (shown, remaining) = plan.previewNames(avoiding: existingNames)
         return SheetGroup(header: L("Preview")) {
             HStack(spacing: Metrics.s) {
                 ForEach(Array(shown.enumerated()), id: \.offset) { index, name in
@@ -327,7 +333,7 @@ struct BulkCreateView: View {
                 }
             }
             .accessibilityElement(children: .combine)
-            .accessibilityLabel(L("Names: \(plan.names().prefix(4).joined(separator: ", "))"))
+            .accessibilityLabel(L("Names: \(plan.names(avoiding: existingNames).prefix(4).joined(separator: ", "))"))
         }
     }
 
@@ -633,7 +639,7 @@ struct BulkCreateView: View {
         }
 
         let colors = plan.colors(avoiding: app.accounts.map(\.colorHex))
-        items = plan.names().enumerated().map { index, name in
+        items = plan.names(avoiding: existingNames).enumerated().map { index, name in
             Item(name: name, colorHex: colors[safe: index] ?? Account.presetColors[0], state: .pending)
         }
         run()
