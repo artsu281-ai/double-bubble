@@ -26,6 +26,7 @@ final class AppLibrary: ObservableObject {
     // touched from view bodies — cache them per app.
     private var urlCache: [UUID: URL] = [:]
     private var iconCache: [UUID: NSImage] = [:]
+    private var artworkCache: [UUID: NSImage] = [:]
     private var strategyCache: [UUID: LaunchStrategy] = [:]
     private var sandboxCache: [UUID: LaunchEngine.SandboxInfo] = [:]
     private var libraryValidationCache: [UUID: Bool] = [:]
@@ -134,6 +135,7 @@ final class AppLibrary: ObservableObject {
     func invalidateCaches(for id: ManagedApp.ID) {
         urlCache[id] = nil
         iconCache[id] = nil
+        artworkCache[id] = nil
         strategyCache[id] = nil
         sandboxCache[id] = nil
         libraryValidationCache[id] = nil
@@ -305,7 +307,51 @@ final class AppLibrary: ObservableObject {
     func updateAccount(_ account: Account, in appID: ManagedApp.ID) {
         guard let i = apps.firstIndex(where: { $0.id == appID }),
               let j = apps[i].accounts.firstIndex(where: { $0.id == account.id }) else { return }
+        let previous = apps[i].accounts[j]
         apps[i].accounts[j] = account
+
+        // The Dock tile lives inside the copy on disk, and used to be redrawn
+        // only by a launch — so changing a colour or an accent changed nothing
+        // anyone could see until the account was next opened, which might be
+        // days. Redraw it now, while the setting is still the thing the user is
+        // looking at.
+        if canRebrandInPlace(from: previous, to: account), !isRunning(account) {
+            rebrandTile(for: account, in: apps[i])
+        }
+    }
+
+    /// Whether an edit can be applied by redrawing the icon alone.
+    ///
+    /// A new name can't: it also goes into the copy's `Info.plist`, which only
+    /// the full rebuild does. Rebranding anyway would write a fingerprint
+    /// claiming the copy is current while the name it displays is not.
+    private func canRebrandInPlace(from old: Account, to new: Account) -> Bool {
+        guard old.name == new.name else { return false }
+        return old.colorHex != new.colorHex
+            || old.iconAccent != new.iconAccent
+            || old.iconData != new.iconData
+    }
+
+    private func rebrandTile(for account: Account, in app: ManagedApp) {
+        guard brandsIcons(app), let url = url(for: app) else { return }
+
+        // Only the copy-based strategies keep a bundle of ours worth
+        // redrawing. An Electron wrapper is rebuilt from scratch on every
+        // launch anyway, so it picks the change up on its own.
+        let workdir: (flag: String, separateValue: Bool)?
+        switch strategy(for: app) {
+        case .copyThenFlag(let flag, let separateValue):
+            workdir = (flag, separateValue)
+        case .bundleCopy:
+            workdir = nil
+        default:
+            return
+        }
+
+        LaunchEngine.shared.rebrandCopy(
+            appURL: url, appName: app.name, account: account,
+            bubbleCount: app.bubbleCount(of: account.id), workdir: workdir
+        )
     }
 
     // MARK: - Derived app info (cached)
@@ -315,6 +361,17 @@ final class AppLibrary: ObservableObject {
         guard let url = app.resolvedURL else { return nil }
         urlCache[app.id] = url
         return url
+    }
+
+    /// The app's own artwork, straight from its bundle — the picture its Dock
+    /// tile is built from. Distinct from `icon(for:)`, which asks the
+    /// Workspace and can hand back a generic placeholder on a cold call.
+    func artwork(for app: ManagedApp) -> NSImage? {
+        if let cached = artworkCache[app.id] { return cached }
+        guard let url = url(for: app) else { return nil }
+        let image = IconFactory.baseIcon(forBundle: url)
+        artworkCache[app.id] = image
+        return image
     }
 
     func icon(for app: ManagedApp) -> NSImage? {
@@ -546,7 +603,8 @@ final class AppLibrary: ObservableObject {
 
         let instance = try await LaunchEngine.shared.launch(
             appURL: url, appName: app.name, account: account,
-            distinctIcons: app.wantsDistinctIcons
+            distinctIcons: app.wantsDistinctIcons,
+            bubbleCount: app.bubbleCount(of: account.id)
         )
         instances[account.id] = instance
 

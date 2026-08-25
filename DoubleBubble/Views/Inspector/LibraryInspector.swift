@@ -87,7 +87,8 @@ struct LibraryInspector: View {
                     AccountAvatar(
                         account: account,
                         size: 48,
-                        isRunning: library.isRunning(account, monitor: monitor)
+                        isRunning: library.isRunning(account, monitor: monitor),
+                        tile: library.tile(for: account, in: app)
                     )
                     VStack(alignment: .leading, spacing: 2) {
                         Text(account.name).font(.cardTitle).lineLimit(2)

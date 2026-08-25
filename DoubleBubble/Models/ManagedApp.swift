@@ -18,7 +18,24 @@ struct Account: Identifiable, Codable, Equatable, Hashable {
     /// list away.
     var iconData: Data?
 
-    /// Runs the app on the profile it normally uses, instead of an isolated one.
+    /// How hard this account's colour is pushed onto the app's own artwork in
+    /// the Dock.
+    ///
+    /// The corner mark alone stops working at about the third account: the
+    /// tiles are the same picture, and picking one out means reading a badge
+    /// a few pixels across while the Dock is in motion. Washing the colour
+    /// over the whole tile is what makes it findable at a glance — the tile
+    /// is blue, the tile is green — and it works on artwork the mark can't
+    /// help with, like an icon that is mostly black.
+    ///
+    /// Optional for decoding: libraries saved before this existed must still
+    /// load, and a missing non-optional key would throw the whole app list
+    /// away.
+    var iconAccent: String?
+
+    var accent: IconAccent { IconAccent(rawValue: iconAccent ?? "") ?? .tint }
+
+        /// Runs the app on the profile it normally uses, instead of an isolated one.
     ///
     /// A Chromium browser can't be given a separate app identity — that needs
     /// a patched Info.plist, which breaks the signature, which library
@@ -121,6 +138,19 @@ struct ManagedApp: Identifiable, Codable, Equatable {
     }
 
     func account(_ id: UUID) -> Account? { accounts.first { $0.id == id } }
+
+    /// How many bubbles stand for this account.
+    ///
+    /// Two for the first one, three for the second, and so on — the count is
+    /// what Double Bubble *did*, not how many accounts happen to exist. One
+    /// cell dividing gives you two; dividing again gives you three. Starting
+    /// at one would be counting accounts, which the badge next to the app name
+    /// already does, and would leave the app's own copy — the thing every
+    /// account was split from — out of the picture.
+    func bubbleCount(of accountID: UUID) -> Int {
+        (accounts.firstIndex { $0.id == accountID } ?? 0) + 2
+    }
+
 }
 
 // MARK: - Color hex init (SwiftUI)

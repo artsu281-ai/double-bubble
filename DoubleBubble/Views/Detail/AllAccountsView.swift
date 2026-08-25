@@ -215,7 +215,8 @@ private struct AllAccountsRow: View {
 
     var body: some View {
         HStack(spacing: Metrics.m) {
-            AccountAvatar(account: account, size: 32, isRunning: isRunning)
+            AccountAvatar(account: account, size: 32, isRunning: isRunning,
+                          tile: library.tile(for: account, in: app))
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(account.name)

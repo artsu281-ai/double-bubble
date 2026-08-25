@@ -28,7 +28,12 @@ struct AccountTile: View {
 
     var body: some View {
         VStack(spacing: Metrics.s) {
-            AccountAvatar(account: account, size: density.tileAvatarSize, isRunning: isRunning)
+            AccountAvatar(
+                account: account,
+                size: density.tileAvatarSize,
+                isRunning: isRunning,
+                tile: library.tile(for: account, in: app)
+            )
                 .padding(.top, Metrics.xs)
 
             VStack(spacing: 2) {

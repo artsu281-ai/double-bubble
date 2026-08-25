@@ -92,12 +92,18 @@ struct AccountRow: View {
         }
     }
 
+
     private var avatarButton: some View {
         Button {
             pickIcon()
         } label: {
             ZStack {
-                AccountAvatar(account: account, size: density.avatarSize, isRunning: isRunning)
+                AccountAvatar(
+                    account: account,
+                    size: density.avatarSize,
+                    isRunning: isRunning,
+                    tile: library.tile(for: account, in: app)
+                )
                 if isHovering {
                     Circle()
                         .fill(.black.opacity(0.45))

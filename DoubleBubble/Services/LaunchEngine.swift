@@ -472,7 +472,8 @@ final class LaunchEngine: @unchecked Sendable {
     }
 
     func launch(
-        appURL: URL, appName: String, account: Account, distinctIcons: Bool = false
+        appURL: URL, appName: String, account: Account, distinctIcons: Bool = false,
+        bubbleCount: Int = 2
     ) async throws -> AppInstance {
         _ = appURL.startAccessingSecurityScopedResource()
         defer { appURL.stopAccessingSecurityScopedResource() }
@@ -498,7 +499,7 @@ final class LaunchEngine: @unchecked Sendable {
         // because it applies to every strategy, not only the flag-based ones.
         if account.usesDefaultProfile, let binary = findMainBinary(in: appURL) {
             var instance = try await launchElectron(
-                appURL: appURL, binaryPath: binary, slug: slug, account: account)
+                appURL: appURL, binaryPath: binary, slug: slug, account: account, bubbleCount: bubbleCount)
             instance.launchedVersion = version
             return instance
         }
@@ -507,7 +508,7 @@ final class LaunchEngine: @unchecked Sendable {
         switch strategy {
         case .electronFlag(let bin):
             instance = try await launchElectron(
-                appURL: appURL, binaryPath: bin, slug: slug, account: account)
+                appURL: appURL, binaryPath: bin, slug: slug, account: account, bubbleCount: bubbleCount)
         case .jetbrains(let bin):
             instance = try await launchJetBrains(binaryPath: bin, slug: slug, account: account)
         case .configDir(let bin, let flag, let separateValue):
@@ -521,7 +522,7 @@ final class LaunchEngine: @unchecked Sendable {
             guard !usesLibraryValidation(for: appURL) else {
                 throw LaunchError.libraryValidation
             }
-            instance = try await launchViaBundleCopy(appURL: appURL, slug: slug, account: account)
+            instance = try await launchViaBundleCopy(appURL: appURL, slug: slug, account: account, bubbleCount: bubbleCount)
 
         case .copyThenFlag(let flag, let separateValue):
             guard !sandboxInfo(for: appURL).blocksBundleCopy else {
@@ -532,7 +533,8 @@ final class LaunchEngine: @unchecked Sendable {
             }
             instance = try await launchViaBundleCopy(
                 appURL: appURL, slug: slug, account: account,
-                workdir: (flag: flag, separateValue: separateValue)
+                workdir: (flag: flag, separateValue: separateValue),
+                bubbleCount: bubbleCount
             )
         }
 
@@ -556,20 +558,30 @@ final class LaunchEngine: @unchecked Sendable {
     /// and comparing the whole struct would force a rebuild (and a fresh
     /// ad-hoc signature) on every single launch, defeating the point.
     private func copyFingerprint(
-        appURL: URL, account: Account, bakedArgument: String?
+        appURL: URL, account: Account, bakedArgument: String?, bubbleCount: Int
     ) -> String {
         let version = Self.bundleVersion(at: appURL) ?? "unknown"
         let iconDigest = account.iconData.map {
             SHA256.hash(data: $0).map { String(format: "%02x", $0) }.joined()
         } ?? "none"
+        // The accent and the bubble count both change what gets drawn on the
+        // tile. Leaving them out meant switching an account to a stronger tint,
+        // or reordering accounts so the mark should show a different number,
+        // left the old icon in place until something unrelated forced a
+        // rebuild — the setting looked like it did nothing.
         return [version, account.name, account.colorHex, iconDigest,
+                account.accent.rawValue, String(bubbleCount),
                 bakedArgument ?? "none"].joined(separator: "\u{0}")
     }
 
     // MARK: - Strategy: Electron / Chromium
 
     private func launchElectron(
-        appURL: URL, binaryPath: String, slug: String, account: Account
+        appURL: URL,
+        binaryPath: String,
+        slug: String,
+        account: Account,
+        bubbleCount: Int = 2
     ) async throws -> AppInstance {
         // A default-profile account gets the same wrapper — its own name and
         // icon — but no directory of its own, so the app opens exactly as it
@@ -611,7 +623,8 @@ final class LaunchEngine: @unchecked Sendable {
             realBinary: binaryPath,
             userDataDir: userDataDir,
             appURL: appURL,
-            account: account
+            account: account,
+            bubbleCount: bubbleCount
         )
 
         let config = NSWorkspace.OpenConfiguration()
@@ -650,7 +663,8 @@ final class LaunchEngine: @unchecked Sendable {
         realBinary: String,
         userDataDir: URL?,
         appURL: URL,
-        account: Account
+        account: Account,
+        bubbleCount: Int = 2
     ) throws {
         let fm = FileManager.default
         let contentsDir = wrapperURL.appendingPathComponent("Contents")
@@ -703,7 +717,9 @@ final class LaunchEngine: @unchecked Sendable {
             baseIcon: IconFactory.baseIcon(forBundle: appURL),
             tint: account.nsColor,
             initial: account.initial,
-            accountImage: account.icon
+            accountImage: account.icon,
+            bubbleCount: max(2, bubbleCount),
+            accent: account.accent
         )
 
         // 4. Sign the wrapper ad-hoc (it's our own code, not Apple's)
@@ -793,7 +809,8 @@ final class LaunchEngine: @unchecked Sendable {
 
     private func launchViaBundleCopy(
         appURL: URL, slug: String, account: Account,
-        workdir: (flag: String, separateValue: Bool)? = nil
+        workdir: (flag: String, separateValue: Bool)? = nil,
+        bubbleCount: Int = 2
     ) async throws -> AppInstance {
         // One directory per account — never a shared "bundle-A".
         let accountDir = bundleRoot.appendingPathComponent(
@@ -813,7 +830,8 @@ final class LaunchEngine: @unchecked Sendable {
                 : Self.shellQuoted("\(w.flag)=\(dataDir.path)")
         }
         let fingerprint = copyFingerprint(
-            appURL: appURL, account: account, bakedArgument: bakedArgument)
+            appURL: appURL, account: account, bakedArgument: bakedArgument,
+            bubbleCount: bubbleCount)
 
         // Reusing an up-to-date copy, instead of rebuilding unconditionally on
         // every single launch, is what lets a Screen Recording or Accessibility
@@ -853,7 +871,9 @@ final class LaunchEngine: @unchecked Sendable {
                 baseIcon: IconFactory.baseIcon(forBundle: appURL),
                 tint: account.nsColor,
                 initial: account.initial,
-                accountImage: account.icon
+                accountImage: account.icon,
+                bubbleCount: max(2, bubbleCount),
+                accent: account.accent
             )
 
             resignBundle(at: copyURL, alsoSigning: realBinary)
@@ -1026,6 +1046,126 @@ final class LaunchEngine: @unchecked Sendable {
         try newData.write(to: plistURL)
 
         return realBinary
+    }
+
+    // MARK: - Re-branding an existing copy
+
+    /// Redraws an existing copy's Dock tile without rebuilding the copy.
+    ///
+    /// Branding only ever happened inside the launch path, so an icon setting
+    /// changed nothing until the account was next opened. On this machine that
+    /// meant tiles four days older than the settings that were supposed to
+    /// describe them, and no way to tell from the app that anything was
+    /// pending.
+    ///
+    /// Rewriting in place costs one re-sign — which the next Open would have
+    /// paid anyway, now that the accent is part of the fingerprint — and saves
+    /// that Open a full re-copy of several hundred megabytes.
+    ///
+    /// `false` when there is no copy yet. Nothing is wrong in that case: the
+    /// first Open builds one with whatever the settings say then.
+    @discardableResult
+    func rebrandCopy(
+        appURL: URL, appName: String, account: Account,
+        bubbleCount: Int, workdir: (flag: String, separateValue: Bool)?
+    ) -> Bool {
+        let slug = Self.slug(for: appName)
+        let accountDir = bundleRoot.appendingPathComponent(
+            "\(slug)-\(account.isolationKey)", isDirectory: true
+        )
+        let copyURL = accountDir.appendingPathComponent(
+            appURL.deletingPathExtension().lastPathComponent + ".app"
+        )
+
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: copyURL.path) else { return false }
+
+        do {
+            try IconFactory.brand(
+                bundle: copyURL,
+                baseIcon: IconFactory.baseIcon(forBundle: appURL),
+                tint: account.nsColor,
+                initial: account.initial,
+                accountImage: account.icon,
+                bubbleCount: max(2, bubbleCount),
+                accent: account.accent
+            )
+        } catch {
+            return false
+        }
+
+        resignBundle(at: copyURL, alsoSigning: bakedBinary(in: copyURL))
+
+        // Kept in step deliberately. Without this the next Open would see a
+        // stale fingerprint, throw the copy away and rebuild it from scratch —
+        // for an icon that is already exactly right.
+        let bakedArgument: String? = workdir.map { w in
+            let dataDir = dataDirectory(slug: slug, account: account)
+            return w.separateValue
+                ? "\(Self.shellQuoted(w.flag)) \(Self.shellQuoted(dataDir.path))"
+                : Self.shellQuoted("\(w.flag)=\(dataDir.path)")
+        }
+        let fingerprint = copyFingerprint(
+            appURL: appURL, account: account,
+            bakedArgument: bakedArgument, bubbleCount: bubbleCount
+        )
+        try? fingerprint.write(
+            to: accountDir.appendingPathComponent(".doublebubble-fingerprint"),
+            atomically: true, encoding: .utf8
+        )
+
+        // Both the Dock and Finder cache icons they have already read, and a
+        // fresh modification date on its own does not clear that. Re-registering
+        // the bundle is what makes LaunchServices read the new artwork; a tile
+        // already pinned in the Dock can still hold its old picture until the
+        // Dock next reloads, which is macOS's to decide, not ours.
+        try? fm.setAttributes([.modificationDate: Date()], ofItemAtPath: copyURL.path)
+        registerWithLaunchServices(copyURL)
+        return true
+    }
+
+    /// Tells LaunchServices the bundle changed, so its icon is read again.
+    ///
+    /// No sudo and no `killall Dock`: `lsregister -f` on a single bundle in the
+    /// user's own directory is the narrowest thing that works, and restarting
+    /// someone's Dock to update a picture is not a trade this should make on
+    /// their behalf.
+    private func registerWithLaunchServices(_ bundle: URL) {
+        runLSRegister(["-f", bundle.path])
+    }
+
+    /// Drops a bundle's registration before it is deleted.
+    ///
+    /// Deleting a bundle out from under LaunchServices leaves a registration
+    /// pointing at nothing, and a Dock tile pinned to it turns into a question
+    /// mark rather than picking the new copy up when one appears.
+    static func unregister(bundleAt path: String) {
+        shared.runLSRegister(["-u", path])
+    }
+
+    private func runLSRegister(_ arguments: [String]) {
+        let lsregister = "/System/Library/Frameworks/CoreServices.framework"
+            + "/Frameworks/LaunchServices.framework/Support/lsregister"
+        guard FileManager.default.isExecutableFile(atPath: lsregister) else { return }
+
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: lsregister)
+        process.arguments = arguments
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        try? process.run()
+        process.waitUntilExit()
+    }
+
+    /// The copy's real executable, once `bakeIsolationFlag` has demoted it from
+    /// `CFBundleExecutable` to an ordinary file. Found by elimination — the
+    /// plist no longer names it, and `--deep` does not re-sign it on its own.
+    private func bakedBinary(in copyURL: URL) -> URL? {
+        let macos = copyURL.appendingPathComponent("Contents/MacOS")
+        let names = (try? FileManager.default.contentsOfDirectory(atPath: macos.path)) ?? []
+        guard names.contains(Self.launcherName),
+              let real = names.first(where: { $0 != Self.launcherName }) else { return nil }
+        return macos.appendingPathComponent(real)
     }
 
     private func patchInfoPlist(at plistURL: URL, displayName: String, key: String) throws {

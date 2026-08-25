@@ -45,27 +45,27 @@ struct AccountColorPicker: View {
     private func swatch(_ hex: String) -> some View {
         let isSelected = colorHex == hex
         let isTaken = usedColors.contains(hex)
+        let color = Color(hex: hex)
 
         return Button {
             colorHex = hex
         } label: {
-            Circle()
-                .fill(Color(hex: hex))
-                .frame(width: 20, height: 20)
-                // A first pass drew a ring inside taken swatches to mark
-                // them. On screen that is indistinguishable from a radio
-                // button, so a row of six colours read as a second, nested
-                // set of choices. The collision is called out in words under
-                // the picker instead — which is where it matters, since only
-                // the colour actually chosen can collide — and the tooltip
-                // still names it on hover.
-                .overlay {
+            ZStack {
+                // Flat. A swatch exists to show a colour exactly; a radial
+                // gradient, a rim highlight and a coloured shadow all shift it,
+                // so the dot you picked was never quite the dot you got.
+                Circle()
+                    .fill(color)
+                    .frame(width: 22, height: 22)
+
+                if isSelected {
                     Circle()
-                        .strokeBorder(.primary.opacity(isSelected ? 0.7 : 0), lineWidth: 2)
-                        .padding(-3)
+                        .strokeBorder(palette.accentColor, lineWidth: 2)
+                        .frame(width: 28, height: 28)
                 }
-                .frame(width: Metrics.minHit - 4, height: Metrics.minHit - 4)
-                .contentShape(Circle())
+            }
+            .frame(width: Metrics.minHit, height: Metrics.minHit)
+            .contentShape(Circle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel(accessibilityName(for: hex))

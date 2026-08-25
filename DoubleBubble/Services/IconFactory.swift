@@ -1,4 +1,5 @@
 import AppKit
+import CoreImage
 import Foundation
 
 // MARK: - IconFactory
@@ -12,6 +13,12 @@ enum IconFactory {
 
     /// Name (without extension) written into the copied bundle's Resources.
     static let iconName = "DoubleBubbleAccount"
+
+    /// The mark's own colours, read off the shipped `.icns` rather than
+    /// guessed, so the corner badge and the app icon can't drift apart.
+    static let cream     = NSColor(srgbRed: 0xE7/255, green: 0xE3/255, blue: 0xD6/255, alpha: 1)
+    static let clayLight = NSColor(srgbRed: 0xCD/255, green: 0x89/255, blue: 0x69/255, alpha: 1)
+    static let clayDark  = NSColor(srgbRed: 0xA0/255, green: 0x61/255, blue: 0x42/255, alpha: 1)
 
     /// Sizes an .icns is expected to carry, as (points, scale).
     private static let variants: [(points: Int, scale: Int)] = [
@@ -47,7 +54,9 @@ enum IconFactory {
         baseIcon: NSImage,
         tint: NSColor,
         initial: String,
-        accountImage: NSImage? = nil
+        accountImage: NSImage? = nil,
+        bubbleCount: Int = 2,
+        accent: IconAccent = .tint
     ) throws {
         let iconset = URL(fileURLWithPath: NSTemporaryDirectory())
             .appendingPathComponent("db-\(UUID().uuidString).iconset", isDirectory: true)
@@ -57,7 +66,8 @@ enum IconFactory {
         for variant in variants {
             let pixels = variant.points * variant.scale
             guard let png = render(base: baseIcon, tint: tint, initial: initial,
-                                   accountImage: accountImage, pixels: pixels) else {
+                                   accountImage: accountImage, pixels: pixels,
+                                   bubbleCount: bubbleCount, accent: accent) else {
                 continue
             }
             let suffix = variant.scale == 1 ? "" : "@\(variant.scale)x"
@@ -83,9 +93,25 @@ enum IconFactory {
 
     // MARK: - Drawing
 
+    /// The same tile the Dock will show, as an image — so the editor can put
+    /// the actual result in front of someone instead of describing it.
+    static func preview(
+        base: NSImage, tint: NSColor, initial: String,
+        accountImage: NSImage?, bubbleCount: Int, accent: IconAccent, points: CGFloat = 64
+    ) -> NSImage? {
+        let pixels = Int(points * 2)
+        guard let data = render(base: base, tint: tint, initial: initial,
+                                accountImage: accountImage, pixels: pixels,
+                                bubbleCount: bubbleCount, accent: accent),
+              let image = NSImage(data: data) else { return nil }
+        image.size = NSSize(width: points, height: points)
+        return image
+    }
+
     private static func render(
         base: NSImage, tint: NSColor, initial: String,
-        accountImage: NSImage?, pixels: Int
+        accountImage: NSImage?, pixels: Int, bubbleCount: Int = 2,
+        accent: IconAccent = .tint
     ) -> Data? {
         let side = CGFloat(pixels)
         guard let rep = NSBitmapImageRep(
@@ -99,15 +125,37 @@ enum IconFactory {
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current = context
 
-        // The app's own artwork, untouched: same rect, same scale it would have
-        // had on its own. The badge goes on top of it, never resizes it.
-        base.draw(in: NSRect(x: 0, y: 0, width: side, height: side),
-                  from: .zero, operation: .sourceOver, fraction: 1)
-
         // Where the artwork actually is. Assuming Apple's 824-of-1024 grid
         // put the badge in the wrong place for icons drawn to their own
         // margins — Antigravity's is 842 with a 91px inset — so measure.
         let art = artworkRect(of: base, in: side)
+        let full = NSRect(x: 0, y: 0, width: side, height: side)
+
+        // Three treatments, not three strengths of one. A flat wash was tried
+        // first: 30% denim over Claude's salmon icon is mauve and 30% teal over
+        // the same icon is brown, so two accounts ended up as two slightly
+        // grubby copies of one tile — the exact thing this is meant to fix.
+        switch accent {
+        case .mark:
+            base.draw(in: full, from: .zero, operation: .sourceOver, fraction: 1)
+
+        case .tint:
+            (duotone(base, tint: tint) ?? base)
+                .draw(in: full, from: .zero, operation: .sourceOver, fraction: 1)
+
+        case .plate:
+            let radius = min(art.width, art.height) * 0.2237
+            tint.setFill()
+            NSBezierPath(roundedRect: art, xRadius: radius, yRadius: radius).fill()
+
+            // Set into the plate rather than filling it corner to corner: an
+            // app icon already carries its own margin, and scaling it up makes
+            // every tile look like a different app instead of the same one in
+            // a new colour.
+            let inset = min(art.width, art.height) * 0.16
+            base.draw(in: art.insetBy(dx: inset, dy: inset),
+                      from: .zero, operation: .sourceOver, fraction: 1)
+        }
 
         // Sit it in the corner rather than above it. A circle of radius r stays
         // inside a rounded corner of radius R when its centre is
@@ -124,31 +172,79 @@ enum IconFactory {
             width: diameter, height: diameter
         )
 
-        // A hairline, not a coloured ring: it only has to keep the badge from
-        // dissolving into dark artwork.
+        // A hairline in the mark's own dark clay rather than white: white
+        // vanishes on the pale artwork this badge often sits on, and the ring
+        // is the only thing keeping the cream disc from dissolving into it.
         let hairline = max(1, side * 0.012)
-        NSColor.white.withAlphaComponent(0.92).setFill()
+        Self.clayDark.withAlphaComponent(0.45).setFill()
         NSBezierPath(ovalIn: badge.insetBy(dx: -hairline, dy: -hairline)).fill()
 
         NSGraphicsContext.saveGraphicsState()
         NSBezierPath(ovalIn: badge).addClip()
 
-        if let mark = accountImage ?? appMark {
-            // Whatever backs a transparent picture should be neutral, not the
-            // account tint, or a logo on clear background picks up a colour cast.
+        if let mark = accountImage {
             NSColor.white.setFill()
             NSBezierPath(ovalIn: badge).fill()
             mark.draw(in: aspectFill(mark.size, in: badge),
                       from: .zero, operation: .sourceOver, fraction: 1)
         } else {
-            tint.setFill()
+            // The badge is a miniature of the app's own icon — cream ground,
+            // clay bubbles — not a coloured sticker. Which account this is now
+            // comes from the tint washed over the whole tile, which is legible
+            // from across a Dock; a few pixels of colour in a corner never was.
+            Self.cream.setFill()
             NSBezierPath(ovalIn: badge).fill()
 
-            if pixels >= 32, let letter = initial.first {
+            if bubbleCount > BubbleCountMark.maxDrawable, pixels >= 32 {
+                // Nobody counts five dots on a Dock tile.
+                let size = diameter * 0.62
+                let attributes: [NSAttributedString.Key: Any] = [
+                    .font: NSFont.systemFont(ofSize: size, weight: .bold),
+                    .foregroundColor: Self.clayDark
+                ]
+                let text = "\(bubbleCount)" as NSString
+                let measured = text.size(withAttributes: attributes)
+                text.draw(
+                    at: NSPoint(x: badge.midX - measured.width / 2,
+                                y: badge.midY - measured.height / 2),
+                    withAttributes: attributes
+                )
+            } else if bubbleCount >= 2 {
+                // The same row the app icon is drawn as, at badge scale:
+                // circles of one size overlapping left to right, each cutting a
+                // ring of cream out of the one behind it, tone stepping from
+                // light clay to dark. Ratios come from `BubbleMark`, which took
+                // them off the shipped icon — a badge that draws its own
+                // arrangement is a second logo, not a smaller one.
+                let n = min(bubbleCount, 4)
+                let span = diameter * 0.786
+                let r = span / (1.375 * CGFloat(n - 1) + 2)
+                let pitch = r * 1.375
+                let ring = r * 0.125
+                let rowWidth = pitch * CGFloat(n - 1) + r * 2
+                var x = badge.midX - rowWidth / 2 + r
+                let cy = badge.midY
+
+                for i in 0..<n {
+                    if i > 0 {
+                        Self.cream.setFill()
+                        NSBezierPath(ovalIn: NSRect(
+                            x: x - r - ring, y: cy - r - ring,
+                            width: (r + ring) * 2, height: (r + ring) * 2
+                        )).fill()
+                    }
+                    let t = n == 1 ? 0 : CGFloat(i) / CGFloat(n - 1)
+                    (Self.clayLight.blended(withFraction: t, of: Self.clayDark) ?? Self.clayDark).setFill()
+                    NSBezierPath(ovalIn: NSRect(
+                        x: x - r, y: cy - r, width: r * 2, height: r * 2
+                    )).fill()
+                    x += pitch
+                }
+            } else if pixels >= 32, let letter = initial.first {
                 let size = diameter * 0.66
                 let attributes: [NSAttributedString.Key: Any] = [
                     .font: NSFont.systemFont(ofSize: size, weight: .bold),
-                    .foregroundColor: NSColor.white
+                    .foregroundColor: Self.clayDark
                 ]
                 let text = String(letter) as NSString
                 let measured = text.size(withAttributes: attributes)
@@ -163,6 +259,36 @@ enum IconFactory {
         NSGraphicsContext.restoreGraphicsState()
         NSGraphicsContext.restoreGraphicsState()
         return rep.representation(using: .png, properties: [:])
+    }
+
+    /// The artwork recoloured: luminance preserved, hue replaced.
+    ///
+    /// `CIColorMonochrome` is the whole job — it maps each pixel's brightness
+    /// onto one colour, which keeps the icon's shapes readable while leaving no
+    /// doubt whose copy it is. Mixing a colour *into* artwork that already has
+    /// one, which the first version did, gives you neither colour.
+    private static func duotone(_ image: NSImage, tint: NSColor) -> NSImage? {
+        guard let tiff = image.tiffRepresentation,
+              let input = CIImage(data: tiff),
+              let filter = CIFilter(name: "CIColorMonochrome") else { return nil }
+        let colour = CIColor(color: tint.usingColorSpace(.sRGB) ?? tint)
+
+        filter.setValue(input, forKey: kCIInputImageKey)
+        filter.setValue(colour, forKey: kCIInputColorKey)
+        filter.setValue(1.0, forKey: kCIInputIntensityKey)
+        guard let mono = filter.outputImage else { return nil }
+
+        // Monochrome flattens contrast along with hue, and a soft shape takes
+        // longer to recognise than a sharp one.
+        guard let controls = CIFilter(name: "CIColorControls") else { return nil }
+        controls.setValue(mono, forKey: kCIInputImageKey)
+        controls.setValue(1.3, forKey: kCIInputContrastKey)
+        controls.setValue(0.05, forKey: kCIInputBrightnessKey)
+        guard let output = controls.outputImage else { return nil }
+
+        let result = NSImage(size: image.size)
+        result.addRepresentation(NSCIImageRep(ciImage: output))
+        return result
     }
 
     /// Double Bubble's own mark, stamped on every copy it makes so a managed

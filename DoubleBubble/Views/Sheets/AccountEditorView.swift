@@ -28,6 +28,8 @@ struct AccountEditorView: View {
     @State private var colorHex = Account.presetColors[0]
     @State private var iconData: Data?
     @State private var usesDefaultProfile = false
+    @State private var accent: IconAccent = .tint
+    @State private var isPinnedInDock = false
     @FocusState private var nameFocused: Bool
 
     private var editing: Account? {
@@ -127,6 +129,48 @@ struct AccountEditorView: View {
                 }
             }
 
+            if library.brandsIcons(app), let artwork = appArtwork {
+                SheetGroup(header: L("In the Dock")) {
+                    DockAccentPicker(
+                        accent: $accent,
+                        appIcon: artwork,
+                        tint: Color(hex: colorHex),
+                        initial: trimmed.isEmpty ? "?" : trimmed,
+                        bubbleCount: previewBubbleCount,
+                        accountImage: iconData.flatMap(NSImage.init(data:))
+                    )
+
+                    Text(L("Two tiles of the same app look identical. The colour is what makes this one findable when several are open at once."))
+                        .font(.meta)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, Metrics.s)
+
+                    // The honest caveat, and only when it applies.
+                    //
+                    // Two wrong remedies were written here before this one, so
+                    // this says only what was actually measured. macOS caches
+                    // an app's icon against its bundle path and never re-reads
+                    // it for a tile the Dock already has: not on relaunch, not
+                    // after `lsregister -f`, not after restarting the Dock or
+                    // the icon services, not after clearing the icon cache, and
+                    // not after the copy is deleted and rebuilt from scratch.
+                    // A tile that arrives *fresh* does show the current icon.
+                    // Everywhere that isn't the Dock — this window, Finder —
+                    // is correct immediately.
+                    if isPinnedInDock {
+                        Label(
+                            L("This account already has a tile in your Dock, and macOS won’t re-read the picture for a tile it already has. Drag that tile out of the Dock and open the account again to get the new one. Here and in Finder it changes straight away."),
+                            systemImage: "info.circle"
+                        )
+                        .font(.meta)
+                        .foregroundStyle(palette.warning)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, Metrics.s)
+                    }
+                }
+            }
+
             SheetGroup {
                 Toggle(isOn: $usesDefaultProfile) {
                     VStack(alignment: .leading, spacing: 3) {
@@ -168,6 +212,20 @@ struct AccountEditorView: View {
         .onAppear(perform: load)
     }
 
+    /// The app's own artwork, read once. `nil` when the bundle can't be found,
+    /// which hides the Dock section rather than previewing a placeholder.
+    private var appArtwork: NSImage? {
+        library.url(for: app).map(IconFactory.baseIcon(forBundle:))
+    }
+
+    /// What the mark will say once this account exists. A new one lands at the
+    /// end of the list, so it is one past what is there now — plus the copy it
+    /// was split from.
+    private var previewBubbleCount: Int {
+        if let editing { return app.bubbleCount(of: editing.id) }
+        return app.accounts.count + 2
+    }
+
     private var placeholder: Account {
         Account(name: trimmed.isEmpty ? "?" : trimmed, colorHex: colorHex)
     }
@@ -178,6 +236,11 @@ struct AccountEditorView: View {
             colorHex = editing.colorHex
             iconData = editing.iconData
             usesDefaultProfile = editing.usesDefaultProfile
+            accent = editing.accent
+            // Only worth mentioning the Dock when this copy is actually in it.
+            if let folder = library.bundleCopyFolder(for: app, account: editing) {
+                isPinnedInDock = DockPins.containsAnything(under: folder)
+            }
         } else {
             name = Account.defaultName(at: app.accounts.count)
             colorHex = library.suggestedColor(in: app)
@@ -199,12 +262,14 @@ struct AccountEditorView: View {
             updated.colorHex = colorHex
             updated.iconData = iconData
             updated.defaultProfile = usesDefaultProfile
+            updated.iconAccent = accent.rawValue
             library.updateAccount(updated, in: app.id)
             onFinished(updated)
         } else {
             var created = Account(name: trimmed, colorHex: colorHex)
             created.iconData = iconData
             created.defaultProfile = usesDefaultProfile
+            created.iconAccent = accent.rawValue
             library.insert(created, in: app.id)
             onFinished(created)
         }

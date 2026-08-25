@@ -661,6 +661,17 @@
         }
       }
     },
+    "All Clear": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё в порядке"
+          }
+        }
+      }
+    },
     "All accounts running": {
       "extractionState": "manual",
       "localizations": {
@@ -1651,6 +1662,17 @@
         }
       }
     },
+    "Disk Usage": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Занято на диске"
+          }
+        }
+      }
+    },
     "Disk Usage per Account": {
       "extractionState": "manual",
       "localizations": {
@@ -1761,6 +1783,17 @@
         }
       }
     },
+    "Drop an application here to manage it with Double Bubble.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетащите сюда приложение, чтобы управлять им через Double Bubble."
+          }
+        }
+      }
+    },
     "Duplicate": {
       "extractionState": "manual",
       "localizations": {
@@ -1867,6 +1900,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Редактирование аккаунта"
+          }
+        }
+      }
+    },
+    "Edit Account…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изменить аккаунт…"
           }
         }
       }
@@ -2109,6 +2153,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сколько места занимает изолированная копия или папка данных каждого аккаунта — показывается рядом со статусом."
+          }
+        }
+      }
+    },
+    "In the Dock": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В Dock"
           }
         }
       }
@@ -2362,6 +2417,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Просматриваю приложения…"
+          }
+        }
+      }
+    },
+    "Mark only": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Только метка"
           }
         }
       }
@@ -2828,6 +2894,17 @@
         }
       }
     },
+    "On a colour": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На цветной подложке"
+          }
+        }
+      }
+    },
     "On disk": {
       "extractionState": "manual",
       "localizations": {
@@ -3198,6 +3275,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Выйти из Double Bubble?"
+          }
+        }
+      }
+    },
+    "Recent Accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Недавние аккаунты"
+          }
+        }
+      }
+    },
+    "Recoloured": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перекрашенная"
           }
         }
       }
@@ -4148,6 +4247,17 @@
         }
       }
     },
+    "Stop Account": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Остановить аккаунт"
+          }
+        }
+      }
+    },
     "Stop All": {
       "extractionState": "manual",
       "localizations": {
@@ -4313,6 +4423,17 @@
         }
       }
     },
+    "The app’s own icon, with just the corner mark.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Родная иконка приложения, только с меткой в углу."
+          }
+        }
+      }
+    },
     "The copy opens already signed in as this account. Turn this off to sign in fresh.": {
       "extractionState": "manual",
       "localizations": {
@@ -4331,6 +4452,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Данные изолированных аккаунтов отправятся в Корзину. Аккаунт на собственном профиле приложения сохранит всё, во что вошёл."
+          }
+        }
+      }
+    },
+    "The icon on a plate of the account’s colour — easiest to pick out of a full Dock.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Иконка на подложке цвета аккаунта — проще всего найти в забитом Dock."
+          }
+        }
+      }
+    },
+    "The icon redrawn in the account’s colour.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Иконка, перерисованная в цвет аккаунта."
           }
         }
       }
@@ -4408,6 +4551,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Тема, горячие клавиши, расширения — то, как приложение настроено."
+          }
+        }
+      }
+    },
+    "This account already has a tile in your Dock, and macOS won’t re-read the picture for a tile it already has. Drag that tile out of the Dock and open the account again to get the new one. Here and in Finder it changes straight away.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У этого аккаунта уже есть плитка в Dock, а macOS не перечитывает картинку для уже стоящей плитки. Вытащите её из Dock и откройте аккаунт заново — появится новая. Здесь и в Finder картинка меняется сразу."
           }
         }
       }
@@ -4577,6 +4731,17 @@
         }
       }
     },
+    "Two tiles of the same app look identical. The colour is what makes this one findable when several are open at once.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Две иконки одного приложения выглядят одинаково. Цвет — это то, что помогает найти нужную, когда открыто сразу несколько."
+          }
+        }
+      }
+    },
     "Unknown": {
       "extractionState": "manual",
       "localizations": {
@@ -4742,6 +4907,17 @@
         }
       }
     },
+    "across all accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "по всем аккаунтам"
+          }
+        }
+      }
+    },
     "all clear": {
       "extractionState": "manual",
       "localizations": {
@@ -4753,6 +4929,17 @@
         }
       }
     },
+    "all systems normal": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ничего не требует внимания"
+          }
+        }
+      }
+    },
     "and %lld more": {
       "extractionState": "manual",
       "localizations": {
@@ -4760,6 +4947,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "и ещё %lld"
+          }
+        }
+      }
+    },
+    "needs attention": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "требуют внимания"
           }
         }
       }

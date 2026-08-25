@@ -18,7 +18,11 @@ struct LibrarySidebar: View {
 
     private var matching: [ManagedApp] {
         guard !ui.appSearch.isEmpty else { return library.apps }
-        return library.apps.filter { $0.name.localizedCaseInsensitiveContains(ui.appSearch) }
+        let query = ui.appSearch.trimmingCharacters(in: .whitespacesAndNewlines)
+        return library.apps.filter { app in
+            app.name.localizedCaseInsensitiveContains(query) ||
+            app.accounts.contains { $0.name.localizedCaseInsensitiveContains(query) }
+        }
     }
 
     private var sorted: [ManagedApp] {
@@ -225,15 +229,31 @@ private struct SidebarAppRow: View {
     private var isSelected: Bool { ui.sidebarSelection == .app(app.id) }
     private var running: Int { library.runningCount(for: app, monitor: monitor) }
 
+    private var matchingAccountName: String? {
+        guard !ui.appSearch.isEmpty else { return nil }
+        let query = ui.appSearch.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !app.name.localizedCaseInsensitiveContains(query) else { return nil }
+        return app.accounts.first { $0.name.localizedCaseInsensitiveContains(query) }?.name
+    }
+
     var body: some View {
         HStack(spacing: Metrics.s) {
             icon
                 .frame(width: density.sidebarIconSize, height: density.sidebarIconSize)
 
-            Text(app.name)
-                .font(.listItem)
-                .lineLimit(1)
-                .truncationMode(.tail)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(app.name)
+                    .font(.listItem)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+
+                if let match = matchingAccountName {
+                    Text("↳ \(match)")
+                        .font(.meta)
+                        .foregroundStyle(isSelected ? Color.white.opacity(0.85) : palette.accentColor)
+                        .lineLimit(1)
+                }
+            }
 
             if running > 0 { RunningDot() }
 

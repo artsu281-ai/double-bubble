@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import UniformTypeIdentifiers
 
 /// The main window.
 ///
@@ -20,6 +21,7 @@ struct LibraryView: View {
     @ObservedObject private var localizer = Localizer.shared
 
     @Environment(\.themePalette) private var palette
+    @State private var isDropTargeted = false
 
     var body: some View {
         NavigationSplitView {
@@ -58,6 +60,8 @@ struct LibraryView: View {
         } message: {
             Text(ui.errorMessage ?? "")
         }
+        .onDrop(of: [.fileURL], isTargeted: $isDropTargeted, perform: handleDrop)
+        .overlay { dropOverlay }
         .background(WindowMinSizeEnforcer(minWidth: Metrics.windowMinWidth, minHeight: Metrics.windowMinHeight))
         .task { await updates.checkIfDue() }
         .onAppear(perform: restoreSelection)
@@ -289,6 +293,61 @@ struct LibraryView: View {
 
     private func accountIsRunning(_ account: Account) -> Bool {
         library.isRunning(account)
+    }
+
+    // MARK: - Drag & Drop
+
+    @ViewBuilder
+    private var dropOverlay: some View {
+        if isDropTargeted {
+            ZStack {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                VStack(spacing: Metrics.m) {
+                    Image(systemName: "arrow.down.app.fill")
+                        .font(.system(size: 44))
+                        .foregroundStyle(palette.accentColor)
+                    Text(L("Add Application"))
+                        .font(.title2.weight(.bold))
+                    Text(L("Drop an application here to manage it with Double Bubble."))
+                        .font(.rowSubtitle)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(Metrics.xxl)
+                .background(
+                    RoundedRectangle(cornerRadius: Metrics.windowRadius, style: .continuous)
+                        .fill(Color(nsColor: .windowBackgroundColor).opacity(0.96))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: Metrics.windowRadius, style: .continuous)
+                                .strokeBorder(palette.accentColor, lineWidth: 2)
+                        )
+                )
+                .shadow(color: .black.opacity(0.35), radius: 24, y: 12)
+            }
+            .transition(.opacity)
+        }
+    }
+
+    private func handleDrop(_ providers: [NSItemProvider]) -> Bool {
+        var handled = false
+        for provider in providers {
+            _ = provider.loadObject(ofClass: URL.self) { url, _ in
+                guard let url, url.pathExtension == "app" else { return }
+                Task { @MainActor in
+                    if let existing = library.apps.first(where: { library.url(for: $0)?.path == url.path }) {
+                        ui.select(app: existing.id)
+                    } else {
+                        let id = library.addApp(at: url)
+                        ui.select(app: id)
+                        if let created = library.app(id)?.accounts.first {
+                            ui.present(.editAccount(appID: id, account: created))
+                        }
+                    }
+                }
+            }
+            handled = true
+        }
+        return handled
     }
 
     // MARK: - Startup

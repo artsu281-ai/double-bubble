@@ -63,6 +63,33 @@ extension AppLibrary {
         }
     }
 
+    /// True when Double Bubble draws this app's Dock tile itself, so the
+    /// account's colour and mark can actually reach it.
+    ///
+    /// `.jetbrains` and `.configDir` run the installed binary untouched —
+    /// there is no copy of ours to brand, and offering the setting for them
+    /// would be promising something that cannot happen.
+    func brandsIcons(_ app: ManagedApp) -> Bool {
+        switch strategy(for: app) {
+        case .electronFlag, .bundleCopy, .copyThenFlag: return true
+        case .jetbrains, .configDir, nil:               return false
+        }
+    }
+
+    /// What this account looks like in the Dock, ready to hand to
+    /// `AccountAvatar`. `nil` for apps Double Bubble doesn't brand, which fall
+    /// back to the lettered circle rather than showing an untinted tile that
+    /// would be identical for every account.
+    @MainActor
+    func tile(for account: Account, in app: ManagedApp) -> AccountAvatar.Tile? {
+        guard brandsIcons(app),
+              let artwork = artwork(for: app),
+              let path = url(for: app)?.path else { return nil }
+        return AccountAvatar.Tile(
+            artwork: artwork, path: path, bubbleCount: app.bubbleCount(of: account.id)
+        )
+    }
+
     // MARK: Creating
 
     /// Makes one account, optionally carrying over another's data, and only
@@ -144,6 +171,38 @@ extension AppLibrary {
         let used = Set(app.accounts.map(\.colorHex))
         return Account.presetColors.first { !used.contains($0) }
             ?? Account.presetColors[app.accounts.count % Account.presetColors.count]
+    }
+
+    /// Throws away this account's re-signed copy so the next Open rebuilds it.
+    ///
+    /// The only way to make a Dock tile show a new icon. macOS caches an app's
+    /// icon against its bundle path and never re-reads it: rewriting the
+    /// `.icns` in place is invisible to the Dock, and so is `lsregister -f`,
+    /// restarting the Dock, restarting `iconservicesagent`, clearing the icon
+    /// cache, or writing the icon under a different name. Deleting the bundle
+    /// and letting it be built again *does* clear it — measured.
+    ///
+    /// The account's data is untouched; only the copy of the application goes,
+    /// and it is rebuilt from the original on the next Open. That costs the
+    /// re-copy and, because the new copy gets a fresh ad-hoc signature, any
+    /// macOS permissions granted to the old one.
+    @MainActor
+    func discardCopy(of account: Account, in app: ManagedApp) {
+        guard let folder = bundleCopyFolder(for: app, account: account) else { return }
+        stop(account: account)
+
+        let path = (folder as NSString).expandingTildeInPath
+        guard path.contains(".double_bubble") else { return }
+
+        // Unregister first: a bundle deleted out from under LaunchServices
+        // leaves a registration pointing at nothing, which is what turns a
+        // pinned tile into a question mark instead of the new icon.
+        let bundle = (try? FileManager.default.contentsOfDirectory(atPath: path))?
+            .first { $0.hasSuffix(".app") }
+            .map { path + "/" + $0 }
+        if let bundle { LaunchEngine.unregister(bundleAt: bundle) }
+
+        try? FileManager.default.removeItem(atPath: path)
     }
 
     // MARK: Removing in bulk

@@ -100,10 +100,11 @@ struct LibraryCommands: Commands {
         CommandGroup(after: .pasteboard) {
             Divider()
 
-            Button(L("Rename…")) {
+            Button(L("Edit Account…")) {
                 guard let app, let account else { return }
                 ui.present(.editAccount(appID: app.id, account: account))
             }
+            .keyboardShortcut("e", modifiers: .command)
             .disabled(account == nil)
 
             Button(L("Remove Account…")) {
@@ -164,6 +165,13 @@ struct LibraryCommands: Commands {
             Button(accountIsRunning ? L("Stop") : L("Open")) { toggleSelected() }
                 .keyboardShortcut("r", modifiers: .command)
                 .disabled(account == nil || (!accountIsRunning && !canOpenSelected))
+
+            Button(L("Stop Account")) {
+                guard let account, accountIsRunning else { return }
+                library.stop(account: account)
+            }
+            .keyboardShortcut("k", modifiers: .command)
+            .disabled(!accountIsRunning)
 
             Button(L("Open in Background")) { toggleSelected(activate: false) }
                 .keyboardShortcut("r", modifiers: [.command, .option])
