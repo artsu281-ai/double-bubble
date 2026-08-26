@@ -21,6 +21,7 @@ struct LibraryView: View {
     @ObservedObject private var localizer = Localizer.shared
 
     @Environment(\.themePalette) private var palette
+    @Environment(\.openSettings) private var openSettings
     @State private var isDropTargeted = false
 
     var body: some View {
@@ -107,9 +108,14 @@ struct LibraryView: View {
     // MARK: - Toolbar
 
     /// Items that belong to the window rather than to whatever is showing in
-    /// it. Settings is deliberately not among them: a gear in a document
-    /// window's toolbar is not a macOS pattern, and ⌘, plus the application
-    /// menu is where people look.
+    /// it.
+    ///
+    /// The gear was taken out of here during the redesign, on the grounds that
+    /// a document window's toolbar is not where macOS puts Settings — ⌘, and
+    /// the application menu are. That is true of a document window and this
+    /// isn't one: there is a single window, it is the app, and the person who
+    /// uses it went looking for the gear and didn't find it. Where someone
+    /// actually looks beats where the rule says to put it.
     @ToolbarContentBuilder
     private var sharedToolbar: some ToolbarContent {
         if let job = tasks.headline {
@@ -127,6 +133,18 @@ struct LibraryView: View {
                 }
                 .help(ui.showInspector ? L("Hide the inspector") : L("Show the inspector"))
             }
+        }
+
+        ToolbarItem(placement: .primaryAction) {
+            Button {
+                openSettings()
+                // `openSettings` brings the scene up but doesn't guarantee it
+                // comes forward when another app is frontmost.
+                NSApp.activate(ignoringOtherApps: true)
+            } label: {
+                Label(L("Settings"), systemImage: "gearshape")
+            }
+            .help(L("Settings"))
         }
     }
 
