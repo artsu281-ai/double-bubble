@@ -92,12 +92,14 @@ enum AppKnowledgeBase {
                              description: "Cursor (Electron/VSCode fork)",
                              persistsData: true)),
 
-        // Google's VS Code fork. Two bundle ids in the wild: it shipped as
-        // `Antigravity.app` and renamed itself to `Antigravity IDE.app` on
-        // update, taking a new identifier with it — which is exactly the case
-        // "Locate Application…" exists for. Both are listed so an install of
-        // either is recognised by name rather than by sniffing for the Electron
-        // framework, which says nothing about *how* to isolate it.
+        // Two separate Google products, not one app that renamed itself —
+        // `Antigravity` and `Antigravity IDE` install side by side, each with
+        // its own bundle id and its own default user data directory
+        // (`~/Library/Application Support/Antigravity` and `…/Antigravity
+        // IDE`). Both are VS Code forks and both take `--user-data-dir`, so
+        // both are listed: recognised by identifier rather than by sniffing
+        // for the Electron framework, which says an app *is* Electron but
+        // nothing about how to isolate it.
         ("com.google.antigravity-ide",
          IsolationDescriptor(kind: .electronUserDataDir,
                              description: "Antigravity IDE (Electron/VSCode fork)",

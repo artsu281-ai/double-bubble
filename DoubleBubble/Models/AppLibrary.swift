@@ -240,6 +240,7 @@ final class AppLibrary: ObservableObject {
 
         let path = (dataFolder(for: apps[i], account: account) as NSString).expandingTildeInPath
         deleteDataFolder(atPath: path, wasRunning: wasRunning)
+        deleteBundleCopy(for: apps[i], account: account, wasRunning: wasRunning)
     }
 
     /// Wipes an account's login and data without removing the account
@@ -279,6 +280,36 @@ final class AppLibrary: ObservableObject {
         }
     }
 
+    /// Removes an account's copy of the application along with the account.
+    ///
+    /// Deleting an account used to take its data folder and leave the copy —
+    /// several hundred megabytes, sometimes most of a gigabyte, sitting in
+    /// `~/.double_bubble/bundles` belonging to nobody and reachable from
+    /// nowhere in the interface. One Antigravity account left 435 MB behind
+    /// that way.
+    ///
+    /// Unregistered before it goes, for the same reason `discardCopy` does it:
+    /// a bundle deleted out from under LaunchServices leaves a registration
+    /// pointing at nothing, and a pinned tile turns into a question mark. The
+    /// same wait as the data folder, since a just-stopped process can still
+    /// hold its own files open — but removed outright rather than trashed,
+    /// because a rebuildable copy of an app you still have is not something
+    /// anyone wants to find in the Trash.
+    private func deleteBundleCopy(for app: ManagedApp, account: Account, wasRunning: Bool) {
+        guard let folder = bundleCopyFolder(for: app, account: account) else { return }
+        let path = (folder as NSString).expandingTildeInPath
+        guard path.contains(".double_bubble") else { return }
+
+        let delay: DispatchTimeInterval = wasRunning ? .seconds(3) : .seconds(0)
+        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + delay) {
+            let bundle = (try? FileManager.default.contentsOfDirectory(atPath: path))?
+                .first { $0.hasSuffix(".app") }
+                .map { path + "/" + $0 }
+            if let bundle { LaunchEngine.unregister(bundleAt: bundle) }
+            try? FileManager.default.removeItem(atPath: path)
+        }
+    }
+
     /// Stops anything still running for this app before dropping it, so we
     /// don't orphan processes we can no longer reach from the UI.
     func removeApp(_ id: ManagedApp.ID) {
@@ -292,6 +323,7 @@ final class AppLibrary: ObservableObject {
             stop(account: account)
             let path = (dataFolder(for: app, account: account) as NSString).expandingTildeInPath
             deleteDataFolder(atPath: path, wasRunning: wasRunning)
+            deleteBundleCopy(for: app, account: account, wasRunning: wasRunning)
         }
         urlCache[id] = nil
         iconCache[id] = nil
