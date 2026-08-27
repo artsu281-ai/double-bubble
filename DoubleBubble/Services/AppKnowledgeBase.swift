@@ -55,6 +55,16 @@ struct IsolationDescriptor {
     /// copy means no place to put a branded icon, and a working second
     /// profile is worth more than a prettier tile.
     var requiresOriginalBundle: Bool = false
+
+    /// Home-relative paths this app keeps its account in, which therefore have
+    /// to be per-account too.
+    ///
+    /// A profile flag only moves what the app agreed to move. Antigravity
+    /// honours `--user-data-dir` and still reads its sign-in from `~/.gemini`,
+    /// so two accounts isolated their Chromium profiles perfectly and shared
+    /// one login. Listing the path here gets the account a `HOME` of its own —
+    /// see `ShadowHome` for what that costs and what it doesn't.
+    var privateHomePaths: [String] = []
 }
 
 // MARK: - Known App Registry
@@ -103,12 +113,14 @@ enum AppKnowledgeBase {
         ("com.google.antigravity-ide",
          IsolationDescriptor(kind: .electronUserDataDir,
                              description: "Antigravity IDE (Electron/VSCode fork)",
-                             persistsData: true)),
+                             persistsData: true,
+                             privateHomePaths: [".gemini"])),
 
         ("com.google.antigravity",
          IsolationDescriptor(kind: .electronUserDataDir,
                              description: "Antigravity (Electron/VSCode fork)",
-                             persistsData: true)),
+                             persistsData: true,
+                             privateHomePaths: [".gemini"])),
 
         ("com.exafunction.windsurf",
          IsolationDescriptor(kind: .electronUserDataDir,

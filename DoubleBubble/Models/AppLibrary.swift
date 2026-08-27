@@ -51,6 +51,7 @@ final class AppLibrary: ObservableObject {
         let isolationKeys = Set(apps.flatMap { $0.accounts.map(\.isolationKey) })
         LaunchEngine.shared.cleanUpOrphanedBundles(keeping: isolationKeys)
         LaunchEngine.shared.cleanUpOrphanedData(keeping: isolationKeys)
+        LaunchEngine.shared.cleanUpOrphanedHomes(keeping: isolationKeys)
         adoptRunningInstances()
         pruneDeadInstances()
     }
@@ -241,6 +242,7 @@ final class AppLibrary: ObservableObject {
         let path = (dataFolder(for: apps[i], account: account) as NSString).expandingTildeInPath
         deleteDataFolder(atPath: path, wasRunning: wasRunning)
         deleteBundleCopy(for: apps[i], account: account, wasRunning: wasRunning)
+        deletePrivateHome(for: apps[i], account: account)
     }
 
     /// Wipes an account's login and data without removing the account
@@ -257,6 +259,10 @@ final class AppLibrary: ObservableObject {
 
         let path = (dataFolder(for: apps[i], account: apps[i].accounts[j]) as NSString).expandingTildeInPath
         deleteDataFolder(atPath: path, wasRunning: wasRunning)
+        // Without this, "Clear Data" clears everything except the one thing
+        // anyone means by it: for an app that keeps its account outside the
+        // profile, the sign-in survives the wipe.
+        clearPrivateHome(for: apps[i], account: apps[i].accounts[j])
     }
 
     /// A just-stopped process can still hold its own files open for a moment,
@@ -283,10 +289,13 @@ final class AppLibrary: ObservableObject {
     /// Removes an account's copy of the application along with the account.
     ///
     /// Deleting an account used to take its data folder and leave the copy —
-    /// several hundred megabytes, sometimes most of a gigabyte, sitting in
-    /// `~/.double_bubble/bundles` belonging to nobody and reachable from
-    /// nowhere in the interface. One Antigravity account left 435 MB behind
-    /// that way.
+    /// several hundred megabytes, sometimes most of a gigabyte, for
+    /// `cleanUpOrphanedBundles` to collect at some later launch. That sweep
+    /// deliberately spares a copy anything is still running from, which is
+    /// exactly the state a copy is in right after the account that owned it
+    /// was deleted: one Antigravity copy sat there through several launches
+    /// for that reason, 435 MB reachable from nowhere in the interface. An
+    /// account the user deleted should free its room now, not eventually.
     ///
     /// Unregistered before it goes, for the same reason `discardCopy` does it:
     /// a bundle deleted out from under LaunchServices leaves a registration
@@ -310,6 +319,28 @@ final class AppLibrary: ObservableObject {
         }
     }
 
+    /// Home-relative paths this app keeps its account in — empty for almost
+    /// everything, since almost everything respects the profile flag it was
+    /// given. See `ShadowHome`.
+    private func privateHomePaths(for app: ManagedApp) -> [String] {
+        guard let url = url(for: app) else { return [] }
+        return LaunchEngine.shared.privateHomePaths(for: url)
+    }
+
+    private func deletePrivateHome(for app: ManagedApp, account: Account) {
+        guard !privateHomePaths(for: app).isEmpty else { return }
+        ShadowHome.remove(
+            slug: LaunchEngine.slug(for: app.name), isolationKey: account.isolationKey)
+    }
+
+    private func clearPrivateHome(for app: ManagedApp, account: Account) {
+        let paths = privateHomePaths(for: app)
+        guard !paths.isEmpty else { return }
+        ShadowHome.clear(
+            slug: LaunchEngine.slug(for: app.name),
+            isolationKey: account.isolationKey, isolating: paths)
+    }
+
     /// Stops anything still running for this app before dropping it, so we
     /// don't orphan processes we can no longer reach from the UI.
     func removeApp(_ id: ManagedApp.ID) {
@@ -324,6 +355,7 @@ final class AppLibrary: ObservableObject {
             let path = (dataFolder(for: app, account: account) as NSString).expandingTildeInPath
             deleteDataFolder(atPath: path, wasRunning: wasRunning)
             deleteBundleCopy(for: app, account: account, wasRunning: wasRunning)
+            deletePrivateHome(for: app, account: account)
         }
         urlCache[id] = nil
         iconCache[id] = nil

@@ -156,6 +156,30 @@ final class LaunchEngine: @unchecked Sendable {
         }
     }
 
+    /// Deletes private homes whose account no longer exists.
+    ///
+    /// Same shape and the same caution as `cleanUpOrphanedData`: a home holds
+    /// the account's sign-in, so an unattended sweep that got `keys` wrong
+    /// would silently log someone out of everything. Trashed, not removed.
+    /// The links inside are not followed — `trashItem` moves them, it does not
+    /// reach through them.
+    func cleanUpOrphanedHomes(keeping keys: Set<String>) {
+        let fm = FileManager.default
+        guard let dirs = try? fm.contentsOfDirectory(
+            at: ShadowHome.root, includingPropertiesForKeys: nil
+        ) else { return }
+
+        for dir in dirs {
+            let name = dir.lastPathComponent
+            guard let dash = name.lastIndex(of: "-") else { continue }
+            let key = String(name[name.index(after: dash)...])
+            guard key.count == 8,
+                  key.allSatisfy({ $0.isHexDigit && !$0.isUppercase }) else { continue }
+            guard !keys.contains(key) else { continue }
+            try? fm.trashItem(at: dir, resultingItemURL: nil)
+        }
+    }
+
     /// Paths of everything the user keeps in their Dock.
     private func dockPinnedPaths() -> [String] {
         guard let tiles = UserDefaults(suiteName: "com.apple.dock")?
@@ -291,6 +315,24 @@ final class LaunchEngine: @unchecked Sendable {
     }
 
     // MARK: - Compatibility
+
+    /// Home-relative paths this app hides its account in, if any.
+    func privateHomePaths(for appURL: URL) -> [String] {
+        guard let id = bundleID(for: appURL),
+              let descriptor = AppKnowledgeBase.descriptor(forBundleID: id) else { return [] }
+        return descriptor.privateHomePaths
+    }
+
+    /// The home this account runs with, built and refreshed — `nil` when the
+    /// app keeps nothing outside the profile, and for a default-profile
+    /// account, which exists precisely to open on the shared login.
+    private func privateHome(for appURL: URL, slug: String, account: Account) -> URL? {
+        guard !account.usesDefaultProfile else { return nil }
+        let paths = privateHomePaths(for: appURL)
+        guard !paths.isEmpty else { return nil }
+        return try? ShadowHome.prepare(
+            slug: slug, isolationKey: account.isolationKey, isolating: paths)
+    }
 
     func bundleID(for appURL: URL) -> String? {
         let plistURL = appURL.appendingPathComponent("Contents/Info.plist")
@@ -558,7 +600,8 @@ final class LaunchEngine: @unchecked Sendable {
     /// and comparing the whole struct would force a rebuild (and a fresh
     /// ad-hoc signature) on every single launch, defeating the point.
     private func copyFingerprint(
-        appURL: URL, account: Account, bakedArgument: String?, bubbleCount: Int
+        appURL: URL, account: Account, bakedArgument: String?, bubbleCount: Int,
+        homeDir: URL? = nil
     ) -> String {
         let version = Self.bundleVersion(at: appURL) ?? "unknown"
         let iconDigest = account.iconData.map {
@@ -571,7 +614,8 @@ final class LaunchEngine: @unchecked Sendable {
         // rebuild — the setting looked like it did nothing.
         return [version, account.name, account.colorHex, iconDigest,
                 account.accent.rawValue, String(bubbleCount),
-                bakedArgument ?? "none"].joined(separator: "\u{0}")
+                bakedArgument ?? "none",
+                homeDir?.path ?? "none"].joined(separator: "\u{0}")
     }
 
     // MARK: - Strategy: Electron / Chromium
@@ -624,7 +668,8 @@ final class LaunchEngine: @unchecked Sendable {
             userDataDir: userDataDir,
             appURL: appURL,
             account: account,
-            bubbleCount: bubbleCount
+            bubbleCount: bubbleCount,
+            homeDir: privateHome(for: appURL, slug: slug, account: account)
         )
 
         let config = NSWorkspace.OpenConfiguration()
@@ -664,7 +709,8 @@ final class LaunchEngine: @unchecked Sendable {
         userDataDir: URL?,
         appURL: URL,
         account: Account,
-        bubbleCount: Int = 2
+        bubbleCount: Int = 2,
+        homeDir: URL? = nil
     ) throws {
         let fm = FileManager.default
         let contentsDir = wrapperURL.appendingPathComponent("Contents")
@@ -681,9 +727,10 @@ final class LaunchEngine: @unchecked Sendable {
         // rather than through the app's shared Dock tile.
         let launcherPath = macosDir.appendingPathComponent("launcher")
         let profileArgument = userDataDir.map { " \"--user-data-dir=\($0.path)\"" } ?? ""
+        let home = homeDir.map { "HOME=\(Self.shellQuoted($0.path))\nexport HOME\n" } ?? ""
         let script = """
         #!/bin/sh
-        exec "\(realBinary)"\(profileArgument) "$@"
+        \(home)exec "\(realBinary)"\(profileArgument) "$@"
         """
         try script.write(to: launcherPath, atomically: true, encoding: .utf8)
         // chmod +x
@@ -829,9 +876,10 @@ final class LaunchEngine: @unchecked Sendable {
                 ? "\(Self.shellQuoted(w.flag)) \(Self.shellQuoted(dataDir.path))"
                 : Self.shellQuoted("\(w.flag)=\(dataDir.path)")
         }
+        let homeDir = privateHome(for: appURL, slug: slug, account: account)
         let fingerprint = copyFingerprint(
             appURL: appURL, account: account, bakedArgument: bakedArgument,
-            bubbleCount: bubbleCount)
+            bubbleCount: bubbleCount, homeDir: homeDir)
 
         // Reusing an up-to-date copy, instead of rebuilding unconditionally on
         // every single launch, is what lets a Screen Recording or Accessibility
@@ -858,9 +906,14 @@ final class LaunchEngine: @unchecked Sendable {
 
             // Bake the isolation flag in before signing, for the same reason as
             // the icon: this rewrites Info.plist and adds an executable.
+            // A private home is baked in for exactly the same reason as the
+            // flag: a copy started from a pinned tile never sees anything we
+            // would have passed at launch, and a copy that opens on the shared
+            // login is the bug this exists to fix.
             var realBinary: URL?
-            if let bakedArgument {
-                realBinary = try bakeIsolationFlag(into: copyURL, argument: bakedArgument)
+            if bakedArgument != nil || homeDir != nil {
+                realBinary = try bakeIsolationFlag(
+                    into: copyURL, argument: bakedArgument, homeDir: homeDir)
             }
 
             // Brand the Dock tile before signing — editing resources afterwards
@@ -1006,7 +1059,9 @@ final class LaunchEngine: @unchecked Sendable {
     /// Claude Desktop is copied to shed (see `AppKnowledgeBase`). Its path is
     /// returned so `resignBundle` re-signs it ad-hoc explicitly.
     @discardableResult
-    private func bakeIsolationFlag(into copyURL: URL, argument: String) throws -> URL {
+    private func bakeIsolationFlag(
+        into copyURL: URL, argument: String?, homeDir: URL?
+    ) throws -> URL {
         let contentsDir = copyURL.appendingPathComponent("Contents")
         let plistURL = contentsDir.appendingPathComponent("Info.plist")
         let data = try Data(contentsOf: plistURL)
@@ -1030,10 +1085,12 @@ final class LaunchEngine: @unchecked Sendable {
         // single-quoted like any other untrusted value: interpolated bare into
         // a double-quoted word, a name containing `$(...)` would run as a
         // command every time the copy launched.
+        let home = homeDir.map { "HOME=\(Self.shellQuoted($0.path))\nexport HOME\n" } ?? ""
+        let flag = argument.map { " " + $0 } ?? ""
         let script = """
         #!/bin/sh
         DIR=$(cd "$(dirname "$0")" && pwd)
-        exec "$DIR"/\(Self.shellQuoted(realExecName)) \(argument) "$@"
+        \(home)exec "$DIR"/\(Self.shellQuoted(realExecName))\(flag) "$@"
         """
         let launcherURL = macosDir.appendingPathComponent(Self.launcherName)
         try script.write(to: launcherURL, atomically: true, encoding: .utf8)
@@ -1107,7 +1164,8 @@ final class LaunchEngine: @unchecked Sendable {
         }
         let fingerprint = copyFingerprint(
             appURL: appURL, account: account,
-            bakedArgument: bakedArgument, bubbleCount: bubbleCount
+            bakedArgument: bakedArgument, bubbleCount: bubbleCount,
+            homeDir: privateHome(for: appURL, slug: slug, account: account)
         )
         try? fingerprint.write(
             to: accountDir.appendingPathComponent(".doublebubble-fingerprint"),
