@@ -437,10 +437,18 @@ struct AccountEditorView: View {
         }
         // Selecting the whole field is what makes a suggested name a
         // suggestion rather than something to delete first.
+        //
+        // Focus is set here and the selection asked for a turn later, once
+        // SwiftUI has actually moved first responder into the field. The
+        // previous version sent `selectAll:` straight to `firstResponder`
+        // with `perform`, and on a sheet that has just opened the first
+        // responder is the *window* — which has no `selectAll:`, so opening
+        // the sheet raised an unrecognised selector and killed the app.
+        // `sendAction(to: nil)` walks the responder chain instead and simply
+        // returns false when nothing along it can oblige.
+        nameFocused = true
         DispatchQueue.main.async {
-            nameFocused = true
-            NSApp.keyWindow?.firstResponder?
-                .perform(#selector(NSText.selectAll(_:)), with: nil)
+            NSApp.sendAction(#selector(NSText.selectAll(_:)), to: nil, from: nil)
         }
     }
 
