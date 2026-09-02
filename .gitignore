@@ -20,3 +20,6 @@ DerivedData/
 
 # Python bytecode from Scripts/
 __pycache__/
+
+# xcodebuild -target leaves this behind when it runs outside DerivedData.
+build/
