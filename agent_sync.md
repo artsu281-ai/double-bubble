@@ -1,18 +1,29 @@
 # AI AGENT SYNC STATE
 Keep this short. Overwrite, don't append — history lives in git, not here.
 
-**CURRENT_GOAL:** — done. Antigravity's accounts share one login; fixed and
-released as 2.0.4.
+**CURRENT_GOAL:** — done. Self-update, released as 2.0.5.
 
 **LAST_ACTION:**
-[Claude Code] -> [next agent]: added `ShadowHome` — a per-account `HOME` for
-apps that keep their sign-in at a fixed path under `~`. `HOME` is baked into
-the shim next to the isolation flag and joins the copy fingerprint, so existing
-copies re-bake once. Removing an account takes its home; Clear Data wipes it;
-orphaned homes are trashed at launch.
+[Claude Code] -> [next agent]: `Updater` downloads the release archive, refuses
+anything whose bundle id / advertised version / `codesign --verify --deep
+--strict` doesn't check out, and hands the swap to a script that outlives the
+process: wait for exit, move the old bundle aside, unpack the new one, restore
+the old one if the copy fails. The banner gained the button and hides it where
+it could only fail (no archive, unwritable location, DerivedData build). The
+old note claiming an ad-hoc signature makes this impossible was wrong —
+Gatekeeper only judges quarantined files, and the updater clears the flag.
 
 **STATUS:**
-- `main` == v2.0.4, released with the zip. Clean build, signature verifies.
+- `main` == v2.0.5, released. `/Applications` holds 2.0.5, installed from the
+  published zip; it is user-owned, so the button will be offered there.
+- **Verified:** swap script on copies — success, failure-restores-old, and
+  paths with spaces and an apostrophe. The whole verification pipeline run by
+  hand against the real published release: it would be accepted.
+- **Not verified:** the button itself. Nobody has clicked it, so the SwiftUI
+  path from press to relaunch is untested. The next release is the test.
+- Ad-hoc signing still proves no authorship — only TLS plus internal
+  integrity. A Developer ID signature or a release-time EdDSA key is what
+  would close that, and neither exists.
 - Earlier this run: crash on opening the account sheet (2.0.3); Duplicate
   folded into account creation; Settings gear back in the toolbar; bulk naming
   counts past taken names; already-added apps stay listed.
@@ -51,6 +62,6 @@ one `artwork` `NSImage` per app. Not what crashed, but `NSImage` is not safe to
 draw from several threads at once. Serialising the renders is the fix.
 
 **NEXT (queue):**
-Have an Antigravity account opened through the app and confirm the shim carries
-`HOME`. Serialise `IconFactory` rendering. Sparkle phase 2. The `.electronFlag`
+Watch the first real self-update land. Have an Antigravity account opened
+through the app and confirm the shim carries `HOME`. Serialise `IconFactory` rendering. Sparkle phase 2. The `.electronFlag`
 wrapper-deletion-orphans-a-pinned-Dock-tile bug.
