@@ -11,6 +11,43 @@ import Foundation
 
 enum IconFactory {
 
+    /// Every draw goes through here one at a time.
+    ///
+    /// `NSGraphicsContext.current` is per-thread, so the contexts themselves
+    /// never collided — but the `NSImage` being drawn is shared. One artwork
+    /// object belongs to an app, and all of that app's accounts render from
+    /// it: the list's tiles through `AccountTileCache`, three more at once the
+    /// moment the editor's accent picker appears. `NSImage` caches
+    /// representations and mutates itself while drawing, and a crash report
+    /// from this app caught three threads inside it simultaneously — one in
+    /// `colorAtX:y:`, two building `CIContext`s.
+    ///
+    /// Honest about what that is: a documented hazard, not a reproduced crash.
+    /// 384 concurrent renders without this lock came back clean, so nothing
+    /// here was measured failing — only measured being in a place Apple says
+    /// not to be in from two threads at once.
+    ///
+    /// It is not free. Measured over 100 tint renders: serial 1.15s → 0.70s
+    /// (the shared context below is why), parallel 0.13s → 0.66s (this lock is
+    /// why). The app renders a dozen tiles, once, off the main thread, and
+    /// caches them — about 7ms each in a row, against a correctness question
+    /// nobody can answer by testing. That trade is worth taking.
+    ///
+    /// Taken around `render`, which every path — `brand`, `preview` — goes
+    /// through, and which is the only place `artworkRect` and `duotone` are
+    /// reached from, so one uncontested lock covers all of it without ever
+    /// being re-entered. A handful of 64pt tiles drawn in a row is not
+    /// something anyone can perceive.
+    private static let drawing = NSLock()
+
+    /// One context for the life of the process.
+    ///
+    /// Building a `CIContext` deserializes Metal binary archives — visible in
+    /// that same crash report as two threads doing it at once, each several
+    /// stack frames deep in `MTLArchiveLinkResolver`. It is documented as safe
+    /// to share, and here it is only ever touched under `drawing` anyway.
+    private static let ciContext = CIContext(options: [.useSoftwareRenderer: false])
+
     /// Name (without extension) written into the copied bundle's Resources.
     static let iconName = "DoubleBubbleAccount"
 
@@ -113,6 +150,9 @@ enum IconFactory {
         accountImage: NSImage?, pixels: Int, bubbleCount: Int = 2,
         accent: IconAccent = .tint
     ) -> Data? {
+        drawing.lock()
+        defer { drawing.unlock() }
+
         let side = CGFloat(pixels)
         guard let rep = NSBitmapImageRep(
             bitmapDataPlanes: nil, pixelsWide: pixels, pixelsHigh: pixels,
@@ -286,9 +326,15 @@ enum IconFactory {
         controls.setValue(0.05, forKey: kCIInputBrightnessKey)
         guard let output = controls.outputImage else { return nil }
 
-        let result = NSImage(size: image.size)
-        result.addRepresentation(NSCIImageRep(ciImage: output))
-        return result
+        // Flattened here rather than handed back as an `NSCIImageRep`.
+        //
+        // A CIImage-backed `NSImage` looks free until it is drawn: AppKit then
+        // builds a `CIContext` of its own, right there in the draw call, for
+        // every tile. That is the Metal-archive work the crash report caught
+        // two threads doing at once. Rendering once through a context we keep
+        // turns the draw back into a plain blit.
+        guard let cg = ciContext.createCGImage(output, from: input.extent) else { return nil }
+        return NSImage(cgImage: cg, size: image.size)
     }
 
     /// Double Bubble's own mark, stamped on every copy it makes so a managed
