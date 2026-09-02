@@ -81,8 +81,21 @@ the fingerprint working as intended — they rebuild on their next Open, and wil
 ask to sign in once. Marking one as the app's own profile keeps it on the
 shared login deliberately.
 
+**DONE — `.electronFlag` wrapper orphaned a pinned Dock tile:** `launchElectron`
+deleted the whole account directory and wrote the wrapper again on *every*
+launch, and derived its filename from the account's name so a rename moved it.
+Now: the directory is never deleted, the wrapper keeps whatever name it already
+has (`wrapperLocation`), it is rebuilt in place only when a fingerprint —
+copy inputs plus the exec'd binary and the profile passed — changes, extras are
+unregistered before removal, and a rebuild re-registers. Reuse also requires
+the launcher and Info.plist to be present, since the unconditional rebuild used
+to hide a half-written wrapper.
+**Unverified:** all four apps here have `distinctIcons = true`, so every account
+takes the *copy* path and none exercises this. Reaching it needs the per-account
+Dock icon toggled off.
+
 **NEXT (queue):**
-Sparkle is no longer needed — self-update ships. Open items: a Developer ID or
-release-time EdDSA key, which is the only thing that would let an update prove
-authorship rather than just integrity; and the `.electronFlag`
-wrapper-deletion-orphans-a-pinned-Dock-tile bug. Serialise `IconFactory` rendering. 
+Sparkle is no longer needed — self-update ships and is confirmed working. Open:
+a Developer ID signature or a release-time EdDSA key, the only thing that would
+let an update prove authorship rather than just integrity. Needs the user's
+decision (paid Apple account, or holding a key), so don't start it unasked. Serialise `IconFactory` rendering. 

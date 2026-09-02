@@ -656,21 +656,52 @@ final class LaunchEngine: @unchecked Sendable {
         let accountDir = bundleRoot.appendingPathComponent(
             "\(slug)-\(account.isolationKey)", isDirectory: true
         )
-        try? FileManager.default.removeItem(at: accountDir)
-        try FileManager.default.createDirectory(at: accountDir, withIntermediateDirectories: true)
+        let fm = FileManager.default
+        try fm.createDirectory(at: accountDir, withIntermediateDirectories: true)
 
-        let wrapperName = account.name.isEmpty ? slug : account.name
-        let wrapperURL = accountDir.appendingPathComponent("\(wrapperName).app")
+        let wrapperURL = wrapperLocation(in: accountDir, fallbackName: account.name.isEmpty ? slug : account.name)
+        let home = privateHome(for: appURL, slug: slug, account: account)
 
-        try buildStubWrapper(
-            at: wrapperURL,
-            realBinary: binaryPath,
-            userDataDir: userDataDir,
-            appURL: appURL,
-            account: account,
-            bubbleCount: bubbleCount,
-            homeDir: privateHome(for: appURL, slug: slug, account: account)
-        )
+        // The wrapper is rebuilt only when something it contains changed.
+        //
+        // It used to be deleted — the whole account directory with it — and
+        // written again on every single launch. A pinned Dock tile points at a
+        // bundle; deleting that bundle out from under LaunchServices is
+        // precisely how a tile becomes a question mark, and it happened every
+        // time the account was opened. Reusing it also skips re-rendering and
+        // re-writing an icon that was already correct.
+        //
+        // The same inputs as a bundle copy, plus the two things only a wrapper
+        // has: which binary it exec's and which profile it passes.
+        let fingerprintURL = accountDir.appendingPathComponent(".doublebubble-fingerprint")
+        let fingerprint = copyFingerprint(
+            appURL: appURL, account: account,
+            bakedArgument: [binaryPath, userDataDir?.path ?? "default"].joined(separator: "\u{0}"),
+            bubbleCount: bubbleCount, homeDir: home)
+
+        // The executable, not just the directory: an unconditional rebuild used
+        // to paper over a wrapper left half-written by a crash or a full disk,
+        // and reusing one would now launch it.
+        let launcher = wrapperURL.appendingPathComponent("Contents/MacOS/launcher")
+        let intact = fm.isExecutableFile(atPath: launcher.path)
+            && fm.fileExists(atPath: wrapperURL.appendingPathComponent("Contents/Info.plist").path)
+
+        if !intact || (try? String(contentsOf: fingerprintURL, encoding: .utf8)) != fingerprint {
+            try buildStubWrapper(
+                at: wrapperURL,
+                realBinary: binaryPath,
+                userDataDir: userDataDir,
+                appURL: appURL,
+                account: account,
+                bubbleCount: bubbleCount,
+                homeDir: home
+            )
+            try? fingerprint.write(to: fingerprintURL, atomically: true, encoding: .utf8)
+            // Written in place, so the path never stopped existing — but its
+            // name and icon just changed, and LaunchServices is still holding
+            // the old ones.
+            registerWithLaunchServices(wrapperURL)
+        }
 
         let config = NSWorkspace.OpenConfiguration()
         config.createsNewApplicationInstance = true
@@ -694,6 +725,37 @@ final class LaunchEngine: @unchecked Sendable {
                                strategy: .electronFlag(binaryPath: binaryPath))
         ProcessMonitor.shared.registerApp(pid: inst.pid)
         return inst
+    }
+
+    /// Where this account's wrapper lives — and, once anything may have
+    /// pinned it, where it has to stay.
+    ///
+    /// A wrapper already there keeps its name whatever that name is, including
+    /// the one an earlier version derived from the account's. Renaming an
+    /// account used to move the bundle, which left a pinned tile pointing at a
+    /// path that no longer existed; the name shown in the Dock and in Finder
+    /// comes from `CFBundleDisplayName` inside, which is rewritten anyway, so
+    /// nothing is gained by moving the file and a pin is lost by it.
+    ///
+    /// More than one is not a state this writes, but toggling the per-account
+    /// Dock icon switches this account between a wrapper and a full copy, and
+    /// a leftover from the other shape has no business being launched. Extras
+    /// are unregistered before they go, for the same reason as everything else
+    /// here.
+    private func wrapperLocation(in accountDir: URL, fallbackName: String) -> URL {
+        let fm = FileManager.default
+        let bundles = ((try? fm.contentsOfDirectory(atPath: accountDir.path)) ?? [])
+            .filter { $0.hasSuffix(".app") }
+            .sorted()
+        guard let first = bundles.first else {
+            return accountDir.appendingPathComponent("\(fallbackName).app")
+        }
+        for extra in bundles.dropFirst() {
+            let path = accountDir.appendingPathComponent(extra).path
+            Self.unregister(bundleAt: path)
+            try? fm.removeItem(atPath: path)
+        }
+        return accountDir.appendingPathComponent(first)
     }
 
     /// Assembles a minimal .app wrapper that exec's another binary.
