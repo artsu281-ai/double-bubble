@@ -1,17 +1,19 @@
 # AI AGENT SYNC STATE
 Keep this short. Overwrite, don't append — history lives in git, not here.
 
-**CURRENT_GOAL:** — done. Test suite and localization checks, released as 2.0.9.
+**CURRENT_GOAL:** — done. Shallow re-signing, released as 2.0.10.
 
 **LAST_ACTION:**
-[Claude Code] -> [next agent]: added `Tests/` (28 tests, four suites), each
-written from a defect that shipped: bulk naming, version comparison,
-`ShadowHome`, and two localization checks. Found three strings that had been
-showing in English since 2.0.1; translated them. Added
-`.github/workflows/tests.yml`, green on the first run.
+[Claude Code] -> [next agent]: `resignBundle` now signs shallowly — the demoted
+real binary plus the bundle — and only falls back to the deep pass if that does
+not verify. Nested frameworks keep their vendor signatures. Before that:
+`Tests/` (28 tests) and `.github/workflows/tests.yml`, green.
 
 **STATUS:**
-- `main` == v2.0.9, released; `/Applications` self-updates from the banner.
+- `main` == v2.0.10, released; `/Applications` self-updates from the banner.
+- **Copies made from now on cost ~0 bytes.** Existing ones keep their deep
+  signature and its 172 MB until something rebuilds them — a source-app update,
+  or a change to the account's name/colour/accent.
 - `xcodebuild test -project DoubleBubble.xcodeproj -scheme DoubleBubble -destination 'platform=macOS'` — 28 passing.
 - Unverified anywhere: the `.electronFlag` wrapper path. Every app in this
   library has `distinctIcons = true`, so all accounts take the copy path.
@@ -49,16 +51,18 @@ rebuilding the bundle at the same path, or dragging the tile out and reopening.
 `NSWorkspace.setIcon` is not a way out: Finder info breaks `codesign --verify
 --deep --strict`.
 
-**MEASURED — what a bundle copy actually costs:** `ditto` clones on APFS, so
-copying 436 MB takes 0.12s and 0 bytes. The **deep re-sign** is what costs:
-172 MB of that 436. `du` therefore overstates `~/.double_bubble/bundles`
-badly. Vendor entitlements — the reason for re-signing — live on the main
-executable, not the nested frameworks, so re-signing shallowly may recover most
-of it. Untested.
+**MEASURED — what a bundle copy costs, and why it no longer does:** `ditto`
+clones on APFS: 436 MB in 0.12s for zero bytes. The **deep re-sign** was the
+entire cost — 172 MB spent breaking those shared blocks apart to re-sign
+frameworks nothing had touched. `du` still overstates
+`~/.double_bubble/bundles` badly for the same reason; it counts logical size.
+Shallow signing was then measured on Claude Desktop, the app the deep pass
+existed for: the copy comes out `Signature=adhoc`, `TeamIdentifier=not set`,
+`keychain-access-groups` **gone**, `--verify --deep --strict` clean, launching
+with every Electron helper loading under vendor signatures. Zero bytes.
 
 **NEXT (queue):**
-Try the shallow re-sign above; it either saves ~172 MB per copy or fails within
-the hour. Then: surface what the library occupies (there is a `DiskUsage`
+Surface what the library occupies (there is a `DiskUsage`
 service, wired only into the creation sheets, so the app says what a thing will
 cost and never what it does cost). Open, and needs the user's decision, not
 ours: a Developer ID signature or a release-time EdDSA key, the only thing that

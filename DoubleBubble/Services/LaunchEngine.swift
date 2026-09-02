@@ -1305,7 +1305,31 @@ final class LaunchEngine: @unchecked Sendable {
     /// has demoted it from `CFBundleExecutable` to an ordinary file in
     /// `Contents/MacOS`, which `--deep` no longer re-signs on its own. Signing
     /// it ad-hoc is what strips the vendor entitlements the copy has to shed.
+    /// Re-signs a copy ad hoc: shallowly if that comes out valid, deeply if not.
+    ///
+    /// Signing deeply rewrites every nested Mach-O in the bundle, and on APFS
+    /// that is what a copy actually costs. Measured on a 436 MB Electron app:
+    /// `ditto` clones it in 0.12s for **zero** bytes, and the deep re-sign then
+    /// spends **172 MB** breaking the clone's shared blocks apart — the whole
+    /// price of an account, paid to re-sign frameworks nothing has touched.
+    ///
+    /// Nothing needs them re-signed. The vendor entitlements this exists to
+    /// shed — Claude Desktop's `keychain-access-groups`, scoped by Anthropic's
+    /// Team ID, which two copies of one signed bundle would otherwise share —
+    /// live on the *main executable*, not on frameworks. Signing the demoted
+    /// real binary and the bundle around it drops them just as completely:
+    /// measured, the copy comes out `Signature=adhoc`, `TeamIdentifier=not
+    /// set`, entitlements empty, `codesign --verify --deep --strict` clean, and
+    /// it launches with every Electron helper loading under the vendor's own
+    /// untouched signatures. Zero bytes.
+    ///
+    /// The deep path stays as a fallback rather than a deletion. It was right
+    /// about *something* for some bundle shape, and one app that will not
+    /// verify is worth 172 MB; an app that will not launch is not.
     private func resignBundle(at url: URL, alsoSigning realBinary: URL? = nil) {
+        if let realBinary { codesign(path: realBinary.path) }
+        if codesign(path: url.path) == 0, verifies(bundleAt: url) { return }
+
         let fm = FileManager.default
         for sub in ["Contents/Frameworks", "Contents/PlugIns"] {
             let dir = url.appendingPathComponent(sub)
@@ -1316,6 +1340,18 @@ final class LaunchEngine: @unchecked Sendable {
         }
         if let realBinary { codesign(path: realBinary.path) }
         codesign(path: url.path, deep: true)
+    }
+
+    /// Whether a bundle's signature holds up on its own terms — the same check
+    /// the updater runs on a downloaded release.
+    private func verifies(bundleAt url: URL) -> Bool {
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/usr/bin/codesign")
+        p.arguments = ["--verify", "--deep", "--strict", url.path]
+        p.standardOutput = FileHandle.nullDevice
+        p.standardError = FileHandle.nullDevice
+        try? p.run(); p.waitUntilExit()
+        return p.terminationStatus == 0
     }
 
     @discardableResult
