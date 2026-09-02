@@ -1,7 +1,8 @@
 # AI AGENT SYNC STATE
 Keep this short. Overwrite, don't append — history lives in git, not here.
 
-**CURRENT_GOAL:** — done. Self-update, released as 2.0.5.
+**CURRENT_GOAL:** — done. Self-update works end to end; icon rendering
+serialised. Released as 2.0.6.
 
 **LAST_ACTION:**
 [Claude Code] -> [next agent]: `Updater` downloads the release archive, refuses
@@ -19,8 +20,12 @@ Gatekeeper only judges quarantined files, and the updater clears the flag.
 - **Verified:** swap script on copies — success, failure-restores-old, and
   paths with spaces and an apostrophe. The whole verification pipeline run by
   hand against the real published release: it would be accepted.
-- **Not verified:** the button itself. Nobody has clicked it, so the SwiftUI
-  path from press to relaunch is untested. The next release is the test.
+- **Verified end to end, by the user:** 2.0.5 updated itself to 2.0.6 from the
+  banner. `/Applications` holds 2.0.6, signature verifies, quarantine clear, no
+  backup or staging left behind, no crash reports. The updater is done.
+- Note for testing another update: `checkIfDue` is throttled to once a day, so
+  a same-day test needs `defaults delete com.doublebubble.app lastUpdateCheckAt`
+  before relaunching.
 - Ad-hoc signing still proves no authorship — only TLS plus internal
   integrity. A Developer ID signature or a release-time EdDSA key is what
   would close that, and neither exists.
@@ -54,14 +59,17 @@ rebuilding the bundle at the same path, or dragging the tile out and reopening
 (user-confirmed). `NSWorkspace.setIcon` is not a way out — Finder info breaks
 `codesign --verify --deep --strict`.
 
-**KNOWN, NOT FIXED — concurrent AppKit drawing in `IconFactory`:**
-a crash report showed three threads at once inside `IconFactory.render`/
-`artworkRect` (`NSImage.draw`, `NSBitmapImageRep.colorAtX:y:`, two `CIContext`
-builds) from `AccountTileCache.render` and `DockAccentPicker.render`, sharing
-one `artwork` `NSImage` per app. Not what crashed, but `NSImage` is not safe to
-draw from several threads at once. Serialising the renders is the fix.
+**DONE — concurrent AppKit drawing in `IconFactory`:** `render` takes a lock
+(never re-entered: every path goes through it, and `artworkRect`/`duotone` are
+only reached from inside it), and `duotone` flattens through one long-lived
+`CIContext` instead of returning an `NSCIImageRep` wrapper that made AppKit
+build a context inside every draw call. Measured, 100 tint renders: serial
+1.15s → 0.70s, parallel 0.13s → 0.66s. **The hazard was never reproduced** —
+384 concurrent renders without the lock came back clean — so this removes
+something documented as unsafe, not something caught failing. Don't "verify" it
+by stress test; that was already tried.
 
 **NEXT (queue):**
-Watch the first real self-update land. Have an Antigravity account opened
-through the app and confirm the shim carries `HOME`. Serialise `IconFactory` rendering. Sparkle phase 2. The `.electronFlag`
+Have an Antigravity account opened through the app and confirm the shim carries
+`HOME` — still the one unverified path. Serialise `IconFactory` rendering. Sparkle phase 2. The `.electronFlag`
 wrapper-deletion-orphans-a-pinned-Dock-tile bug.
