@@ -226,6 +226,13 @@ struct LibraryInspector: View {
             }
         }
 
+        if let bundleID = library.url(for: app).flatMap(LaunchEngine.shared.bundleID(for:)) {
+            IsolationOverrideGroup(
+                library: library, app: app, bundleID: bundleID,
+                isRunning: library.runningCount(for: app, monitor: monitor) > 0
+            )
+        }
+
         InspectorGroup(header: L("Application")) {
             InspectorRow(label: L("Version")) {
                 Text(library.currentVersion(for: app) ?? L("Unknown")).monospacedDigit()
@@ -476,5 +483,105 @@ struct AppDiskBreakdown: View {
         }
         sizes = found
         isMeasuring = false
+    }
+}
+
+
+// MARK: - Teaching it about an application it doesn't know
+
+/// Where someone can tell Double Bubble what it failed to work out.
+///
+/// The knowledge base covers 33 applications and there are rather more than 33
+/// applications. When it guesses wrong there was previously nothing to be done
+/// but wait for the guess to be corrected in a release — while the person
+/// looking at the wrong guess has the application right there and can try
+/// things.
+///
+/// Two settings, because two things are wrong when this is wrong. The method
+/// is how the profile is kept apart, and the paths are the ones the
+/// application hides its account in — the second being the part no flag can
+/// discover. Antigravity honours `--user-data-dir` perfectly and still shares
+/// one login through `~/.gemini`; finding that took an afternoon of measuring,
+/// and nobody should have to wait for someone else's afternoon.
+private struct IsolationOverrideGroup: View {
+    @ObservedObject var library: AppLibrary
+    let app: ManagedApp
+    let bundleID: String
+    let isRunning: Bool
+
+    @State private var kind: IsolationOverrides.Kind = .automatic
+    @State private var paths: String = ""
+    @State private var isExpanded = false
+
+    var body: some View {
+        InspectorGroup(header: L("If this application doesn’t work")) {
+            DisclosureGroup(isExpanded: $isExpanded) {
+                VStack(alignment: .leading, spacing: Metrics.s) {
+                    Picker(L("Method"), selection: $kind) {
+                        Text(L("Work it out automatically")).tag(IsolationOverrides.Kind.automatic)
+                        Text(L("Pass a data directory")).tag(IsolationOverrides.Kind.dataDirectoryFlag)
+                        Text(L("Copy the application")).tag(IsolationOverrides.Kind.copy)
+                        Text(L("Copy it and pass a data directory"))
+                            .tag(IsolationOverrides.Kind.copyWithDataDirectoryFlag)
+                    }
+                    .labelsHidden()
+                    .onChange(of: kind) { _, _ in commit() }
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(L("Folders in your home this account should keep to itself"))
+                            .font(.meta)
+                            .foregroundStyle(.secondary)
+                        TextField("~/.config/example", text: $paths, onCommit: commit)
+                            .textFieldStyle(.roundedBorder)
+                            .font(.meta)
+                        Text(L("Separate several with commas. Use this when accounts share a login although their data is separate — the sign-in is being kept somewhere the data directory doesn’t reach."))
+                            .font(.meta)
+                            .foregroundStyle(.tertiary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    if isRunning {
+                        Label(L("Stop every account to change this."), systemImage: "exclamationmark.circle")
+                            .font(.meta)
+                            .foregroundStyle(.orange)
+                    }
+                }
+                .disabled(isRunning)
+                .padding(.top, Metrics.xs)
+            } label: {
+                Text(summary)
+                    .font(.meta)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .task(id: bundleID) { load() }
+    }
+
+    private var summary: String {
+        let entry = IsolationOverrides.entry(forBundleID: bundleID)
+        guard let entry, !entry.isEmpty else {
+            return L("Tell Double Bubble how to isolate it.")
+        }
+        return L("Set by you — Double Bubble’s own answer is being ignored for this application.")
+    }
+
+    private func load() {
+        let entry = IsolationOverrides.entry(forBundleID: bundleID) ?? .init()
+        kind = entry.kind
+        paths = IsolationOverrides.describe(entry.homePaths)
+        isExpanded = !entry.isEmpty
+    }
+
+    /// Written straight through, and the caches dropped with it — the resolved
+    /// strategy is remembered per app, so without this the change would appear
+    /// to do nothing until the next launch.
+    private func commit() {
+        IsolationOverrides.set(
+            IsolationOverrides.Entry(kind: kind, homePaths: IsolationOverrides.parse(paths)),
+            forBundleID: bundleID
+        )
+        library.invalidateCaches(for: app.id)
+        library.objectWillChange.send()
     }
 }

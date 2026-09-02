@@ -82,3 +82,54 @@ final class LibraryLoadTests: XCTestCase {
         )
     }
 }
+
+/// Turning what someone typed into paths.
+///
+/// The field accepts what people write rather than one exact shape, and the
+/// shape it stores has to be the one `ShadowHome` expects: a leading `~/` that
+/// survived would be appended to the shadow home as a directory literally
+/// named `~`, which isolates nothing and looks like it did.
+final class IsolationOverrideParsingTests: XCTestCase {
+
+    func testAcceptsEveryWayPeopleWriteAHomePath() {
+        XCTAssertEqual(IsolationOverrides.parse("~/.gemini"), [".gemini"])
+        XCTAssertEqual(IsolationOverrides.parse("/.gemini"), [".gemini"])
+        XCTAssertEqual(IsolationOverrides.parse(".gemini"), [".gemini"])
+        XCTAssertEqual(IsolationOverrides.parse("  ~/.gemini  "), [".gemini"])
+    }
+
+    func testSplitsOnCommasAndNewlines() {
+        XCTAssertEqual(
+            IsolationOverrides.parse("~/.gemini, ~/.config/thing"),
+            [".gemini", ".config/thing"]
+        )
+        XCTAssertEqual(IsolationOverrides.parse(".a\n.b"), [".a", ".b"])
+    }
+
+    func testTrailingSlashesAreDropped() {
+        XCTAssertEqual(IsolationOverrides.parse("~/.gemini/"), [".gemini"])
+    }
+
+    /// Nothing that escapes the home directory, and nothing empty.
+    func testRefusesPathsThatWouldNotStayInTheHome() {
+        XCTAssertEqual(IsolationOverrides.parse("../../etc"), [])
+        XCTAssertEqual(IsolationOverrides.parse("."), [])
+        XCTAssertEqual(IsolationOverrides.parse("~/"), [])
+        XCTAssertEqual(IsolationOverrides.parse(", ,"), [])
+        XCTAssertEqual(IsolationOverrides.parse(""), [])
+    }
+
+    func testRoundTripsThroughTheDisplayForm() {
+        let typed = "~/.gemini, ~/.codeium"
+        let parsed = IsolationOverrides.parse(typed)
+        XCTAssertEqual(IsolationOverrides.describe(parsed), typed)
+        XCTAssertEqual(IsolationOverrides.parse(IsolationOverrides.describe(parsed)), parsed)
+    }
+
+    func testAnEmptyOverrideIsNotStoredAsOne() {
+        XCTAssertTrue(IsolationOverrides.Entry().isEmpty)
+        XCTAssertTrue(IsolationOverrides.Entry(kind: .automatic, homePaths: []).isEmpty)
+        XCTAssertFalse(IsolationOverrides.Entry(kind: .copy, homePaths: []).isEmpty)
+        XCTAssertFalse(IsolationOverrides.Entry(kind: .automatic, homePaths: [".x"]).isEmpty)
+    }
+}

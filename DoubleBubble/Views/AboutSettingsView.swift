@@ -3,21 +3,15 @@ import AppKit
 
 /// Which page of Settings is showing.
 enum SettingsSection: String, CaseIterable, Identifiable {
-    case general, appearance, dockIcon, language, advanced, about
+    case general, appearance, advanced, about
 
     var id: String { rawValue }
-
-    /// Split the way the sidebar groups them: things you change, then things
-    /// you only read.
-    var isInformational: Bool { self == .about }
 
     @MainActor
     var title: String {
         switch self {
         case .general:    return L("General")
         case .appearance: return L("Appearance")
-        case .dockIcon:   return L("Dock Icon")
-        case .language:   return L("Language")
         case .advanced:   return L("Advanced")
         case .about:      return L("About")
         }
@@ -27,8 +21,6 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         switch self {
         case .general:    return "slider.horizontal.3"
         case .appearance: return "paintpalette"
-        case .dockIcon:   return "dock.rectangle"
-        case .language:   return "character.bubble"
         case .advanced:   return "gearshape.2"
         case .about:      return "info.circle"
         }
@@ -55,45 +47,49 @@ struct SettingsView: View {
     @Environment(\.themePalette) private var palette
 
     var body: some View {
-        HStack(spacing: 0) {
-            sidebar
-            Rectangle().fill(palette.hairline).frame(width: 1)
+        VStack(spacing: 0) {
+            tabBar
+            Rectangle().fill(palette.hairline).frame(height: 1)
             detail
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            footer
         }
-        .frame(minWidth: 760, idealWidth: 820, minHeight: 520, idealHeight: 600)
+        .frame(minWidth: 620, idealWidth: 680, minHeight: 520, idealHeight: 600)
         .background(palette.windowBackground)
     }
 
-    private var sidebar: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            group(L("Settings"), SettingsSection.allCases.filter { !$0.isInformational }, top: 26)
-            group(L("Information"), SettingsSection.allCases.filter(\.isInformational), top: 20)
-            Spacer(minLength: 16)
-            footer
+    /// A row of tabs across the top rather than a column down the side.
+    ///
+    /// Four, not the six pages there were: six pills in a row is a row of
+    /// abbreviations. Language belongs with the rest of General, and the Dock
+    /// icon is an appearance question — the pages were split finely because a
+    /// sidebar can afford to be, and a tab bar cannot.
+    private var tabBar: some View {
+        HStack(spacing: Metrics.xs) {
+            ForEach(SettingsSection.allCases) { item in
+                SettingsTabButton(
+                    title: item.title,
+                    icon: item.icon,
+                    isSelected: section == item
+                ) {
+                    withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
+                        section = item
+                    }
+                }
+            }
         }
-        .padding(.horizontal, 10)
-        .padding(.bottom, 14)
-        .frame(width: 208)
-        .sidebarSurface()
+        .padding(Metrics.xs)
+        .background(palette.cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(palette.hairline, lineWidth: 1)
+        )
+        .padding(.horizontal, Metrics.l)
+        .padding(.top, Metrics.m)
+        .padding(.bottom, Metrics.s)
     }
 
-    @ViewBuilder
-    private func group(_ label: String, _ items: [SettingsSection], top: CGFloat) -> some View {
-        Text(label.uppercased())
-            .font(.sectionLabel)
-            .kerning(0.8)
-            .foregroundStyle(.tertiary)
-            .padding(.horizontal, 12)
-            .padding(.top, top)
-            .padding(.bottom, 6)
-
-        ForEach(items) { item in
-            SettingsSidebarRow(item: item, isSelected: item == section) { section = item }
-        }
-    }
-
-    /// The same at-a-glance line Intact keeps down here: what the app is doing
-    /// right now, and which build is saying so.
     private var footer: some View {
         VStack(alignment: .leading, spacing: 7) {
             Rectangle().fill(palette.hairline).frame(height: 1)
@@ -111,21 +107,25 @@ struct SettingsView: View {
                 .font(.meta)
                 .foregroundStyle(.tertiary)
         }
-        .padding(.horizontal, 10)
+        .padding(.horizontal, Metrics.l)
+        .padding(.bottom, Metrics.m)
         .padding(.top, 4)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     @ViewBuilder
     private var detail: some View {
         switch section {
         case .general:
-            SettingsPage(title: section.title) { GeneralSection() }
+            SettingsPage(title: section.title) {
+                GeneralSection()
+                LanguageSection()
+            }
         case .appearance:
-            SettingsPage(title: section.title) { AppearanceSection() }
-        case .dockIcon:
-            SettingsPage(title: section.title) { DockIconSection() }
-        case .language:
-            SettingsPage(title: section.title) { LanguageSection() }
+            SettingsPage(title: section.title) {
+                AppearanceSection()
+                DockIconSection()
+            }
         case .advanced:
             SettingsPage(title: section.title) { AdvancedSection(library: library) }
         case .about:
@@ -133,45 +133,6 @@ struct SettingsView: View {
         }
     }
 }
-
-private struct SettingsSidebarRow: View {
-    let item: SettingsSection
-    let isSelected: Bool
-    let action: () -> Void
-
-    @Environment(\.themePalette) private var palette
-    @State private var hovering = false
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 10) {
-                Image(systemName: item.icon)
-                    .font(.listItem)
-                    .fontWeight(isSelected ? .semibold : .regular)
-                    .foregroundStyle(isSelected ? palette.accentColor : Color.secondary)
-                    .frame(width: 19)
-                Text(item.title)
-                    .font(.listItem)
-                    .fontWeight(isSelected ? .semibold : .regular)
-                    .foregroundStyle(isSelected ? Color.primary : Color.secondary)
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 11)
-            .padding(.vertical, 7)
-            .background(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(isSelected ? palette.accentColor.opacity(0.14)
-                                     : (hovering ? palette.hairline.opacity(0.6) : .clear))
-            )
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
-        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
-    }
-}
-
-// MARK: - Appearance
 
 private struct AppearanceSection: View {
     @AppStorage(AppTheme.storageKey) private var themeRaw = AppTheme.terracotta.rawValue
@@ -492,4 +453,41 @@ private struct AboutSection: View {
 
 #Preview {
     SettingsView(library: AppLibrary())
+}
+
+
+/// One tab in the settings window's top bar.
+///
+/// Borrowed from Cerberus DNS, down to the spring: `response: 0.2` with
+/// `dampingFraction: 0.8` is quick enough to feel like the tab answered the
+/// click and damped enough not to wobble afterwards. Deliberately the only
+/// animation added — this app had a pass specifically to remove decoration,
+/// and a control acknowledging a press is not decoration.
+struct SettingsTabButton: View {
+    let title: String
+    let icon: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    @Environment(\.themePalette) private var palette
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: isSelected ? .semibold : .medium))
+                Text(title)
+                    .font(.system(size: 12, weight: isSelected ? .semibold : .medium))
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 7)
+            .background(isSelected ? palette.accentColor : Color.primary.opacity(0.05))
+            .foregroundStyle(isSelected ? Color.white : Color.primary)
+            .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+    }
 }

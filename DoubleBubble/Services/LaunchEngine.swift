@@ -294,6 +294,15 @@ final class LaunchEngine: @unchecked Sendable {
             return .bundleCopy
         }
 
+        // 0. What the user decided, if they decided anything. Ahead of the
+        //    knowledge base deliberately: someone with the application in
+        //    front of them, who has tried it, knows more than a table written
+        //    without it.
+        if let chosen = IsolationOverrides.entry(forBundleID: bundleID)?.kind,
+           let strategy = strategy(from: chosen, appURL: appURL) {
+            return strategy
+        }
+
         // 1. Check knowledge base first (most specific)
         if let descriptor = AppKnowledgeBase.descriptor(forBundleID: bundleID) {
             return strategy(from: descriptor, appURL: appURL)
@@ -324,9 +333,14 @@ final class LaunchEngine: @unchecked Sendable {
 
     /// Home-relative paths this app hides its account in, if any.
     func privateHomePaths(for appURL: URL) -> [String] {
-        guard let id = bundleID(for: appURL),
-              let descriptor = AppKnowledgeBase.descriptor(forBundleID: id) else { return [] }
-        return descriptor.privateHomePaths
+        guard let id = bundleID(for: appURL) else { return [] }
+        let known = AppKnowledgeBase.descriptor(forBundleID: id)?.privateHomePaths ?? []
+        let chosen = IsolationOverrides.entry(forBundleID: id)?.homePaths ?? []
+        // Added to, not replaced: someone naming a path they found should not
+        // silently switch off the one that was already known to be needed.
+        var merged = known
+        for path in chosen where !merged.contains(path) { merged.append(path) }
+        return merged
     }
 
     /// The home this account runs with, built and refreshed — `nil` when the
@@ -411,6 +425,24 @@ final class LaunchEngine: @unchecked Sendable {
             isSandboxed: (plist["com.apple.security.app-sandbox"] as? Bool) ?? false,
             appGroups: (plist["com.apple.security.application-groups"] as? [String]) ?? []
         )
+    }
+
+    /// A user's choice, turned into a strategy. `nil` for `.automatic`, and
+    /// for a flag-based choice on a bundle whose binary can't be found — in
+    /// both cases detection carries on as though nothing was chosen.
+    private func strategy(
+        from kind: IsolationOverrides.Kind, appURL: URL
+    ) -> LaunchStrategy? {
+        switch kind {
+        case .automatic:
+            return nil
+        case .dataDirectoryFlag:
+            return findMainBinary(in: appURL).map { .electronFlag(binaryPath: $0) }
+        case .copy:
+            return .bundleCopy
+        case .copyWithDataDirectoryFlag:
+            return .copyThenFlag(flag: "--user-data-dir", separateValue: false)
+        }
     }
 
     private func strategy(from descriptor: IsolationDescriptor, appURL: URL) -> LaunchStrategy {

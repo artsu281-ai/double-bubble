@@ -1442,6 +1442,28 @@
         }
       }
     },
+    "Copy it and pass a data directory": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копировать и передавать каталог данных"
+          }
+        }
+      }
+    },
+    "Copy the application": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копировать приложение"
+          }
+        }
+      }
+    },
     "Couldn’t Open": {
       "extractionState": "manual",
       "localizations": {
@@ -2047,6 +2069,17 @@
         }
       }
     },
+    "Folders in your home this account should keep to itself": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Папки в домашнем каталоге, которые аккаунт держит при себе"
+          }
+        }
+      }
+    },
     "Follows the macOS appearance": {
       "extractionState": "manual",
       "localizations": {
@@ -2186,6 +2219,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сколько места занимает изолированная копия или папка данных каждого аккаунта — показывается рядом со статусом."
+          }
+        }
+      }
+    },
+    "If this application doesn’t work": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Если это приложение не работает"
           }
         }
       }
@@ -3257,6 +3301,17 @@
         }
       }
     },
+    "Pass a data directory": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Передавать каталог данных"
+          }
+        }
+      }
+    },
     "Pick any application, including ones not listed here": {
       "extractionState": "manual",
       "localizations": {
@@ -4027,6 +4082,28 @@
         }
       }
     },
+    "Separate several with commas. Use this when accounts share a login although their data is separate — the sign-in is being kept somewhere the data directory doesn’t reach.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Несколько — через запятую. Пригодится, когда данные у аккаунтов разные, а вход общий: значит, вход хранится там, куда каталог данных не достаёт."
+          }
+        }
+      }
+    },
+    "Set by you — Double Bubble’s own answer is being ignored for this application.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Задано вами — собственный ответ Double Bubble для этого приложения не применяется."
+          }
+        }
+      }
+    },
     "Setting up “%@”": {
       "extractionState": "manual",
       "localizations": {
@@ -4573,6 +4650,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Бирюзовый"
+          }
+        }
+      }
+    },
+    "Tell Double Bubble how to isolate it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подскажите Double Bubble, как его разделять."
           }
         }
       }
@@ -5189,6 +5277,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Что нового"
+          }
+        }
+      }
+    },
+    "Work it out automatically": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Определить самостоятельно"
           }
         }
       }

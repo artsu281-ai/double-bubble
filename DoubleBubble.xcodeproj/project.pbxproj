@@ -53,6 +53,7 @@
 		A5DCE8272C0A80EEB9612AB4 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226081B1751F1BE7B0B6A0F6 /* LibraryView.swift */; };
 		A6A02C0AA038B230A19FE489 /* AddAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87462A9E5093E51C45B0F476 /* AddAppView.swift */; };
 		A894F640D335CAA73A8C1C13 /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = E07DDF06750E61FC3E24D580 /* Profile.swift */; };
+		A9E03D1F6354F5D9AD0AC314 /* IsolationOverrides.swift in Sources */ = {isa = PBXBuildFile; fileRef = 564C7C02FE87551DC3EB651B /* IsolationOverrides.swift */; };
 		AAE92AE99593825B8FC883FC /* Metrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E39C0193503C6D49FABB557 /* Metrics.swift */; };
 		B3E4131092EBEE25FF976385 /* LibrarySidebar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3087649A36AB7B72B77975 /* LibrarySidebar.swift */; };
 		B88A1D27734F56A0CF243630 /* ShadowHome.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3945C08C12BB4C2AB396883 /* ShadowHome.swift */; };
@@ -115,6 +116,7 @@
 		41D5F010C19BCC0B2AF2D98B /* DoubleBubbleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoubleBubbleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		435C22C64AB594B21D0A2A93 /* AppInstance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInstance.swift; sourceTree = "<group>"; };
 		52B4928A9D65D07D55BF519F /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		564C7C02FE87551DC3EB651B /* IsolationOverrides.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IsolationOverrides.swift; sourceTree = "<group>"; };
 		58FAC9DFF19D54B7D668CAD4 /* LibraryUIState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryUIState.swift; sourceTree = "<group>"; };
 		5CB169CA64248148A8E9E982 /* ShadowHomeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShadowHomeTests.swift; sourceTree = "<group>"; };
 		5D4B82A9BCEA9A24141C54EC /* LaunchEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchEngineTests.swift; sourceTree = "<group>"; };
@@ -226,6 +228,7 @@
 				D070B713D58C6220FBA3EF39 /* IconFactory.swift */,
 				BDDC54EAEA95C8021FFFB9F8 /* InstalledApps.swift */,
 				E77D12C233ACE9F160D1FD4D /* InterfaceDensity.swift */,
+				564C7C02FE87551DC3EB651B /* IsolationOverrides.swift */,
 				D16A492456FA5FD2FC7C5F75 /* LaunchAtLogin.swift */,
 				5E42A65B0B1B35CBCD3ED7DD /* LaunchEngine.swift */,
 				CF196557E6C262667244D515 /* Localization.swift */,
@@ -486,6 +489,7 @@
 				E4967471ACBE044BFC95128D /* IconFactory.swift in Sources */,
 				3E1C00CBE03D796C65C9111D /* InstalledApps.swift in Sources */,
 				A4A2176AC1795CC5EDE95C17 /* InterfaceDensity.swift in Sources */,
+				A9E03D1F6354F5D9AD0AC314 /* IsolationOverrides.swift in Sources */,
 				83D52B40CE8DEEB87BF6FD0E /* LaunchAtLogin.swift in Sources */,
 				A55DA93D17FD848EC3CB92B2 /* LaunchEngine.swift in Sources */,
 				DFC714C960EB79C96435931F /* LibraryCommands.swift in Sources */,
@@ -633,7 +637,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -652,7 +656,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.0.14;
+				MARKETING_VERSION = 2.1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -698,7 +702,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -711,7 +715,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.0.14;
+				MARKETING_VERSION = 2.1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "Double Bubble";

@@ -1,11 +1,19 @@
 # AI AGENT SYNC STATE
 Keep this short. Overwrite, don't append — history lives in git, not here.
 
-**CURRENT_GOAL:** — done. Debt sweep: library can no longer be destroyed by a
-bad read, destructive failures are logged, 48 tests. Released as 2.0.14.
+**CURRENT_GOAL:** — done. Per-app isolation override, settings in tabs.
+Released as 2.1.0.
 
 **LAST_ACTION:**
-[Claude Code] -> [next agent]: (1) `AppLibrary.load(stored:backup:)` — absent
+[Claude Code] -> [next agent]: `IsolationOverrides` — a per-bundle-id store the
+launcher consults **before** the knowledge base, holding a method and the
+home-relative paths an app hides its account in. Edited in the inspector's
+Isolation tab. This is the answer to "the knowledge base covers 7 of 42
+installed apps": the person with the app in front of them can now record what
+works. Settings moved from a sidebar to four top tabs (General+Language,
+Appearance+Dock Icon, Advanced, About) in Cerberus DNS's pill style, spring
+included — `response: 0.2, dampingFraction: 0.8`. Earlier:
+(1) `AppLibrary.load(stored:backup:)` — absent
 and unreadable are now different things; a library that will not parse changes
 nothing, saves nothing and sweeps nothing, and a copy lives at
 `~/.double_bubble/library.json`. Proven live: both sources corrupted, 1.2 GB of
