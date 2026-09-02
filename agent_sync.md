@@ -1,13 +1,14 @@
 # AI AGENT SYNC STATE
 Keep this short. Overwrite, don't append — history lives in git, not here.
 
-**CURRENT_GOAL:** — done. Shallow re-signing, released as 2.0.10.
+**CURRENT_GOAL:** — done. Honest disk reporting, released as 2.0.11.
 
 **LAST_ACTION:**
-[Claude Code] -> [next agent]: `resignBundle` now signs shallowly — the demoted
-real binary plus the bundle — and only falls back to the deep pass if that does
-not verify. Nested frameworks keep their vendor signatures. Before that:
-`Tests/` (28 tests) and `.github/workflows/tests.yml`, green.
+[Claude Code] -> [next agent]: private homes are now counted (they were shown
+nowhere, and for an app like Antigravity that is where the account's weight
+is), and the app copy no longer shows a size — it is an APFS clone and every
+folder-sizing tool reports its full apparent size as though occupied. Before
+that: shallow re-signing (2.0.10), `Tests/` + CI (2.0.9).
 
 **STATUS:**
 - `main` == v2.0.10, released; `/Applications` self-updates from the banner.

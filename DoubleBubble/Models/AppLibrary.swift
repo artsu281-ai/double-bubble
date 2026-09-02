@@ -334,7 +334,7 @@ final class AppLibrary: ObservableObject {
     /// Home-relative paths this app keeps its account in — empty for almost
     /// everything, since almost everything respects the profile flag it was
     /// given. See `ShadowHome`.
-    private func privateHomePaths(for app: ManagedApp) -> [String] {
+    func privateHomePaths(for app: ManagedApp) -> [String] {
         guard let url = url(for: app) else { return [] }
         return LaunchEngine.shared.privateHomePaths(for: url)
     }
@@ -613,6 +613,21 @@ final class AppLibrary: ObservableObject {
     /// permissions" affordance in the UI points at. `nil` for `.jetbrains`/
     /// `.configDir`, which run the original binary unmodified and have no
     /// separate identity of their own.
+    /// The account's own home directory, when this app hides its account in
+    /// one — see `ShadowHome`. `nil` for everything else, which is almost
+    /// everything.
+    ///
+    /// Worth its own entry wherever sizes are shown: for an app like
+    /// Antigravity this is where the account's real weight sits, and it was
+    /// invisible in an interface that carefully accounted for the profile
+    /// directory next to it.
+    func privateHomeFolder(for app: ManagedApp, account: Account) -> String? {
+        guard !account.usesDefaultProfile, !privateHomePaths(for: app).isEmpty else { return nil }
+        return ShadowHome.directory(
+            slug: LaunchEngine.slug(for: app.name), isolationKey: account.isolationKey
+        ).path
+    }
+
     func bundleCopyFolder(for app: ManagedApp, account: Account) -> String? {
         switch strategy(for: app) {
         case .bundleCopy, .copyThenFlag, .electronFlag:

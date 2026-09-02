@@ -331,6 +331,17 @@
         }
       }
     },
+    "A clone, sharing storage with the application it was made from. It takes almost no room of its own, and no tool on this system can say exactly how little.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Клон: делит место с приложением, с которого сделан. Собственного места занимает почти нисколько, и точную величину не назовёт ни одно средство в системе."
+          }
+        }
+      }
+    },
     "A copy of an existing account": {
       "extractionState": "manual",
       "localizations": {
@@ -4115,6 +4126,17 @@
         }
       }
     },
+    "Sign-in and settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вход и настройки"
+          }
+        }
+      }
+    },
     "Signs it out and deletes everything it stored — login, history, settings. It's currently running, so it's stopped first. The account itself, its name and color, stay.": {
       "extractionState": "manual",
       "localizations": {
@@ -5072,13 +5094,13 @@
         }
       }
     },
-    "across all accounts": {
+    "account data, not app copies": {
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "по всем аккаунтам"
+            "value": "данные аккаунтов, без копий приложений"
           }
         }
       }

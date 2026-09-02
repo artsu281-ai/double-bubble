@@ -258,6 +258,12 @@ struct LibraryInspector: View {
                         path: library.dataFolder(for: app, account: account),
                         label: L("Data")
                     )
+                    // For an app that keeps its account outside the profile —
+                    // Antigravity's `~/.gemini` — this is where the weight
+                    // actually is, and it used to be shown nowhere at all.
+                    if let home = library.privateHomeFolder(for: app, account: account) {
+                        MeasuredPath(path: home, label: L("Sign-in and settings"))
+                    }
                     HStack(spacing: Metrics.s) {
                         Button(L("Show")) { reveal(library.dataFolder(for: app, account: account)) }
                         Button(L("Clear…"), role: .destructive) {
@@ -271,7 +277,19 @@ struct LibraryInspector: View {
 
             if let copyPath = library.bundleCopyFolder(for: app, account: account) {
                 InspectorGroup(header: L("App copy")) {
-                    MeasuredPath(path: copyPath, label: L("Copy"))
+                    // Deliberately not a size. The copy is an APFS clone: it
+                    // shares its blocks with the application it came from, and
+                    // every way of measuring a folder — this app's own, `du`,
+                    // Finder's Get Info — adds up file sizes and reports the
+                    // whole thing as though it were occupied. Measured: cloning
+                    // a 436 MB app costs zero bytes. A number that says 436 MB
+                    // is worse than no number, because someone will go and
+                    // delete an account over it.
+                    Text(L("A clone, sharing storage with the application it was made from. It takes almost no room of its own, and no tool on this system can say exactly how little."))
+                        .font(.meta)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    PathLabel(path: copyPath)
                     Button(L("Show")) { reveal(copyPath) }
                         .controlSize(.small)
                         .padding(.top, Metrics.xs)
@@ -445,9 +463,16 @@ struct AppDiskBreakdown: View {
         isMeasuring = true
         var found: [UUID: Int64] = [:]
         for account in app.accounts {
+            var bytes: Int64 = 0
             let path = library.dataFolder(for: app, account: account)
-            guard path != "—" else { continue }
-            found[account.id] = await DiskUsage.size(atPath: path) ?? 0
+            if path != "—" { bytes += await DiskUsage.size(atPath: path) ?? 0 }
+            // The account's own home, where an app like Antigravity keeps the
+            // sign-in the profile directory does not hold.
+            if let home = library.privateHomeFolder(for: app, account: account) {
+                bytes += await DiskUsage.size(atPath: home) ?? 0
+            }
+            guard bytes > 0 else { continue }
+            found[account.id] = bytes
         }
         sizes = found
         isMeasuring = false

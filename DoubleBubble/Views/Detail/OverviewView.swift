@@ -17,10 +17,19 @@ struct OverviewView: View {
     private var runningTotal: Int { library.totalRunningCount }
     private var accountTotal: Int { library.apps.reduce(0) { $0 + $1.accounts.count } }
 
+    /// What the library actually occupies: the accounts' data, plus the
+    /// private homes for apps that keep their sign-in outside the profile.
+    ///
+    /// Application copies are left out on purpose. They are APFS clones
+    /// sharing their blocks with the original, so adding their apparent sizes
+    /// here would have reported several gigabytes that nobody is paying for.
     private var totalDiskUsage: Int64 {
         library.allAccounts.reduce(0) { total, entry in
             let path = library.dataFolder(for: entry.app, account: entry.account)
-            return total + (DiskUsage.cachedSize(atPath: path) ?? 0)
+            let home = library.privateHomeFolder(for: entry.app, account: entry.account)
+            return total
+                + (DiskUsage.cachedSize(atPath: path) ?? 0)
+                + (home.flatMap { DiskUsage.cachedSize(atPath: $0) } ?? 0)
         }
     }
 
@@ -131,7 +140,7 @@ struct OverviewView: View {
             StatTile(
                 title: L("Disk Usage"),
                 value: DiskUsage.string(for: totalDiskUsage),
-                caption: L("across all accounts"),
+                caption: L("account data, not app copies"),
                 symbol: "internaldrive.fill",
                 tone: .neutral
             )
