@@ -23,6 +23,7 @@
 		3E1C00CBE03D796C65C9111D /* InstalledApps.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDC54EAEA95C8021FFFB9F8 /* InstalledApps.swift */; };
 		3F55E29F5B4829D2E35DFD22 /* SidebarBottomBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBBAF004712C73C790BCA1C4 /* SidebarBottomBar.swift */; };
 		42F3161B6C5042F0AD603B0E /* AccountIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62048241210426CB09FE058E /* AccountIcon.swift */; };
+		43662A8563185AC7391CBCCB /* Updater.swift in Sources */ = {isa = PBXBuildFile; fileRef = D836CE62A23BC74B3038CE09 /* Updater.swift */; };
 		451E81E3EAD900BDAC87D07F /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7DB5F01715D59A9C9DD90C6 /* Typography.swift */; };
 		474D57E91617EF8773F18424 /* AccountRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA52B5C6195E1DBE875325B /* AccountRow.swift */; };
 		4C45E4701B53546924D15956 /* IconAccent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD890DF3DEBDD9193D4CB225 /* IconAccent.swift */; };
@@ -129,6 +130,7 @@
 		D070B713D58C6220FBA3EF39 /* IconFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconFactory.swift; sourceTree = "<group>"; };
 		D16A492456FA5FD2FC7C5F75 /* LaunchAtLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLogin.swift; sourceTree = "<group>"; };
 		D40DF8D9EB09762F0BEE11A9 /* DataCopier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCopier.swift; sourceTree = "<group>"; };
+		D836CE62A23BC74B3038CE09 /* Updater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Updater.swift; sourceTree = "<group>"; };
 		DC71EC751B01158C318C223C /* BulkCreateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulkCreateView.swift; sourceTree = "<group>"; };
 		DD890DF3DEBDD9193D4CB225 /* IconAccent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconAccent.swift; sourceTree = "<group>"; };
 		DF4A57756B638FCCB51EA8B4 /* AboutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSettingsView.swift; sourceTree = "<group>"; };
@@ -191,6 +193,7 @@
 				B80ED456F7B0D1A0D3DE1622 /* SystemSettings.swift */,
 				3F5656DC6D2C681ED3D09618 /* TaskCenter.swift */,
 				802F10C0860C8F855F6AB822 /* UpdateChecker.swift */,
+				D836CE62A23BC74B3038CE09 /* Updater.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -444,6 +447,7 @@
 				451E81E3EAD900BDAC87D07F /* Typography.swift in Sources */,
 				56CD656B2A5D2018A20D0348 /* UpdateBanner.swift in Sources */,
 				2FF01334012B0072C075A87C /* UpdateChecker.swift in Sources */,
+				43662A8563185AC7391CBCCB /* Updater.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -522,7 +526,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -541,7 +545,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.0.4;
+				MARKETING_VERSION = 2.0.5;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -587,7 +591,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -600,7 +604,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.0.4;
+				MARKETING_VERSION = 2.0.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "Double Bubble";

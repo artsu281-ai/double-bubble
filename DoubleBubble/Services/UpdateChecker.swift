@@ -1,12 +1,13 @@
 import Foundation
 
-/// Tells the user when a newer release exists. It does not install anything.
+/// Finds out whether a newer release exists. `Updater` is what installs it.
 ///
-/// Double Bubble is signed ad hoc rather than through the Apple Developer
-/// Program, so an update always ends with the user approving the new copy in
-/// Gatekeeper by hand; there is no version of this that silently swaps the app
-/// underneath them. What was missing was simply *knowing* — someone who
-/// downloaded a release had no way to hear that a later one fixed their bug.
+/// This used to end with "it does not install anything", on the grounds that
+/// an ad-hoc signature means Gatekeeper stops the new copy and the user has to
+/// approve it by hand. That was wrong: Gatekeeper only judges files carrying
+/// the quarantine flag, and an updater that clears it hands over an app that
+/// opens on the first try. See `Updater` for what the ad-hoc signature does
+/// still cost.
 ///
 /// This is the only network request Double Bubble makes. It is an anonymous
 /// GET of a public endpoint: no account data, no identifiers, nothing about
@@ -17,7 +18,12 @@ final class UpdateChecker: ObservableObject {
 
     struct Release: Equatable {
         let version: String
+        /// The release page, for "What's new".
         let url: URL
+        /// The archive to install. `nil` when a release was published without
+        /// one — the banner then offers the page and nothing else, rather than
+        /// a button that would fail on click.
+        let downloadURL: URL?
     }
 
     static let enabledKey = "checkForUpdatesAutomatically"
@@ -98,10 +104,18 @@ final class UpdateChecker: ObservableObject {
               let url = URL(string: page)
         else { return nil }
 
+        // The archive, if the release carries one. A release published without
+        // an asset is still worth announcing; it just can't be installed from
+        // here.
+        let asset = (json["assets"] as? [[String: Any]])?
+            .compactMap { $0["browser_download_url"] as? String }
+            .first { $0.hasSuffix(".zip") }
+            .flatMap(URL.init(string:))
+
         // Tags are published as "v1.0.1"; compare on the number alone.
         let version = tag.hasPrefix("v") ? String(tag.dropFirst()) : tag
         guard !version.isEmpty else { return nil }
-        return Release(version: version, url: url)
+        return Release(version: version, url: url, downloadURL: asset)
     }
 
     /// Compares dotted numeric versions component by component, so 1.0.10

@@ -1101,6 +1101,17 @@
         }
       }
     },
+    "Checking the download…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверяю загруженное…"
+          }
+        }
+      }
+    },
     "Choose": {
       "extractionState": "manual",
       "localizations": {
@@ -1750,6 +1761,17 @@
         }
       }
     },
+    "Double Bubble %@ is available — download it from the release page.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доступна версия Double Bubble %@ — скачайте её со страницы релиза."
+          }
+        }
+      }
+    },
     "Double Bubble %@ is available.": {
       "extractionState": "manual",
       "localizations": {
@@ -1801,6 +1823,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Double Bubble не может определить, как это приложение хранит данные."
+          }
+        }
+      }
+    },
+    "Downloading Double Bubble %@…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загружаю Double Bubble %@…"
           }
         }
       }
@@ -2142,6 +2175,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Инспектор"
+          }
+        }
+      }
+    },
+    "Installing. Double Bubble will reopen by itself.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Устанавливаю. Double Bubble откроется сам."
           }
         }
       }
@@ -4467,6 +4511,50 @@
         }
       }
     },
+    "The download couldn’t be unpacked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось распаковать загруженное."
+          }
+        }
+      }
+    },
+    "The download didn’t contain an application.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В загруженном файле нет приложения."
+          }
+        }
+      }
+    },
+    "The download didn’t start.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загрузка не началась."
+          }
+        }
+      }
+    },
+    "The download wasn’t the update it claimed to be.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загруженное не совпало с объявленным обновлением."
+          }
+        }
+      }
+    },
     "The icon on a plate of the account’s colour — easiest to pick out of a full Dock.": {
       "extractionState": "manual",
       "localizations": {
@@ -4507,6 +4595,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Неудавшиеся откатились — недоделанного не осталось."
+          }
+        }
+      }
+    },
+    "The update failed its own integrity check and was not installed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновление не прошло проверку целостности и установлено не было."
           }
         }
       }
@@ -4720,6 +4819,17 @@
         }
       }
     },
+    "Try Again": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторить"
+          }
+        }
+      }
+    },
     "Turn off “History and cache” on the first step to copy much less, or create fewer accounts.": {
       "extractionState": "manual",
       "localizations": {
@@ -4793,6 +4903,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Открепить %@"
+          }
+        }
+      }
+    },
+    "Update and Restart": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновить и перезапустить"
           }
         }
       }
