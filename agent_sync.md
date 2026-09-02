@@ -69,7 +69,20 @@ build a context inside every draw call. Measured, 100 tint renders: serial
 something documented as unsafe, not something caught failing. Don't "verify" it
 by stress test; that was already tried.
 
+**VERIFIED on the machine:** a new Antigravity IDE account (`db6a7bc7`) was
+opened through the app. Its shim carries `HOME=` alongside `--user-data-dir=`,
+its own `~/.gemini` filled to 29 MB, the symlinks resolve (Library, Documents,
+.zshrc, .gitconfig, work_tree all point at the real home), and the real 18 GB
+`~/.gemini` is untouched. Nothing unverified is left in this run.
+
+Note: the two pre-existing copies (`Antigravity-9bb3b610`,
+`Antigravity_IDE-bf0d3282`) still carry the old shim without `HOME`. That is
+the fingerprint working as intended — they rebuild on their next Open, and will
+ask to sign in once. Marking one as the app's own profile keeps it on the
+shared login deliberately.
+
 **NEXT (queue):**
-Have an Antigravity account opened through the app and confirm the shim carries
-`HOME` — still the one unverified path. Serialise `IconFactory` rendering. Sparkle phase 2. The `.electronFlag`
-wrapper-deletion-orphans-a-pinned-Dock-tile bug.
+Sparkle is no longer needed — self-update ships. Open items: a Developer ID or
+release-time EdDSA key, which is the only thing that would let an update prove
+authorship rather than just integrity; and the `.electronFlag`
+wrapper-deletion-orphans-a-pinned-Dock-tile bug. Serialise `IconFactory` rendering. 
