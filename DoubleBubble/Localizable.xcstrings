@@ -2674,6 +2674,17 @@
         }
       }
     },
+    "New account starting from “%@”": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новый аккаунт на основе «%@»"
+          }
+        }
+      }
+    },
     "Next": {
       "extractionState": "manual",
       "localizations": {
@@ -3917,6 +3928,17 @@
         }
       }
     },
+    "Setting up “%@”": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настраиваю «%@»"
+          }
+        }
+      }
+    },
     "Settings": {
       "extractionState": "manual",
       "localizations": {
@@ -5149,13 +5171,13 @@
         }
       }
     },
-    "“%@” has never been opened, so it has no data yet. The duplicate starts empty.": {
+    "“%@” has never been opened, so it has nothing to copy yet.": {
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "«%@» ни разу не открывали, поэтому данных пока нет. Копия начнёт с пустого места."
+            "value": "«%@» ни разу не открывали, поэтому копировать пока нечего."
           }
         }
       }

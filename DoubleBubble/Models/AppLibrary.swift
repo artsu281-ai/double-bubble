@@ -18,6 +18,10 @@ final class AppLibrary: ObservableObject {
         didSet { savePresets() }
     }
 
+    /// True when XCTest is in the process — the test bundle is hosted by this
+    /// app, so this class is built and run by the test runner too.
+    static let isRunningTests = NSClassFromString("XCTestCase") != nil
+
     private let storeKey = "com.doublebubble.library"
     private let legacyKey = "com.doublebubble.profiles"
     private let presetKey = "com.doublebubble.presets"
@@ -48,10 +52,18 @@ final class AppLibrary: ObservableObject {
             presets = decoded
         }
 
-        let isolationKeys = Set(apps.flatMap { $0.accounts.map(\.isolationKey) })
-        LaunchEngine.shared.cleanUpOrphanedBundles(keeping: isolationKeys)
-        LaunchEngine.shared.cleanUpOrphanedData(keeping: isolationKeys)
-        LaunchEngine.shared.cleanUpOrphanedHomes(keeping: isolationKeys)
+        // Unit tests run with this app as their host, so every `xcodebuild
+        // test` constructs this against the real library on a real machine —
+        // and these three sweeps delete: application copies, data folders, and
+        // the sign-ins inside private homes, on the strength of one key set.
+        // Whatever the risk of that is at launch, it is not a risk worth
+        // taking because somebody pressed ⌘U.
+        if !Self.isRunningTests {
+            let isolationKeys = Set(apps.flatMap { $0.accounts.map(\.isolationKey) })
+            LaunchEngine.shared.cleanUpOrphanedBundles(keeping: isolationKeys)
+            LaunchEngine.shared.cleanUpOrphanedData(keeping: isolationKeys)
+            LaunchEngine.shared.cleanUpOrphanedHomes(keeping: isolationKeys)
+        }
         adoptRunningInstances()
         pruneDeadInstances()
     }

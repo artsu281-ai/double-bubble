@@ -82,6 +82,36 @@ SwiftPM.
 swift build
 ```
 
+## Tests
+
+```
+xcodebuild test -project DoubleBubble.xcodeproj -scheme DoubleBubble -destination 'platform=macOS'
+```
+
+Four suites, and each exists because the thing it checks has already shipped
+broken at least once:
+
+- **Bulk naming** — numbering used to restart at 1 and ignore the names already
+  in use, so "three more accounts" collided with two that existed.
+- **Version comparison** — comparing release tags as strings puts 1.0.9 above
+  1.0.10, and the symptom is an update that is simply never offered.
+- **Shadow home** — the per-account `HOME`, including that clearing an account
+  takes its sign-in and that removing one does not reach through its symlinks.
+- **Localization** — that every `L("…")` in the source has a key in the
+  catalogue, and that no translation reorders format specifiers without
+  positional ones.
+
+That last check is not a nicety. `L()` takes a `String.LocalizationValue`, and
+Xcode's extractor does not look inside a wrapper, so a new string reaches the
+interface in English however carefully the catalogue is maintained — and a
+translation that swaps `%lld` and `%@` feeds an integer to `%@` and kills the
+app. Both have happened. The suite found three more untranslated strings the
+first time it was run.
+
+The unit tests are hosted by the application, so running them launches it. Its
+launch-time sweeps — which delete application copies, data folders and the
+sign-ins inside private homes — are skipped when XCTest is in the process.
+
 ## Project layout
 
 ```

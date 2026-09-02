@@ -1,0 +1,28 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      # The Xcode project is generated, not committed — project.yml is the
+      # source of truth, so nothing here works until it has been run.
+      - name: Generate the project
+        run: xcodegen generate
+
+      - name: Test
+        run: |
+          xcodebuild test \
+            -project DoubleBubble.xcodeproj \
+            -scheme DoubleBubble \
+            -destination 'platform=macOS' \
+            | xcbeautify --renderer github-actions || exit ${PIPESTATUS[0]}
