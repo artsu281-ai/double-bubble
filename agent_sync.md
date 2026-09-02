@@ -1,11 +1,19 @@
 # AI AGENT SYNC STATE
 Keep this short. Overwrite, don't append — history lives in git, not here.
 
-**CURRENT_GOAL:** — done. Onboarding, and the app lists now tell the truth
-about what can be run twice. Released as 2.0.13.
+**CURRENT_GOAL:** — done. Debt sweep: library can no longer be destroyed by a
+bad read, destructive failures are logged, 48 tests. Released as 2.0.14.
 
 **LAST_ACTION:**
-[Claude Code] -> [next agent]: `InstalledApps.describe` now asks whether
+[Claude Code] -> [next agent]: (1) `AppLibrary.load(stored:backup:)` — absent
+and unreadable are now different things; a library that will not parse changes
+nothing, saves nothing and sweeps nothing, and a copy lives at
+`~/.double_bubble/library.json`. Proven live: both sources corrupted, 1.2 GB of
+data untouched, Trash unchanged, the bad preferences preserved for repair.
+(2) `Diagnostics.attempt` gives destructive `try?` sites a voice —
+`log stream --predicate 'subsystem == "com.doublebubble.app"'`. (3) 48 tests
+(was 28), including the wrapper-path logic nothing had ever executed. Earlier:
+`InstalledApps.describe` now asks whether
 copying an app would actually produce something that runs — sandbox App
 Groups and library validation, against the strategy `addApp` would really use
 (per-account Dock icons on, which is what turns a flag strategy into a copy
@@ -66,13 +74,6 @@ Shallow signing was then measured on Claude Desktop, the app the deep pass
 existed for: the copy comes out `Signature=adhoc`, `TeamIdentifier=not set`,
 `keychain-access-groups` **gone**, `--verify --deep --strict` clean, launching
 with every Electron helper loading under vendor signatures. Zero bytes.
-
-**KNOWN GAP left by that fix:** a blocked app can no longer be added at all,
-so the detail screen's blocker card — which offers to switch to a working
-alternative build, Telegram → Telegram Lite via
-`AppKnowledgeBase.alternative(forBundleID:)` — is now unreachable for it. The
-Add sheet says "Can't run twice" and stops there. Naming the alternative in
-that row would be the fix, and is worth doing.
 
 **NEXT (queue):**
 Surface what the library occupies (there is a `DiskUsage`

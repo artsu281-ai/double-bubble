@@ -106,7 +106,7 @@ enum InstalledApps {
     ///
     /// Both checks shell out to `codesign`, which is why this lives in the
     /// background scan and not in `decorate` on the main actor.
-    private static func cannotBeCopied(_ url: URL) -> Bool {
+    static func cannotBeCopied(_ url: URL) -> Bool {
         switch LaunchEngine.upgradedForDistinctIcons(
             LaunchEngine.shared.detectStrategy(for: url)
         ) {
@@ -126,8 +126,14 @@ enum InstalledApps {
     static func decorate(_ entry: Entry) -> Entry {
         var copy = entry
         copy.icon = NSWorkspace.shared.icon(forFile: entry.url.path)
+        // Naming the alternative here is the only place left to name it.
+        // A blocked app can no longer be added, so the detail screen's blocker
+        // card — which offers to switch to the build that works — is out of
+        // reach for it. "Can't run twice" is true and leaves someone stuck;
+        // "try Telegram Desktop" is true and does not.
+        let alternative = entry.bundleID.flatMap(AppKnowledgeBase.alternative(forBundleID:))
         copy.isolationLabel = entry.blocked
-            ? L("Can’t run twice")
+            ? (alternative.map { L("Can’t run twice — try \($0.name)") } ?? L("Can’t run twice"))
             : (LaunchEngine.shared.detectStrategy(for: entry.url).label)
         return copy
     }
@@ -157,7 +163,11 @@ extension InstalledApps {
             name: name,
             bundleID: Bundle(url: url)?.bundleIdentifier,
             isolationLabel: "",
-            blocked: LaunchEngine.shared.requiresOriginalBundle(for: url),
+            // The same question the list asks. Asking a smaller one here meant
+            // an app the list would have refused could still be added by
+            // picking it from the file panel, and failed on its first Open.
+            blocked: LaunchEngine.shared.requiresOriginalBundle(for: url)
+                || cannotBeCopied(url),
             icon: nil
         ))
     }

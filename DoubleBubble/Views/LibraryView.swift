@@ -67,6 +67,9 @@ struct LibraryView: View {
         }
         .onDrop(of: [.fileURL], isTargeted: $isDropTargeted, perform: handleDrop)
         .onAppear {
+            if library.loadFailed {
+                ui.errorMessage = L("Double Bubble couldn’t read its library, so it has changed nothing: no account, no data and no application copy has been touched, and nothing has been written over. Quitting is safe. The library lives under com.doublebubble.library in this app’s preferences, with a copy at ~/.double_bubble/library.json.")
+            }
             guard !hasSeenWelcome else { return }
             hasSeenWelcome = true
             if library.apps.isEmpty { ui.present(.welcome) }

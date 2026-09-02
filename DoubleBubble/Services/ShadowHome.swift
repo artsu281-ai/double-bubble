@@ -59,7 +59,9 @@ enum ShadowHome {
                 guard (try? fm.destinationOfSymbolicLink(atPath: link.path)) != nil else { continue }
                 try? fm.removeItem(at: link)
             }
-            try? fm.createSymbolicLink(at: link, withDestinationURL: target)
+            Diagnostics.attempt("linking \(name) into the home for \(slug)-\(isolationKey)") {
+                try fm.createSymbolicLink(at: link, withDestinationURL: target)
+            }
         }
 
         // Links whose target has since gone. Left in place they are worse than
@@ -89,7 +91,9 @@ enum ShadowHome {
     static func remove(slug: String, isolationKey: String) {
         let home = directory(slug: slug, isolationKey: isolationKey)
         guard home.path.contains("/.double_bubble/homes/") else { return }
-        try? FileManager.default.removeItem(at: home)
+        Diagnostics.attempt("removing the private home \(slug)-\(isolationKey)") {
+            try FileManager.default.removeItem(at: home)
+        }
     }
 
     /// Wipes what the account keeps to itself, leaving the links in place —
@@ -101,7 +105,9 @@ enum ShadowHome {
         for path in paths {
             let own = home.appendingPathComponent(path)
             guard (try? FileManager.default.destinationOfSymbolicLink(atPath: own.path)) == nil else { continue }
-            try? FileManager.default.removeItem(at: own)
+            Diagnostics.attempt("clearing \(path) from the home for \(slug)-\(isolationKey)") {
+                try FileManager.default.removeItem(at: own)
+            }
         }
     }
 

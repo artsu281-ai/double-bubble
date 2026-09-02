@@ -16,6 +16,7 @@
 		25AF001A002374A3E9196B2C /* AppIcon-light-flat.icns in Resources */ = {isa = PBXBuildFile; fileRef = 667FBFF9B004034B8D6A61A6 /* AppIcon-light-flat.icns */; };
 		2811CCABC12D2666AF5F17DE /* SidebarMaterial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4FC14215C17C876E649753 /* SidebarMaterial.swift */; };
 		281F2636683A5AFE93AEB0FB /* DockIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F49F899158334B7B28A597 /* DockIcon.swift */; };
+		291B2550CB95D990CB8BC5A2 /* LibraryLoadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDB227B7E55FD81755A4C327 /* LibraryLoadTests.swift */; };
 		2F70244E5649C45A6BC507FC /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F864AE3E398BF1EE75B4C8AD /* NotificationService.swift */; };
 		2FF01334012B0072C075A87C /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 802F10C0860C8F855F6AB822 /* UpdateChecker.swift */; };
 		317A235DB0362B2D7F568272 /* ManagedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEFB751656938F8CED5DB241 /* ManagedApp.swift */; };
@@ -32,6 +33,8 @@
 		56CD656B2A5D2018A20D0348 /* UpdateBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A233EF71501F6DB42BEAE19 /* UpdateBanner.swift */; };
 		64E40A1E9642777E6B05F85B /* AppChooser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73380AD71B8BC92020A4E4F6 /* AppChooser.swift */; };
 		66D6C78D13D10946351F4655 /* AppInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435C22C64AB594B21D0A2A93 /* AppInstance.swift */; };
+		67439CB85C7156EC1731A735 /* Diagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E22E6D6CC44B067BD55EDE7 /* Diagnostics.swift */; };
+		6F820E446A795F4E02228145 /* LaunchEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D4B82A9BCEA9A24141C54EC /* LaunchEngineTests.swift */; };
 		6FD561026427BBACED195D26 /* AppLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C276686BE1DBB00973054F9C /* AppLibrary.swift */; };
 		72311BB88058F9B201A7FFA9 /* DockAccentPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96502F9B7E63FAAFAD61604 /* DockAccentPicker.swift */; };
 		738219D2E2116767398363FE /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67DE699110C48CF400F70840 /* AppTheme.swift */; };
@@ -114,6 +117,7 @@
 		52B4928A9D65D07D55BF519F /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		58FAC9DFF19D54B7D668CAD4 /* LibraryUIState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryUIState.swift; sourceTree = "<group>"; };
 		5CB169CA64248148A8E9E982 /* ShadowHomeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShadowHomeTests.swift; sourceTree = "<group>"; };
+		5D4B82A9BCEA9A24141C54EC /* LaunchEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchEngineTests.swift; sourceTree = "<group>"; };
 		5E42A65B0B1B35CBCD3ED7DD /* LaunchEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchEngine.swift; sourceTree = "<group>"; };
 		62048241210426CB09FE058E /* AccountIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountIcon.swift; sourceTree = "<group>"; };
 		66096C39D03543C29F7CDC9F /* DoubleBubble.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoubleBubble.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -125,6 +129,7 @@
 		79EF28519CEA5BD2A5782060 /* AppIcon-dark-flat.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "AppIcon-dark-flat.icns"; sourceTree = "<group>"; };
 		802F10C0860C8F855F6AB822 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		87462A9E5093E51C45B0F476 /* AddAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAppView.swift; sourceTree = "<group>"; };
+		8E22E6D6CC44B067BD55EDE7 /* Diagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diagnostics.swift; sourceTree = "<group>"; };
 		8EF1F28C9D9462AC74B642E3 /* LibraryInspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryInspector.swift; sourceTree = "<group>"; };
 		94B2FEE0CC9520A2C1BAE4BA /* SheetKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetKit.swift; sourceTree = "<group>"; };
 		9731963773FAEB883ED95FD3 /* AppLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguage.swift; sourceTree = "<group>"; };
@@ -162,6 +167,7 @@
 		F6C5F8F629B253FBB7659180 /* AppIcon-light-glass.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "AppIcon-light-glass.icns"; sourceTree = "<group>"; };
 		F864AE3E398BF1EE75B4C8AD /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		FB26E6AF4810DBFD50C82FBF /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		FDB227B7E55FD81755A4C327 /* LibraryLoadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryLoadTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -169,6 +175,8 @@
 			isa = PBXGroup;
 			children = (
 				ACB9621B7A17A6B7F39C75C2 /* BulkNamingTests.swift */,
+				5D4B82A9BCEA9A24141C54EC /* LaunchEngineTests.swift */,
+				FDB227B7E55FD81755A4C327 /* LibraryLoadTests.swift */,
 				E528530CB43A4D02C8C72803 /* LocalizationTests.swift */,
 				5CB169CA64248148A8E9E982 /* ShadowHomeTests.swift */,
 				2C22A188310EF4EE7B671E41 /* VersionComparisonTests.swift */,
@@ -211,6 +219,7 @@
 				9731963773FAEB883ED95FD3 /* AppLanguage.swift */,
 				67DE699110C48CF400F70840 /* AppTheme.swift */,
 				D40DF8D9EB09762F0BEE11A9 /* DataCopier.swift */,
+				8E22E6D6CC44B067BD55EDE7 /* Diagnostics.swift */,
 				19F4584FAF26AFA4989FD658 /* DiskUsage.swift */,
 				05F49F899158334B7B28A597 /* DockIcon.swift */,
 				24EE04ADF3D6FDEC794A71F0 /* DockPins.swift */,
@@ -467,6 +476,7 @@
 				BFDAC68BEBDEC6240A85A131 /* BulkCreateView.swift in Sources */,
 				73DA574E5A1E5FEC25ED0ED6 /* DataCopier.swift in Sources */,
 				7C8E9464D322F77F2D8059E3 /* DetailCards.swift in Sources */,
+				67439CB85C7156EC1731A735 /* Diagnostics.swift in Sources */,
 				C9E871AB68ABE8F12EF51D05 /* DiskUsage.swift in Sources */,
 				72311BB88058F9B201A7FFA9 /* DockAccentPicker.swift in Sources */,
 				281F2636683A5AFE93AEB0FB /* DockIcon.swift in Sources */,
@@ -511,6 +521,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				A2CB051E7CDE59F50DCCBC18 /* BulkNamingTests.swift in Sources */,
+				6F820E446A795F4E02228145 /* LaunchEngineTests.swift in Sources */,
+				291B2550CB95D990CB8BC5A2 /* LibraryLoadTests.swift in Sources */,
 				486045D7C5EAD22C90170564 /* LocalizationTests.swift in Sources */,
 				FB7799E63E39492C14012026 /* ShadowHomeTests.swift in Sources */,
 				3F19623AA7EB47F2D4856662 /* VersionComparisonTests.swift in Sources */,
@@ -621,7 +633,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -640,7 +652,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.0.13;
+				MARKETING_VERSION = 2.0.14;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -686,7 +698,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -699,7 +711,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.0.13;
+				MARKETING_VERSION = 2.0.14;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "Double Bubble";

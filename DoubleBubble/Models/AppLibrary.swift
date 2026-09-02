@@ -22,6 +22,22 @@ final class AppLibrary: ObservableObject {
     /// app, so this class is built and run by the test runner too.
     static let isRunningTests = NSClassFromString("XCTestCase") != nil
 
+    /// Set when the library was present but could not be read.
+    ///
+    /// Nothing is deleted and nothing is overwritten while this is set — see
+    /// `init`. A flag rather than a sentence because `init` is not on the main
+    /// actor and `L()` is; the window says it in words.
+    @Published private(set) var loadFailed = false
+
+    /// A copy of the library beside the data it describes.
+    ///
+    /// The library lived in one place, `UserDefaults`, in about four kilobytes
+    /// — while describing gigabytes of logins and profiles that are useless
+    /// without it. A second copy costs nothing and is written on every save.
+    static var backupURL: URL {
+        URL(fileURLWithPath: NSString(string: "~/.double_bubble/library.json").expandingTildeInPath)
+    }
+
     private let storeKey = "com.doublebubble.library"
     private let legacyKey = "com.doublebubble.profiles"
     private let presetKey = "com.doublebubble.presets"
@@ -38,10 +54,32 @@ final class AppLibrary: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init() {
-        if let data = UserDefaults.standard.data(forKey: storeKey),
-           let decoded = try? JSONDecoder().decode([ManagedApp].self, from: data) {
+        // Absent and unreadable are not the same thing, and treating them the
+        // same was a way to lose everything.
+        //
+        // A library that fails to decode used to fall through to the legacy
+        // migration, which returns an empty list, and then `save()` wrote that
+        // emptiness over the bytes that had failed to parse. The three sweeps
+        // below then ran with no keys at all, read every real account as an
+        // orphan, and trashed a gigabyte of logins — while the mapping that
+        // would have explained them was already overwritten.
+        //
+        // So: read the preferences, fall back to the copy on disk, and if the
+        // data was there and neither could be read, change nothing. No save,
+        // no sweep, and a message saying so.
+        switch Self.load(
+            stored: UserDefaults.standard.data(forKey: storeKey),
+            backup: try? Data(contentsOf: Self.backupURL)
+        ) {
+        case .decoded(let decoded):
             apps = decoded
-        } else {
+        case .recovered(let decoded):
+            apps = decoded
+            save()          // the copy was good and the preferences were not
+        case .unreadable:
+            loadFailed = true
+            apps = []
+        case .fresh:
             // Property observers don't fire from init, so persist explicitly.
             apps = Self.migrateFromLegacyProfiles(key: legacyKey)
             save()
@@ -58,7 +96,9 @@ final class AppLibrary: ObservableObject {
         // the sign-ins inside private homes, on the strength of one key set.
         // Whatever the risk of that is at launch, it is not a risk worth
         // taking because somebody pressed ⌘U.
-        if !Self.isRunningTests {
+        // `loadFailed` means the key set below would be a lie, and these
+        // sweeps act on it by deleting.
+        if !Self.isRunningTests, !loadFailed {
             let isolationKeys = Set(apps.flatMap { $0.accounts.map(\.isolationKey) })
             LaunchEngine.shared.cleanUpOrphanedBundles(keeping: isolationKeys)
             LaunchEngine.shared.cleanUpOrphanedData(keeping: isolationKeys)
@@ -129,9 +169,18 @@ final class AppLibrary: ObservableObject {
 
     // MARK: - Persistence
 
+    /// Writes the library to both places it lives.
+    ///
+    /// Refuses to write while `loadFailed` is set: whatever is in memory then
+    /// is not the user's library, and saving it would destroy the thing that
+    /// could not be read.
     private func save() {
-        guard let data = try? JSONEncoder().encode(apps) else { return }
+        guard !loadFailed, let data = try? JSONEncoder().encode(apps) else { return }
         UserDefaults.standard.set(data, forKey: storeKey)
+
+        try? FileManager.default.createDirectory(
+            at: Self.backupURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try? data.write(to: Self.backupURL, options: .atomic)
     }
 
     private func savePresets() {
@@ -159,6 +208,39 @@ final class AppLibrary: ObservableObject {
     /// If both slots pointed at the same app, they become two accounts of one
     /// app — which is what the user actually had. If they pointed at different
     /// apps, each becomes its own app and gains a second account.
+    /// What to do with what was found in the two places the library lives.
+    ///
+    /// Pulled out of `init` so it can be tested without a library to lose. The
+    /// distinction it exists to draw is `fresh` from `unreadable`: nothing
+    /// stored means a new installation and the sweeps are right to run, while
+    /// stored-but-unparseable means the user's library is there and we cannot
+    /// read it — in which case every key the sweeps would act on is missing,
+    /// and acting on that deletes their accounts' data.
+    enum Load: Equatable {
+        /// The preferences parsed.
+        case decoded([ManagedApp])
+        /// The preferences did not, the copy on disk did.
+        case recovered([ManagedApp])
+        /// Something is stored and neither copy can be read. Touch nothing.
+        case unreadable
+        /// Nothing is stored at all.
+        case fresh
+    }
+
+    static func load(stored: Data?, backup: Data?) -> Load {
+        let decoder = JSONDecoder()
+        if let stored, let apps = try? decoder.decode([ManagedApp].self, from: stored) {
+            return .decoded(apps)
+        }
+        if let backup, let apps = try? decoder.decode([ManagedApp].self, from: backup) {
+            // A good copy is worth using whether or not the preferences held
+            // anything — a preferences file wiped by something else is the
+            // same accident as one that will not parse.
+            return .recovered(apps)
+        }
+        return stored == nil ? .fresh : .unreadable
+    }
+
     private static func migrateFromLegacyProfiles(key: String) -> [ManagedApp] {
         guard let data = UserDefaults.standard.data(forKey: key),
               let decoded = try? JSONDecoder().decode([String: Profile].self, from: data)
@@ -294,7 +376,11 @@ final class AppLibrary: ObservableObject {
         let url = URL(fileURLWithPath: path)
         let delay: DispatchTimeInterval = wasRunning ? .seconds(3) : .seconds(0)
         DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + delay) {
-            try? FileManager.default.trashItem(at: url, resultingItemURL: nil)
+            // Worth hearing about: someone who was told their data is gone and
+            // finds it still on disk has been misled about something private.
+            Diagnostics.attempt("trashing the data folder at \(path)") {
+                try FileManager.default.trashItem(at: url, resultingItemURL: nil)
+            }
         }
     }
 
@@ -327,7 +413,9 @@ final class AppLibrary: ObservableObject {
                 .first { $0.hasSuffix(".app") }
                 .map { path + "/" + $0 }
             if let bundle { LaunchEngine.unregister(bundleAt: bundle) }
-            try? FileManager.default.removeItem(atPath: path)
+            Diagnostics.attempt("removing the application copy at \(path)") {
+                try FileManager.default.removeItem(atPath: path)
+            }
         }
     }
 

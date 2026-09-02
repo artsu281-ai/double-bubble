@@ -1090,6 +1090,17 @@
         }
       }
     },
+    "Can’t run twice — try %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дважды не запустить — попробуйте %@"
+          }
+        }
+      }
+    },
     "Can’t run two accounts": {
       "extractionState": "manual",
       "localizations": {
@@ -1845,6 +1856,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Double Bubble не может определить, как это приложение хранит данные."
+          }
+        }
+      }
+    },
+    "Double Bubble couldn’t read its library, so it has changed nothing: no account, no data and no application copy has been touched, and nothing has been written over. Quitting is safe. The library lives under com.doublebubble.library in this app’s preferences, with a copy at ~/.double_bubble/library.json.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double Bubble не смог прочитать свою библиотеку и поэтому ничего не менял: ни один аккаунт, ни его данные, ни копии приложений не тронуты, и ничего не перезаписано. Выходить безопасно. Библиотека хранится под ключом com.doublebubble.library в настройках приложения, копия — в ~/.double_bubble/library.json."
           }
         }
       }

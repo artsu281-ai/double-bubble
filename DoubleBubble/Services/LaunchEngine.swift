@@ -123,7 +123,9 @@ final class LaunchEngine: @unchecked Sendable {
             if let dash = name.lastIndex(of: "-"), keys.contains(String(name[name.index(after: dash)...])) {
                 continue
             }
-            try? fm.removeItem(at: dir)
+            Diagnostics.attempt("removing the orphaned copy \(name)") {
+                try fm.removeItem(at: dir)
+            }
         }
     }
 
@@ -152,7 +154,9 @@ final class LaunchEngine: @unchecked Sendable {
             guard key.count == 8,
                   key.allSatisfy({ $0.isHexDigit && !$0.isUppercase }) else { continue }
             guard !keys.contains(key) else { continue }
-            try? fm.trashItem(at: dir, resultingItemURL: nil)
+            Diagnostics.attempt("trashing the orphaned data folder \(name)") {
+                try fm.trashItem(at: dir, resultingItemURL: nil)
+            }
         }
     }
 
@@ -176,7 +180,9 @@ final class LaunchEngine: @unchecked Sendable {
             guard key.count == 8,
                   key.allSatisfy({ $0.isHexDigit && !$0.isUppercase }) else { continue }
             guard !keys.contains(key) else { continue }
-            try? fm.trashItem(at: dir, resultingItemURL: nil)
+            Diagnostics.attempt("trashing the orphaned private home \(name)") {
+                try fm.trashItem(at: dir, resultingItemURL: nil)
+            }
         }
     }
 
@@ -742,7 +748,7 @@ final class LaunchEngine: @unchecked Sendable {
     /// a leftover from the other shape has no business being launched. Extras
     /// are unregistered before they go, for the same reason as everything else
     /// here.
-    private func wrapperLocation(in accountDir: URL, fallbackName: String) -> URL {
+    func wrapperLocation(in accountDir: URL, fallbackName: String) -> URL {
         let fm = FileManager.default
         let bundles = ((try? fm.contentsOfDirectory(atPath: accountDir.path)) ?? [])
             .filter { $0.hasSuffix(".app") }
