@@ -83,9 +83,39 @@ enum InstalledApps {
             name: name,
             bundleID: bundleID,
             isolationLabel: "",   // filled in on the main actor, where L() lives
-            blocked: known?.requiresOriginalBundle ?? false,
+            blocked: (known?.requiresOriginalBundle ?? false) || cannotBeCopied(url),
             icon: nil             // loaded lazily by the row that shows it
         )
+    }
+
+    /// Whether copying this application would produce something that cannot
+    /// run — asked here, in the list, rather than discovered on the first Open.
+    ///
+    /// The list used to ask only whether an app insists on running from its
+    /// installed bundle, which catches browsers and nothing else. Telegram
+    /// went on being offered by both the Add sheet and the welcome screen
+    /// although its own entry in the knowledge base says plainly that the
+    /// sandbox check rejects it: it is sandboxed and built around App Groups,
+    /// so a re-signed copy is locked out of its own data and there is no
+    /// workaround short of Telegram's signing identity. Being offered
+    /// something and then refused it is the wrong order.
+    ///
+    /// Asked against the strategy adding it would *actually* use, per-account
+    /// Dock icons included, since `addApp` turns those on and they are what
+    /// turns a flag-based strategy into a copy-based one.
+    ///
+    /// Both checks shell out to `codesign`, which is why this lives in the
+    /// background scan and not in `decorate` on the main actor.
+    private static func cannotBeCopied(_ url: URL) -> Bool {
+        switch LaunchEngine.upgradedForDistinctIcons(
+            LaunchEngine.shared.detectStrategy(for: url)
+        ) {
+        case .bundleCopy, .copyThenFlag:
+            return LaunchEngine.shared.sandboxInfo(for: url).blocksBundleCopy
+                || LaunchEngine.shared.usesLibraryValidation(for: url)
+        case .electronFlag, .jetbrains, .configDir:
+            return false
+        }
     }
 
     /// The label and icon are deliberately left out of the background scan:

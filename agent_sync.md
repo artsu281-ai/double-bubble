@@ -1,15 +1,19 @@
 # AI AGENT SYNC STATE
 Keep this short. Overwrite, don't append — history lives in git, not here.
 
-**CURRENT_GOAL:** — done. First-run onboarding, released as 2.0.12.
+**CURRENT_GOAL:** — done. Onboarding, and the app lists now tell the truth
+about what can be run twice. Released as 2.0.13.
 
 **LAST_ACTION:**
-[Claude Code] -> [next agent]: `WelcomeView` — a first-run sheet that scans for
-installed applications it can run twice and offers them, rather than explaining
-the idea over several screens. Shown once, and only when the library is empty;
-reopenable from Help, which also had a 404 link (wrong repo owner) now fixed.
-Before that: honest disk reporting (2.0.11), shallow re-signing (2.0.10),
-`Tests/` + CI (2.0.9).
+[Claude Code] -> [next agent]: `InstalledApps.describe` now asks whether
+copying an app would actually produce something that runs — sandbox App
+Groups and library validation, against the strategy `addApp` would really use
+(per-account Dock icons on, which is what turns a flag strategy into a copy
+one). It only asked about `requiresOriginalBundle` before, so Telegram was
+offered by both the Add sheet and the new welcome screen although its own
+knowledge-base entry says the sandbox check rejects it. Before that:
+`WelcomeView` (2.0.12), honest disk reporting (2.0.11), shallow re-signing
+(2.0.10), `Tests/` + CI (2.0.9).
 
 **STATUS:**
 - `main` == v2.0.10, released; `/Applications` self-updates from the banner.
@@ -62,6 +66,13 @@ Shallow signing was then measured on Claude Desktop, the app the deep pass
 existed for: the copy comes out `Signature=adhoc`, `TeamIdentifier=not set`,
 `keychain-access-groups` **gone**, `--verify --deep --strict` clean, launching
 with every Electron helper loading under vendor signatures. Zero bytes.
+
+**KNOWN GAP left by that fix:** a blocked app can no longer be added at all,
+so the detail screen's blocker card — which offers to switch to a working
+alternative build, Telegram → Telegram Lite via
+`AppKnowledgeBase.alternative(forBundleID:)` — is now unreachable for it. The
+Add sheet says "Can't run twice" and stops there. Naming the alternative in
+that row would be the fix, and is worth doing.
 
 **NEXT (queue):**
 Surface what the library occupies (there is a `DiskUsage`
