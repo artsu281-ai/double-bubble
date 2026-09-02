@@ -870,6 +870,17 @@
         }
       }
     },
+    "Applications on this Mac it can run twice": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Установленные приложения, которые можно запустить дважды"
+          }
+        }
+      }
+    },
     "Applications on this Mac that Double Bubble knows how to keep separate.": {
       "extractionState": "manual",
       "localizations": {
@@ -2432,6 +2443,17 @@
         }
       }
     },
+    "Looking…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ищу…"
+          }
+        }
+      }
+    },
     "Mark only": {
       "extractionState": "manual",
       "localizations": {
@@ -2806,6 +2828,17 @@
         }
       }
     },
+    "Not Now": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не сейчас"
+          }
+        }
+      }
+    },
     "Not enough space": {
       "extractionState": "manual",
       "localizations": {
@@ -2824,6 +2857,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Не хватает места на диске"
+          }
+        }
+      }
+    },
+    "Not everything can be split. A few applications — web browsers most of all — insist on being the only copy of themselves, and Double Bubble will say so instead of pretending.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разделить можно не всё. Некоторые приложения — прежде всего браузеры — требуют быть единственной своей копией, и Double Bubble прямо об этом скажет, а не сделает вид, что получилось."
           }
         }
       }
@@ -2857,6 +2901,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ничего не запущено"
+          }
+        }
+      }
+    },
+    "Nothing here it recognises yet. Pick an application yourself and it will work out how to isolate it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Знакомых пока не нашлось. Выберите приложение сами — способ изоляции подберётся автоматически."
           }
         }
       }
@@ -3638,6 +3693,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Размер строк"
+          }
+        }
+      }
+    },
+    "Run one application several times over, each with its own login and its own data. The application never learns about the others.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Одно приложение, запущенное несколько раз: у каждого запуска свой вход и свои данные. Само приложение о соседях не узнает."
           }
         }
       }
@@ -5068,6 +5134,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ожидает"
+          }
+        }
+      }
+    },
+    "Welcome to Double Bubble": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Знакомство с Double Bubble"
           }
         }
       }

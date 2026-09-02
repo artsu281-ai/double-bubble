@@ -42,6 +42,7 @@
 		83D52B40CE8DEEB87BF6FD0E /* LaunchAtLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = D16A492456FA5FD2FC7C5F75 /* LaunchAtLogin.swift */; };
 		89BFD8DFC031700326E02436 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF196557E6C262667244D515 /* Localization.swift */; };
 		8D13E3231B878FECB247EC6B /* AccountTileCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09BD518CE0F6193E71291B58 /* AccountTileCache.swift */; };
+		8F452646B0BF8FAB9FEC7E60 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB26E6AF4810DBFD50C82FBF /* WelcomeView.swift */; };
 		9921FFBA2D04A2A4662E078E /* ProcessMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A34A759C778A4B977E4F11 /* ProcessMonitor.swift */; };
 		A2CB051E7CDE59F50DCCBC18 /* BulkNamingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB9621B7A17A6B7F39C75C2 /* BulkNamingTests.swift */; };
 		A4A2176AC1795CC5EDE95C17 /* InterfaceDensity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77D12C233ACE9F160D1FD4D /* InterfaceDensity.swift */; };
@@ -160,6 +161,7 @@
 		EDA52B5C6195E1DBE875325B /* AccountRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountRow.swift; sourceTree = "<group>"; };
 		F6C5F8F629B253FBB7659180 /* AppIcon-light-glass.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "AppIcon-light-glass.icns"; sourceTree = "<group>"; };
 		F864AE3E398BF1EE75B4C8AD /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		FB26E6AF4810DBFD50C82FBF /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -264,6 +266,7 @@
 				87462A9E5093E51C45B0F476 /* AddAppView.swift */,
 				DC71EC751B01158C318C223C /* BulkCreateView.swift */,
 				94B2FEE0CC9520A2C1BAE4BA /* SheetKit.swift */,
+				FB26E6AF4810DBFD50C82FBF /* WelcomeView.swift */,
 			);
 			path = Sheets;
 			sourceTree = "<group>";
@@ -499,6 +502,7 @@
 				56CD656B2A5D2018A20D0348 /* UpdateBanner.swift in Sources */,
 				2FF01334012B0072C075A87C /* UpdateChecker.swift in Sources */,
 				43662A8563185AC7391CBCCB /* Updater.swift in Sources */,
+				8F452646B0BF8FAB9FEC7E60 /* WelcomeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -617,7 +621,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -636,7 +640,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.0.11;
+				MARKETING_VERSION = 2.0.12;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -682,7 +686,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -695,7 +699,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.0.11;
+				MARKETING_VERSION = 2.0.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "Double Bubble";

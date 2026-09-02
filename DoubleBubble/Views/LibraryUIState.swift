@@ -75,7 +75,12 @@ final class LibraryUIState: ObservableObject {
 
     // MARK: Sheets
 
+    /// Whether the welcome sheet has been offered. Read by the window and by
+    /// the Help menu, which can bring it back.
+    static let welcomeSeenKey = "hasSeenWelcome"
+
     enum Route: Identifiable {
+        case welcome
         case addApp
         case newAccount(appID: UUID)
         case editAccount(appID: UUID, account: Account)
@@ -84,6 +89,7 @@ final class LibraryUIState: ObservableObject {
 
         var id: String {
             switch self {
+            case .welcome:                      return "welcome"
             case .addApp:                       return "addApp"
             case .newAccount(let appID):        return "new-\(appID)"
             case .editAccount(_, let account):  return "edit-\(account.id)"

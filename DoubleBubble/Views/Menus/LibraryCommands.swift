@@ -219,8 +219,12 @@ struct LibraryCommands: Commands {
         }
 
         CommandGroup(replacing: .help) {
+            Button(L("Welcome to Double Bubble")) { ui.present(.welcome) }
+
+            // Pointed at a repository that does not exist — the owner is
+            // `artsu281-ai`, so this menu item has always opened a 404.
             Button(L("Double Bubble Help")) {
-                if let url = URL(string: "https://github.com/artsu/double-bubble#readme") {
+                if let url = URL(string: "https://github.com/artsu281-ai/double-bubble#readme") {
                     NSWorkspace.shared.open(url)
                 }
             }

@@ -1,14 +1,15 @@
 # AI AGENT SYNC STATE
 Keep this short. Overwrite, don't append — history lives in git, not here.
 
-**CURRENT_GOAL:** — done. Honest disk reporting, released as 2.0.11.
+**CURRENT_GOAL:** — done. First-run onboarding, released as 2.0.12.
 
 **LAST_ACTION:**
-[Claude Code] -> [next agent]: private homes are now counted (they were shown
-nowhere, and for an app like Antigravity that is where the account's weight
-is), and the app copy no longer shows a size — it is an APFS clone and every
-folder-sizing tool reports its full apparent size as though occupied. Before
-that: shallow re-signing (2.0.10), `Tests/` + CI (2.0.9).
+[Claude Code] -> [next agent]: `WelcomeView` — a first-run sheet that scans for
+installed applications it can run twice and offers them, rather than explaining
+the idea over several screens. Shown once, and only when the library is empty;
+reopenable from Help, which also had a 404 link (wrong repo owner) now fixed.
+Before that: honest disk reporting (2.0.11), shallow re-signing (2.0.10),
+`Tests/` + CI (2.0.9).
 
 **STATUS:**
 - `main` == v2.0.10, released; `/Applications` self-updates from the banner.

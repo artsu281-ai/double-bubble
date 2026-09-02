@@ -23,6 +23,10 @@ struct LibraryView: View {
     @Environment(\.themePalette) private var palette
     @Environment(\.openSettings) private var openSettings
     @State private var isDropTargeted = false
+    /// Shown once, and only to someone who has nothing in their library yet —
+    /// an existing user does not need to be welcomed to an app they have been
+    /// using. The flag is set either way, so this can never come back.
+    @AppStorage(LibraryUIState.welcomeSeenKey) private var hasSeenWelcome = false
 
     var body: some View {
         NavigationSplitView {
@@ -62,6 +66,11 @@ struct LibraryView: View {
             Text(ui.errorMessage ?? "")
         }
         .onDrop(of: [.fileURL], isTargeted: $isDropTargeted, perform: handleDrop)
+        .onAppear {
+            guard !hasSeenWelcome else { return }
+            hasSeenWelcome = true
+            if library.apps.isEmpty { ui.present(.welcome) }
+        }
         .overlay { dropOverlay }
         .background(WindowMinSizeEnforcer(minWidth: Metrics.windowMinWidth, minHeight: Metrics.windowMinHeight))
         .task { await updates.checkIfDue() }
@@ -153,6 +162,21 @@ struct LibraryView: View {
     @ViewBuilder
     private func sheet(_ route: LibraryUIState.Route) -> some View {
         switch route {
+        case .welcome:
+            WelcomeView(library: library) { id in
+                ui.select(app: id)
+                // Same hand-off as the Add sheet: a new app arrives with a
+                // placeholder account, and naming it is the next thing anyone
+                // wants to do.
+                if let created = library.app(id)?.accounts.first {
+                    DispatchQueue.main.async {
+                        ui.present(.editAccount(appID: id, account: created))
+                    }
+                }
+            } onChooseAnother: {
+                DispatchQueue.main.async { ui.present(.addApp) }
+            }
+
         case .addApp:
             AddAppView(library: library) { id in
                 ui.select(app: id)
