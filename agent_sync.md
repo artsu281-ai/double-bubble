@@ -1,8 +1,34 @@
 # AI AGENT SYNC STATE
 Keep this short. Overwrite, don't append — history lives in git, not here.
 
-**CURRENT_GOAL:** — done. Self-update works end to end; icon rendering
-serialised. Released as 2.0.6.
+**CURRENT_GOAL:** — done. Test suite and localization checks. Released as 2.0.9.
+
+**TESTS EXIST NOW — read this before adding more.**
+28 tests in `Tests/`, run with
+`xcodebuild test -project DoubleBubble.xcodeproj -scheme DoubleBubble -destination 'platform=macOS'`.
+Each suite was written from a defect that shipped: bulk naming, version
+comparison, `ShadowHome`, and two localization checks (every `L("…")` has a
+catalogue key; no translation reorders `%lld`/`%@` without positional
+specifiers). They found three untranslated strings on the first run.
+
+Three things about the setup:
+- The bundle is **hosted by the app**, so `xcodebuild test` launches it. The
+  launch-time sweeps are skipped via `AppLibrary.isRunningTests` — do not
+  remove that guard, they delete copies, data folders and sign-ins.
+- `TEST_HOST` is spelled out in `project.yml` because the product is named
+  "Double Bubble", not after its target.
+- Defining the scheme made Release build **universal** and doubled the binary.
+  `ARCHS: arm64` is now pinned deliberately. Hosting also costs ~300 KB in the
+  download (symbol export); chased and judged not worth more.
+
+**Verify a test actually fails before trusting it.** The specifier check was
+confirmed by putting the historical crash back in the catalogue — the first
+attempt at "corrupting" it kept the specifier order and passed, which is how a
+test that checks nothing gets written.
+
+`.github/workflows/tests.yml` runs the suite on push. **Unverified on CI** — a
+hosted GUI test bundle may not run on a headless runner. If it fails there, the
+fix is a non-hosted test target, not deleting the tests.
 
 **LAST_ACTION:**
 [Claude Code] -> [next agent]: `Updater` downloads the release archive, refuses
