@@ -17,11 +17,21 @@ final class AccountTileCache: ObservableObject {
 
     static let shared = AccountTileCache()
 
-    /// Bumped whenever a tile is stored, so views waiting on one redraw.
+    /// Bumped only when tiles are thrown away, so views that are holding one
+    /// know to ask again.
+    ///
+    /// It used to be bumped every time a tile *landed*, which republished this
+    /// object to every avatar in the window. Twelve accounts meant twelve
+    /// republishes redrawing twelve avatars each — a hundred and forty-four
+    /// body evaluations, arriving one at a time, which is what the flickering
+    /// on first opening an app actually was. A landed tile now goes back to
+    /// the one view that asked for it and nobody else hears about it.
     @Published private(set) var generation = 0
 
     private var tiles: [String: NSImage] = [:]
-    private var inFlight: Set<String> = []
+    /// In-flight renders, kept so a second asker awaits the first one's work
+    /// rather than starting its own.
+    private var pending: [String: Task<NSImage?, Never>] = [:]
 
     private init() {}
 
@@ -40,38 +50,38 @@ final class AccountTileCache: ObservableObject {
 
     func cached(_ key: String) -> NSImage? { tiles[key] }
 
-    /// Renders off the main thread and publishes when it lands. Repeat calls
-    /// for a key already being drawn are dropped rather than queued.
-    func render(
+    /// The tile for a key: the cached one, or one rendered off the main thread.
+    ///
+    /// Returns to its caller instead of publishing, so the avatar that asked is
+    /// the only view that changes. Two avatars asking for the same key — the
+    /// same account drawn in the list and in the inspector — await one render.
+    func image(
         key: String,
         artwork: NSImage,
         account: Account,
         bubbleCount: Int,
         points: CGFloat
-    ) {
-        guard tiles[key] == nil, !inFlight.contains(key) else { return }
-        inFlight.insert(key)
+    ) async -> NSImage? {
+        if let cached = tiles[key] { return cached }
+        if let running = pending[key] { return await running.value }
 
         let tint = account.nsColor
         let initial = account.initial
         let mark = account.icon
         let accent = account.accent
 
-        Task { [weak self] in
-            let image = await Task.detached(priority: .userInitiated) {
-                IconFactory.preview(
-                    base: artwork, tint: tint, initial: initial,
-                    accountImage: mark, bubbleCount: bubbleCount,
-                    accent: accent, points: points
-                )
-            }.value
-
-            guard let self else { return }
-            self.inFlight.remove(key)
-            guard let image else { return }
-            self.tiles[key] = image
-            self.generation &+= 1
+        let task = Task.detached(priority: .userInitiated) {
+            IconFactory.preview(
+                base: artwork, tint: tint, initial: initial,
+                accountImage: mark, bubbleCount: bubbleCount,
+                accent: accent, points: points
+            )
         }
+        pending[key] = task
+        let image = await task.value
+        pending[key] = nil
+        if let image { tiles[key] = image }
+        return image
     }
 
     /// Drops everything for one app — its artwork changed, or it was relocated.

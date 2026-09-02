@@ -36,6 +36,8 @@ struct AccountAvatar: View {
 
     @Environment(\.themePalette) private var palette
     @ObservedObject private var tiles = AccountTileCache.shared
+    /// This view's own copy, so a tile landing anywhere else doesn't redraw it.
+    @State private var rendered: NSImage?
 
     private var resolvedColor: Color { colorOverride ?? account.color }
 
@@ -61,21 +63,37 @@ struct AccountAvatar: View {
 
     var body: some View {
         Group {
-            if let key = cacheKey, let image = tiles.cached(key) {
-                Image(nsImage: image)
-                    .resizable()
-                    .interpolation(.high)
-                    .scaledToFit()
-                    .overlay(alignment: .bottomLeading) {
-                        if isRunning { runningDot }
-                    }
+            if let image = rendered ?? cacheKey.flatMap(tiles.cached) {
+                artwork(image)
+            } else if let tile {
+                // The app's own icon while the branded one is still being
+                // drawn, rather than a lettered circle.
+                //
+                // The circle is a different shape in a different palette, so
+                // swapping it for the tile a moment later read as the view
+                // redrawing itself — which, opening an app for the first time,
+                // is exactly what someone sees. Starting from the untinted
+                // artwork means the first frame is already the right icon in
+                // the right place, and all that arrives late is the colour and
+                // the mark.
+                artwork(tile.artwork)
             } else {
                 circle
             }
         }
         .frame(width: size, height: size)
-        .task(id: cacheKey) { requestTile() }
+        .task(id: renderID) { await load() }
         .accessibilityHidden(true)
+    }
+
+    private func artwork(_ image: NSImage) -> some View {
+        Image(nsImage: image)
+            .resizable()
+            .interpolation(.high)
+            .scaledToFit()
+            .overlay(alignment: .bottomLeading) {
+                if isRunning { runningDot }
+            }
     }
 
     /// A green pip in the corner rather than a ring: the tile is a rounded
@@ -120,9 +138,20 @@ struct AccountAvatar: View {
         }
     }
 
-    private func requestTile() {
-        guard let tile, let key = cacheKey else { return }
-        tiles.render(
+    /// Includes the cache's generation so a wholesale invalidation — the app's
+    /// artwork changed underneath us — makes this ask again.
+    private var renderID: String { "\(cacheKey ?? "none")|\(tiles.generation)" }
+
+    private func load() async {
+        guard let tile, let key = cacheKey else {
+            rendered = nil
+            return
+        }
+        if let cached = tiles.cached(key) {
+            rendered = cached
+            return
+        }
+        rendered = await tiles.image(
             key: key, artwork: tile.artwork, account: account,
             bubbleCount: tile.bubbleCount, points: size
         )

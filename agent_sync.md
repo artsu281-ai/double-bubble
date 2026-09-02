@@ -94,6 +94,16 @@ to hide a half-written wrapper.
 takes the *copy* path and none exercises this. Reaching it needs the per-account
 Dock icon toggled off.
 
+**DONE — tiles flickered on first opening an app:** `AccountTileCache.generation`
+was `@Published` and bumped on every tile that *landed*, republishing the cache
+to every avatar in the window — twelve accounts meant a hundred and forty-four
+body evaluations arriving one at a time. And the placeholder was a lettered
+circle, a different shape in a different palette from the tile replacing it.
+Now `image(key:…)` returns to its caller (deduping in-flight renders per key)
+into the avatar's own `@State`, `generation` is bumped only by `invalidate`,
+and the placeholder is the app's own artwork from `artworkCache` — instant, and
+the same shape, so only colour and mark arrive late.
+
 **NEXT (queue):**
 Sparkle is no longer needed — self-update ships and is confirmed working. Open:
 a Developer ID signature or a release-time EdDSA key, the only thing that would
