@@ -3,7 +3,7 @@ Keep this short. Overwrite, don't append — history lives in git, not here.
 
 **CURRENT_GOAL:** — done. Answered a UI critique that held this app against
 Cerberus DNS: verified every claim against the code, fixed what measured.
-Committed, **not released** — the user has not been asked about 2.1.1 yet.
+Released as **2.1.1**.
 
 **LAST_ACTION:**
 [Claude Code] -> [next agent]: The critique was mostly wrong and pointed at two
@@ -48,7 +48,8 @@ the app menu, and Settings in the menu bar extra.
 **STATUS:**
 - 65 tests (was 54). Two new files: `PaletteContrastTests`, `DockIconAppearanceTests`.
 - Release builds arm64, `codesign --verify --deep --strict` clean.
-- `main` is at v2.1.0 on the remote; this work is committed locally only.
+- `main` == v2.1.1, released and live; the latest-release endpoint serves it,
+  so installed copies self-update from the banner or Check for Updates….
 
 **TRAP — `NSApp.appearance` is now pinned for the Light and Dark themes**
 (`AppTheme.syncApplicationAppearance`, so `NSAlert` and the two `NSOpenPanel`s
@@ -101,8 +102,9 @@ signatures. `du` still overstates `~/.double_bubble/bundles`; it counts logical
 size.
 
 **NEXT (queue):**
-Nothing in this work has been seen on screen — the theme cross-fade, the
-hover borders, the inspector slide, the new menu items. Ask before assuming.
+Nothing in 2.1.1 has been seen on screen — the theme cross-fade, the hover
+borders, the inspector slide, the new menu items, the pill in the dark theme.
+Built, tested, translated, shipped, unlooked-at. Ask before assuming.
 Still open and still the user's call, not ours: a Developer ID signature or a
 release-time EdDSA key (the only thing that would let an update prove
 authorship rather than integrity), and arm64-only vs universal.
