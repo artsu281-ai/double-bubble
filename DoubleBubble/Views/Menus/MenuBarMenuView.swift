@@ -47,6 +47,8 @@ struct MenuBarMenuView: View {
                 NSApp.activate(ignoringOtherApps: true)
             }
 
+            SettingsLink { Text(L("Settings")) }
+
             Divider()
 
             Button(L("Quit")) { NSApp.terminate(nil) }

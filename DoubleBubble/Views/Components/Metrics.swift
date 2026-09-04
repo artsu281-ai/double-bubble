@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 // One spacing and shape scale for the whole app.
 //
@@ -78,6 +79,24 @@ enum Motion {
     static let layout = Animation.easeInOut(duration: 0.28)
     /// A row arriving or leaving.
     static let row = Animation.easeOut(duration: 0.20)
+    /// The window repainting when the theme changes. Longer than the rest on
+    /// purpose: every surface moves at once, and at `state` speed that much
+    /// simultaneous change reads as a flash rather than a transition.
+    static let theme = Animation.easeInOut(duration: 0.25)
+    /// A control acknowledging a press — the settings tabs. Quick enough to
+    /// read as an answer, damped enough not to wobble after it.
+    static let control = Animation.spring(response: 0.2, dampingFraction: 0.8)
+
+    /// `nil` when the user has asked for less motion.
+    ///
+    /// `.motion(_:value:)` is the way to animate; this exists for the few
+    /// places that have to call `withAnimation` because the change is made in
+    /// a button's action rather than derived from state. Without it those
+    /// calls are a hole in Reduce Motion — they were, in three places.
+    @MainActor
+    static func reduced(_ animation: Animation) -> Animation? {
+        NSWorkspace.shared.accessibilityDisplayShouldReduceMotion ? nil : animation
+    }
 }
 
 extension View {

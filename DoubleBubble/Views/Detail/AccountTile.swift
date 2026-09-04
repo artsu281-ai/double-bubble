@@ -83,6 +83,10 @@ struct AccountTile: View {
         .contentShape(RoundedRectangle(cornerRadius: Metrics.cardRadius, style: .continuous))
         .onHover { isHovering = $0 }
         .motion(Motion.quick, value: isHovering)
+        // The one thing this app exists to show. It was the only state in the
+        // window that changed without any motion at all.
+        .motion(Motion.state, value: isRunning)
+        .motion(Motion.state, value: isSelected || isHighlighted)
         .onTapGesture { handleTap() }
         .contextMenu { AccountMenu(library: library, ui: ui, app: app, account: account) }
         .accessibilityLabel(label)
@@ -94,7 +98,14 @@ struct AccountTile: View {
         ZStack {
             shape.fill(palette.cardBackground)
             shape.strokeBorder(
-                isSelected || isHighlighted ? palette.accentColor : palette.hairline,
+                // `isHovering` was set and animated here and then read by
+                // nothing, so a tile under the pointer looked identical to
+                // one that wasn't — in the one view where every element is
+                // clickable. Same treatment the Add tile in this file already
+                // gives its own hover.
+                isSelected || isHighlighted
+                    ? palette.accentColor
+                    : (isHovering ? palette.accentColor.opacity(0.45) : palette.hairline),
                 lineWidth: isSelected || isHighlighted ? 2 : 1
             )
         }
@@ -154,14 +165,14 @@ struct AddAccountTile: View {
                         )
                     Image(systemName: "plus")
                         .font(.system(size: density.tileAvatarSize * 0.32, weight: .semibold))
-                        .foregroundStyle(palette.accentColor)
+                        .foregroundStyle(palette.accentTextColor)
                 }
                 .frame(width: density.tileAvatarSize, height: density.tileAvatarSize)
                 .padding(.top, Metrics.xs)
 
                 Text(L("Add Account"))
                     .font(.rowTitle)
-                    .foregroundStyle(palette.accentColor)
+                    .foregroundStyle(palette.accentTextColor)
 
                 Spacer(minLength: 0)
             }

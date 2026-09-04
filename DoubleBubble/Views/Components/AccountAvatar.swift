@@ -133,7 +133,8 @@ struct AccountAvatar: View {
                 .overlay {
                     Text(initial)
                         .font(.system(size: size * 0.42, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white)
+                        // Not `.white`: on the amber swatch that is 2.75:1.
+                        .foregroundStyle(resolvedColor.readableForeground)
                 }
         }
     }

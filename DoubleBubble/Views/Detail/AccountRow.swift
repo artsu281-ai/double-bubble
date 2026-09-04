@@ -70,6 +70,7 @@ struct AccountRow: View {
         .onHover { isHovering = $0 }
         .motion(Motion.quick, value: showsActions)
         .motion(Motion.state, value: isHighlighted)
+        .motion(Motion.state, value: isRunning)
         .contextMenu { AccountMenu(library: library, ui: ui, app: app, account: account) }
         .task(id: dataPath) { await measure() }
         .accessibilityLabel(accessibilityLabel)

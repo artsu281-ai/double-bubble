@@ -35,6 +35,15 @@ struct LibraryCommands: Commands {
     }
 
     var body: some Commands {
+        // Where every Mac app puts it, and the only place people look. The
+        // app checks on its own and shows a banner when something is there;
+        // this is for the person who wants to ask.
+        CommandGroup(after: .appInfo) {
+            Button(L("Check for Updates…")) {
+                Task { await UpdateChecker.shared.check() }
+            }
+        }
+
         CommandGroup(replacing: .newItem) {
             Button(L("Add Application…")) { ui.present(.addApp) }
                 .keyboardShortcut("n", modifiers: .command)

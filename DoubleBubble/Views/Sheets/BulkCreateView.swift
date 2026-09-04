@@ -622,12 +622,12 @@ struct BulkCreateView: View {
     private func next() {
         guard let index = Step.allCases.firstIndex(of: step),
               index + 1 < Step.allCases.count else { return }
-        withAnimation(Motion.layout) { step = Step.allCases[index + 1] }
+        withAnimation(Motion.reduced(Motion.layout)) { step = Step.allCases[index + 1] }
     }
 
     private func back() {
         guard let index = Step.allCases.firstIndex(of: step), index > 0 else { return }
-        withAnimation(Motion.layout) { step = Step.allCases[index - 1] }
+        withAnimation(Motion.reduced(Motion.layout)) { step = Step.allCases[index - 1] }
     }
 
     private func start() {

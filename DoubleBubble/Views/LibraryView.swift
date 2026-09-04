@@ -74,7 +74,11 @@ struct LibraryView: View {
             hasSeenWelcome = true
             if library.apps.isEmpty { ui.present(.welcome) }
         }
+        // `dropOverlay` declares `.transition(.opacity)`, which does nothing
+        // without an animation covering the change that inserts it — so the
+        // whole overlay was appearing and vanishing in a single frame.
         .overlay { dropOverlay }
+        .motion(Motion.state, value: isDropTargeted)
         .background(WindowMinSizeEnforcer(minWidth: Metrics.windowMinWidth, minHeight: Metrics.windowMinHeight))
         .task { await updates.checkIfDue() }
         .onAppear(perform: restoreSelection)
@@ -91,6 +95,8 @@ struct LibraryView: View {
                 }
                 detailContent
             }
+            // A banner arriving shoved the pane down in one frame.
+            .motion(Motion.state, value: updates.available?.version)
 
             if ui.showInspector && ui.selectedAppID != nil {
                 Divider()
@@ -98,6 +104,10 @@ struct LibraryView: View {
                     .frame(width: Metrics.inspectorWidth)
             }
         }
+        // The widest layout change in the app, and the only one that happened
+        // instantly: 280pt of pane appearing while everything else in the
+        // window animates reads as a glitch rather than as a panel.
+        .motion(Motion.layout, value: ui.showInspector && ui.selectedAppID != nil)
     }
 
     @ViewBuilder

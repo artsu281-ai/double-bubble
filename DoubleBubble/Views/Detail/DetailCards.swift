@@ -107,7 +107,7 @@ struct NoticeCard<Content: View>: View {
         switch tone {
         case .warning: return palette.warning
         case .danger:  return palette.danger
-        case .info:    return palette.accentColor
+        case .info:    return palette.accentTextColor
         }
     }
 

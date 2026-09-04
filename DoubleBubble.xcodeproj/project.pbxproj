@@ -44,6 +44,7 @@
 		82A97954C6E441DCB6895008 /* AppKnowledgeBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F262A1E8ED7F1EB1ECEEEA7 /* AppKnowledgeBase.swift */; };
 		83D52B40CE8DEEB87BF6FD0E /* LaunchAtLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = D16A492456FA5FD2FC7C5F75 /* LaunchAtLogin.swift */; };
 		89BFD8DFC031700326E02436 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF196557E6C262667244D515 /* Localization.swift */; };
+		8BFC936BA6FD72F5CEE80B0D /* PaletteContrastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65D2B0DDCC4B05B04C52312 /* PaletteContrastTests.swift */; };
 		8D13E3231B878FECB247EC6B /* AccountTileCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09BD518CE0F6193E71291B58 /* AccountTileCache.swift */; };
 		8F452646B0BF8FAB9FEC7E60 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB26E6AF4810DBFD50C82FBF /* WelcomeView.swift */; };
 		9921FFBA2D04A2A4662E078E /* ProcessMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A34A759C778A4B977E4F11 /* ProcessMonitor.swift */; };
@@ -65,6 +66,7 @@
 		BE4386CE5B11E4BEA5ED0998 /* AppIcon-dark-flat.icns in Resources */ = {isa = PBXBuildFile; fileRef = 79EF28519CEA5BD2A5782060 /* AppIcon-dark-flat.icns */; };
 		BFDAC68BEBDEC6240A85A131 /* BulkCreateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC71EC751B01158C318C223C /* BulkCreateView.swift */; };
 		C21B74E57483C1D48AFFD495 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 52B4928A9D65D07D55BF519F /* Localizable.xcstrings */; };
+		C2D7C2F4B3C6D3AE14CF3051 /* DockIconAppearanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E72872627C8B402B7FDCF25F /* DockIconAppearanceTests.swift */; };
 		C9E871AB68ABE8F12EF51D05 /* DiskUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19F4584FAF26AFA4989FD658 /* DiskUsage.swift */; };
 		CF1F21D15E47FFC5475AB8DE /* SystemSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80ED456F7B0D1A0D3DE1622 /* SystemSettings.swift */; };
 		D023FCF5BA6402E504CDC532 /* AccountPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB9424A3A220DDBD0A8CE4A /* AccountPreset.swift */; };
@@ -156,12 +158,14 @@
 		D070B713D58C6220FBA3EF39 /* IconFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconFactory.swift; sourceTree = "<group>"; };
 		D16A492456FA5FD2FC7C5F75 /* LaunchAtLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLogin.swift; sourceTree = "<group>"; };
 		D40DF8D9EB09762F0BEE11A9 /* DataCopier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCopier.swift; sourceTree = "<group>"; };
+		D65D2B0DDCC4B05B04C52312 /* PaletteContrastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaletteContrastTests.swift; sourceTree = "<group>"; };
 		D836CE62A23BC74B3038CE09 /* Updater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Updater.swift; sourceTree = "<group>"; };
 		DC71EC751B01158C318C223C /* BulkCreateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulkCreateView.swift; sourceTree = "<group>"; };
 		DD890DF3DEBDD9193D4CB225 /* IconAccent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconAccent.swift; sourceTree = "<group>"; };
 		DF4A57756B638FCCB51EA8B4 /* AboutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSettingsView.swift; sourceTree = "<group>"; };
 		E07DDF06750E61FC3E24D580 /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
 		E528530CB43A4D02C8C72803 /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
+		E72872627C8B402B7FDCF25F /* DockIconAppearanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconAppearanceTests.swift; sourceTree = "<group>"; };
 		E77D12C233ACE9F160D1FD4D /* InterfaceDensity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterfaceDensity.swift; sourceTree = "<group>"; };
 		E82870DCE97B6A662D06A642 /* DoubleBubble.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DoubleBubble.entitlements; sourceTree = "<group>"; };
 		E96502F9B7E63FAAFAD61604 /* DockAccentPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockAccentPicker.swift; sourceTree = "<group>"; };
@@ -177,9 +181,11 @@
 			isa = PBXGroup;
 			children = (
 				ACB9621B7A17A6B7F39C75C2 /* BulkNamingTests.swift */,
+				E72872627C8B402B7FDCF25F /* DockIconAppearanceTests.swift */,
 				5D4B82A9BCEA9A24141C54EC /* LaunchEngineTests.swift */,
 				FDB227B7E55FD81755A4C327 /* LibraryLoadTests.swift */,
 				E528530CB43A4D02C8C72803 /* LocalizationTests.swift */,
+				D65D2B0DDCC4B05B04C52312 /* PaletteContrastTests.swift */,
 				5CB169CA64248148A8E9E982 /* ShadowHomeTests.swift */,
 				2C22A188310EF4EE7B671E41 /* VersionComparisonTests.swift */,
 			);
@@ -525,9 +531,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				A2CB051E7CDE59F50DCCBC18 /* BulkNamingTests.swift in Sources */,
+				C2D7C2F4B3C6D3AE14CF3051 /* DockIconAppearanceTests.swift in Sources */,
 				6F820E446A795F4E02228145 /* LaunchEngineTests.swift in Sources */,
 				291B2550CB95D990CB8BC5A2 /* LibraryLoadTests.swift in Sources */,
 				486045D7C5EAD22C90170564 /* LocalizationTests.swift in Sources */,
+				8BFC936BA6FD72F5CEE80B0D /* PaletteContrastTests.swift in Sources */,
 				FB7799E63E39492C14012026 /* ShadowHomeTests.swift in Sources */,
 				3F19623AA7EB47F2D4856662 /* VersionComparisonTests.swift in Sources */,
 			);

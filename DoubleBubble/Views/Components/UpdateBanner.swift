@@ -21,7 +21,7 @@ struct UpdateBanner: View {
     var body: some View {
         HStack(spacing: Metrics.s) {
             Image(systemName: symbol)
-                .foregroundStyle(isFailed ? palette.warning : palette.accentColor)
+                .foregroundStyle(isFailed ? palette.warning : palette.accentTextColor)
                 .accessibilityHidden(true)
 
             Text(message)

@@ -274,12 +274,16 @@ private struct AllAccountsRow: View {
                 .fill(palette.cardBackground)
                 .overlay(
                     RoundedRectangle(cornerRadius: Metrics.cardRadius, style: .continuous)
-                        .strokeBorder(palette.hairline, lineWidth: 1)
+                        .strokeBorder(
+                            isHovering ? palette.accentColor.opacity(0.45) : palette.hairline,
+                            lineWidth: 1
+                        )
                 )
         )
         .contentShape(RoundedRectangle(cornerRadius: Metrics.cardRadius, style: .continuous))
         .onHover { isHovering = $0 }
         .motion(Motion.quick, value: isHovering)
+        .motion(Motion.state, value: isRunning)
         .contextMenu { AccountMenu(library: library, ui: ui, app: app, account: account) }
         .accessibilityLabel("\(account.name), \(app.name), \(isRunning ? L("Running") : L("Not running"))")
     }

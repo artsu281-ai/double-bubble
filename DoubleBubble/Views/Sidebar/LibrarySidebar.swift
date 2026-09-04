@@ -189,7 +189,7 @@ private struct SidebarSmartRow: View {
             Image(systemName: symbol)
                 .font(.system(size: density.sidebarIconSize * 0.85, weight: .semibold))
                 .frame(width: density.sidebarIconSize, height: density.sidebarIconSize)
-                .foregroundStyle(isSelected ? Color.white : palette.accentColor)
+                .foregroundStyle(isSelected ? Color.white : palette.accentTextColor)
 
             Text(title)
                 .font(.listItem)
@@ -250,7 +250,7 @@ private struct SidebarAppRow: View {
                 if let match = matchingAccountName {
                     Text("↳ \(match)")
                         .font(.meta)
-                        .foregroundStyle(isSelected ? Color.white.opacity(0.85) : palette.accentColor)
+                        .foregroundStyle(isSelected ? Color.white.opacity(0.85) : palette.accentTextColor)
                         .lineLimit(1)
                 }
             }
@@ -310,7 +310,7 @@ private struct SidebarAppRow: View {
             ) {
                 library.togglePinned(app.id)
             }
-            .foregroundStyle(isSelected ? Color.white : (app.isPinned ? palette.accentColor : Color.secondary))
+            .foregroundStyle(isSelected ? Color.white : (app.isPinned ? palette.accentTextColor : Color.secondary))
 
             RowActionButton(
                 symbol: "trash",

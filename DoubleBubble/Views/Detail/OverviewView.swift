@@ -338,7 +338,10 @@ struct OverviewView: View {
                 if totalDiskUsage > 0 && appSize > 0 {
                     HStack(spacing: Metrics.xs) {
                         Capsule()
-                            .fill(palette.accentColor.opacity(0.85))
+                            // Was 0.85, which composited to 2.68:1 against
+                            // its own track — under the 3:1 asked of a
+                            // graphical object. Full strength is 3.36:1.
+                            .fill(palette.accentColor)
                             .frame(width: max(4, CGFloat(appSize) / CGFloat(totalDiskUsage) * 50), height: 4)
                     }
                     .frame(width: 50, height: 4, alignment: .leading)

@@ -54,6 +54,7 @@ enum DockIcon {
     static let glassKey = "dockIconGlass"
 
     private static var appearanceObservation: NSKeyValueObservation?
+    private static var systemAppearanceObserver: NSObjectProtocol?
     private static var cache: [String: NSImage] = [:]
 
     /// Safe to call more than once; a second call just replaces the observer.
@@ -62,6 +63,23 @@ enum DockIcon {
             \.effectiveAppearance, options: [.initial]
         ) { _, _ in
             MainActor.assumeIsolated { apply() }
+        }
+
+        // `effectiveAppearance` stops moving with macOS the moment the app
+        // pins `NSApp.appearance` for its own Light or Dark theme, so on its
+        // own it would leave an Automatic tile frozen at whatever the system
+        // was when the theme was chosen. This is the system's own setting
+        // changing, which is the thing Automatic actually tracks.
+        if systemAppearanceObserver == nil {
+            systemAppearanceObserver = DistributedNotificationCenter.default().addObserver(
+                forName: Notification.Name("AppleInterfaceThemeChangedNotification"),
+                object: nil,
+                queue: .main
+            ) { _ in
+                // A turn late on purpose: the notification can arrive before
+                // the preference it announces has been written.
+                DispatchQueue.main.async { MainActor.assumeIsolated { apply() } }
+            }
         }
     }
 
@@ -96,7 +114,9 @@ enum DockIcon {
 
     // MARK: - Private
 
-    private static var resolvedVariant: String {
+    /// Internal so a test can ask what the Dock would be shown without
+    /// going through `NSApp.applicationIconImage`.
+    static var resolvedVariant: String {
         variant(for: theme, glass: isGlass)
     }
 
@@ -110,8 +130,20 @@ enum DockIcon {
         return "AppIcon-\(tone)-\(glass ? "glass" : "flat")"
     }
 
-    private static var systemIsDark: Bool {
-        NSApp.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+    /// Whether **macOS** is dark — not whether this app is.
+    ///
+    /// It used to read `NSApp.effectiveAppearance`, which was only ever right
+    /// by accident: nothing pinned `NSApp.appearance`, so the app's effective
+    /// appearance and the system's were the same value. They stopped being the
+    /// same when the app began pinning it so that `NSAlert` and the open
+    /// panels would match the chosen theme, and an Automatic tile started
+    /// following the app's windows instead of the Dock it sits in — which is
+    /// exactly the coupling the type's own doc comment says must not exist.
+    ///
+    /// The key is absent entirely when macOS is in Light; only "Dark" is ever
+    /// written.
+    static var systemIsDark: Bool {
+        UserDefaults.standard.string(forKey: "AppleInterfaceStyle") == "Dark"
     }
 
     /// Held once loaded — the Dock asks for several sizes out of each.

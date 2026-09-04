@@ -100,7 +100,7 @@ struct WelcomeView: View {
 
             Text(L("Add"))
                 .font(.controlLabel)
-                .foregroundStyle(palette.accentColor)
+                .foregroundStyle(palette.accentTextColor)
         }
         .padding(.vertical, Metrics.xs)
     }

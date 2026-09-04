@@ -72,7 +72,7 @@ struct SettingsView: View {
                     icon: item.icon,
                     isSelected: section == item
                 ) {
-                    withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
+                    withAnimation(Motion.reduced(Motion.control)) {
                         section = item
                     }
                 }
@@ -482,8 +482,12 @@ struct SettingsTabButton: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 7)
-            .background(isSelected ? palette.accentColor : Color.primary.opacity(0.05))
-            .foregroundStyle(isSelected ? Color.white : Color.primary)
+            .background(isSelected ? palette.accentTextColor : Color.primary.opacity(0.05))
+            // The one opaque accent fill in the app carrying a label we draw
+            // ourselves, so it is the one place the pairing has to be picked
+            // rather than assumed. White is right on the light clay (5.31:1)
+            // and wrong on the dark one (2.63:1); the fill decides.
+            .foregroundStyle(isSelected ? palette.accentTextColor.readableForeground : Color.primary)
             .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
             .contentShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
         }

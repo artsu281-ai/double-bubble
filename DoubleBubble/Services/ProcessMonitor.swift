@@ -54,7 +54,7 @@ final class ProcessMonitor: ObservableObject {
 
     /// Register a GUI app launched via NSWorkspace
     func registerApp(pid: pid_t) {
-        mutate { self.runningPIDs.insert(pid) }
+        mutate { if !self.runningPIDs.contains(pid) { self.runningPIDs.insert(pid) } }
     }
 
     /// Register a Process launched directly (Electron binary, JetBrains, etc.)
@@ -94,7 +94,12 @@ final class ProcessMonitor: ObservableObject {
             .sink { [weak self] notification in
                 guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey]
                         as? NSRunningApplication else { return }
-                self?.runningPIDs.remove(app.processIdentifier)
+                // Every application on the machine quitting arrives here, and
+                // `@Published` republishes on any touch of the setter whether
+                // the value changed or not — so closing an unrelated window
+                // was invalidating every view watching this. Ask first.
+                guard let self, self.runningPIDs.contains(app.processIdentifier) else { return }
+                self.runningPIDs.remove(app.processIdentifier)
             }
             .store(in: &cancellables)
     }

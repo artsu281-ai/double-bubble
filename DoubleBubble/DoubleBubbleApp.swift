@@ -29,6 +29,10 @@ struct DoubleBubbleApp: App {
         }
         .windowResizability(.contentMinSize)
         .commands {
+            // View ▸ Hide Sidebar and ⌃⌘S. `NavigationSplitView` can collapse
+            // its sidebar, but nothing offered the command, so the only way to
+            // do it was to drag the divider to the edge.
+            SidebarCommands()
             LibraryCommands(library: library, ui: ui, localizer: localizer)
         }
 
@@ -42,9 +46,11 @@ struct DoubleBubbleApp: App {
         }
         .menuBarExtraStyle(.menu)
 
-        // Settings get a window of their own. The toolbar button that used to
-        // open this is gone — a gear in a document window's toolbar isn't a
-        // macOS pattern — so ⌘, and the application menu are the way in.
+        // Settings get a window of their own, which is where macOS puts them:
+        // ⌘, and the application menu both land here. The toolbar gear was
+        // taken out on that reasoning and then put back, because someone went
+        // looking for it there — see the comment on `sharedToolbar`. All three
+        // doors open this one window.
         Settings {
             SettingsView(library: library)
                 .themed()
